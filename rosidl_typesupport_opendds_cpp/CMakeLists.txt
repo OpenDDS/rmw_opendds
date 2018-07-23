@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.5)
 
-project(rosidl_typesupport_opensplice_cpp)
+project(rosidl_typesupport_opendds_cpp)
 
 # Default to C++14
 if(NOT CMAKE_CXX_STANDARD)
@@ -10,18 +10,12 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
 endif()
 
+# Load required packages.
 find_package(ament_cmake REQUIRED)
-
-find_package(opensplice_cmake_module REQUIRED)
-find_package(OpenSplice MODULE)
-if(NOT OpenSplice_FOUND)
-  ament_package()
-  message(WARNING "Could not find PrismTech OpenSplice - skipping '${PROJECT_NAME}'")
-  return()
-endif()
-
 find_package(ament_cmake_python REQUIRED)
+find_package(opendds_cmake_module REQUIRED)
 
+# Declare RMW and ROS-IDL typesupport dependencies.
 ament_export_dependencies(rmw)
 ament_export_dependencies(rosidl_cmake)
 ament_export_dependencies(rosidl_generator_c)
@@ -37,15 +31,13 @@ add_library(${PROJECT_NAME} SHARED
   src/identifier.cpp
   src/misc.cpp
   src/u_instanceHandle.c)
-if(WIN32)
-  target_compile_definitions(${PROJECT_NAME}
-    PRIVATE "ROSIDL_TYPESUPPORT_OPENSPLICE_CPP_BUILDING_DLL")
-endif()
+
 target_include_directories(${PROJECT_NAME}
   PUBLIC
   include
 )
-ament_target_dependencies(${PROJECT_NAME} "OpenSplice")
+
+ament_target_dependencies(${PROJECT_NAME} "OpenDDS")
 ament_export_libraries(${PROJECT_NAME})
 
 ament_index_register_resource("rosidl_typesupport_cpp")
@@ -55,13 +47,9 @@ if(BUILD_TESTING)
   ament_lint_auto_find_test_dependencies()
 endif()
 
-ament_package(
-  CONFIG_EXTRAS "rosidl_typesupport_opensplice_cpp-extras.cmake.in"
-)
-
 install(
-  PROGRAMS bin/rosidl_typesupport_opensplice_cpp
-  DESTINATION lib/rosidl_typesupport_opensplice_cpp
+  PROGRAMS bin/rosidl_typesupport_opendds_cpp
+  DESTINATION lib/rosidl_typesupport_opendds_cpp
 )
 install(
   DIRECTORY cmake resource

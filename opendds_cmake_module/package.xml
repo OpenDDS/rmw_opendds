@@ -3,7 +3,7 @@
 <package format="2">
   <name>opendds_cmake_module</name>
   <version>0.1.0</version>
-  <description>Provide CMake module to find OpenDDS.</description>
+  <description>Provide CMake module to find and configure OpenDDS.</description>
   <maintainer email="brandon@alicorn.io">Brandon Sanders</maintainer>
   <license>Apache License 2.0</license>
 
