@@ -2,8 +2,9 @@
 
 # Ensure COLCON_PREFIX_PATH exists.
 if [[ -z "$COLCON_PREFIX_PATH" ]]; then
-	echo "COLCON_PREFIX_PATH must be set to the /install directory of a ROS-2 installation or overlay."1>&2
-	exit 1
+	echo "COLCON_PREFIX_PATH must be set to the /install directory of a ROS-2 installation or overlay." 1>&2
+	echo "Have you sourced /path/to/ros2_ws/install/local_setup.sh?" 1>&2
+	exit
 fi
 
 # Prompt for confirmation and perform installation.
