@@ -10,10 +10,10 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
 endif()
 
-# Load required packages.
+# Load required CMake packages.
 find_package(ament_cmake REQUIRED)
-find_package(ament_cmake_python REQUIRED)
 find_package(opendds_cmake_module REQUIRED)
+find_package(OpenDDS MODULE)
 
 # Declare RMW and ROS-IDL typesupport dependencies.
 ament_export_dependencies(rmw)
@@ -24,8 +24,6 @@ ament_export_dependencies(rosidl_generator_dds_idl)
 ament_export_dependencies(rosidl_typesupport_interface)
 
 ament_export_include_directories(include)
-
-ament_python_install_package(${PROJECT_NAME})
 
 add_library(${PROJECT_NAME} SHARED
   src/identifier.cpp
@@ -48,13 +46,10 @@ if(BUILD_TESTING)
 endif()
 
 install(
-  PROGRAMS bin/rosidl_typesupport_opendds_cpp
-  DESTINATION lib/rosidl_typesupport_opendds_cpp
-)
-install(
-  DIRECTORY cmake resource
+  DIRECTORY cmake
   DESTINATION share/${PROJECT_NAME}
 )
+
 install(
   DIRECTORY include/
   DESTINATION include
