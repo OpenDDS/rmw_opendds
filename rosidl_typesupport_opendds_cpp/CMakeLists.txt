@@ -23,21 +23,6 @@ ament_export_dependencies(rosidl_generator_cpp)
 ament_export_dependencies(rosidl_generator_dds_idl)
 ament_export_dependencies(rosidl_typesupport_interface)
 
-ament_export_include_directories(include)
-
-add_library(${PROJECT_NAME} SHARED
-  src/identifier.cpp
-  src/misc.cpp
-  src/u_instanceHandle.c)
-
-target_include_directories(${PROJECT_NAME}
-  PUBLIC
-  include
-)
-
-ament_target_dependencies(${PROJECT_NAME} "OpenDDS")
-ament_export_libraries(${PROJECT_NAME})
-
 ament_index_register_resource("rosidl_typesupport_cpp")
 
 if(BUILD_TESTING)
