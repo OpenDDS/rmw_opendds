@@ -45,18 +45,10 @@ if(BUILD_TESTING)
   ament_lint_auto_find_test_dependencies()
 endif()
 
-install(
-  DIRECTORY cmake
-  DESTINATION share/${PROJECT_NAME}
+# Make this package available to other ROS-2 packages.
+ament_package(
+  CONFIG_EXTRAS "rosidl_typesupport_opendds_cpp-extras.cmake"
 )
 
-install(
-  DIRECTORY include/
-  DESTINATION include
-)
-install(
-  TARGETS ${PROJECT_NAME}
-  ARCHIVE DESTINATION lib
-  LIBRARY DESTINATION lib
-  RUNTIME DESTINATION bin
-)
+# Install CMake utilities.
+install(DIRECTORY cmake DESTINATION share/${PROJECT_NAME})
