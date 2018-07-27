@@ -16,11 +16,13 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
 	echo "Removing OpenDDS RMW files from $COLCON_PREFIX_PATH/../src/ros2/"
 	rm -rf $COLCON_PREFIX_PATH/../src/ros2/opendds_cmake_module
 	rm -rf $COLCON_PREFIX_PATH/../src/ros2/rmw_opendds_cpp
+	rm -rf $COLCON_PREFIX_PATH/../src/ros2/rosidl_typesupport_opendds_c
 	rm -rf $COLCON_PREFIX_PATH/../src/ros2/rosidl_typesupport_opendds_cpp
 
 	# Copy new installation.
 	echo "Installing OpenDDS RMW files to $COLCON_PREFIX_PATH/../src/ros2/"
 	cp -r opendds_cmake_module $COLCON_PREFIX_PATH/../src/ros2/
 	cp -r rmw_opendds_cpp $COLCON_PREFIX_PATH/../src/ros2/
+	cp -r rosidl_typesupport_opendds_c $COLCON_PREFIX_PATH/../src/ros2/
 	cp -r rosidl_typesupport_opendds_cpp $COLCON_PREFIX_PATH/../src/ros2/
 fi
