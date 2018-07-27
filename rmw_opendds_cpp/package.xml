@@ -2,7 +2,7 @@
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
   <name>rmw_opendds_cpp</name>
-  <version>0.1</version>
+  <version>0.1.0</version>
   <description>Implement the ROS middleware interface using OpenDDS static code generation in C++.</description>
   <maintainer email="brandon@alicorn.io">Brandon Sanders</maintainer>
   <license>Apache License 2.0</license>
