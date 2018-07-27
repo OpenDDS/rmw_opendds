@@ -16,12 +16,13 @@ find_package(opendds_cmake_module REQUIRED)
 find_package(OpenDDS MODULE)
 
 # Declare RMW and ROS-IDL typesupport dependencies.
-ament_export_dependencies(rmw)
-ament_export_dependencies(rosidl_cmake)
-ament_export_dependencies(rosidl_generator_c)
-ament_export_dependencies(rosidl_generator_cpp)
-ament_export_dependencies(rosidl_generator_dds_idl)
-ament_export_dependencies(rosidl_typesupport_interface)
+ament_export_dependencies(
+    rmw
+    rosidl_cmake
+    rosidl_generator_cpp
+    rosidl_generator_dds_idl
+    rosidl_typesupport_interface
+)
 
 ament_index_register_resource("rosidl_typesupport_cpp")
 
@@ -31,9 +32,7 @@ if(BUILD_TESTING)
 endif()
 
 # Make this package available to other ROS-2 packages.
-ament_package(
-  CONFIG_EXTRAS "rosidl_typesupport_opendds_cpp-extras.cmake"
-)
+ament_package(CONFIG_EXTRAS "${PROJECT_NAME}-extras.cmake")
 
 # Install CMake utilities.
 install(DIRECTORY cmake DESTINATION share/${PROJECT_NAME})

@@ -24,6 +24,10 @@ if(DEFINED ENV{DDS_ROOT})
   	message(FATAL_ERROR "opendds_idl compiler not found. Is $DDS_ROOT configured correctly?")
   endif()
 
+  # Set OpenDDS library directory.
+  set(OpenDDS_HEADER_DIRS "${DDS_ROOT}/dds")
+  set(OpenDDS_LIBRARY_DIRS "${DDS_ROOT}/lib")
+
   set(DDS_FOUND TRUE)
 else()
 
