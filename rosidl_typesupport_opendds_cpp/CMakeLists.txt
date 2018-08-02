@@ -12,6 +12,7 @@ endif()
 
 # Load required CMake packages.
 find_package(ament_cmake REQUIRED)
+find_package(ament_cmake_python REQUIRED)
 find_package(opendds_cmake_module REQUIRED)
 find_package(OpenDDS MODULE)
 
@@ -31,8 +32,10 @@ if(BUILD_TESTING)
   ament_lint_auto_find_test_dependencies()
 endif()
 
-# Make this package available to other ROS-2 packages.
-ament_package(CONFIG_EXTRAS "${PROJECT_NAME}-extras.cmake")
-
 # Install CMake utilities.
 install(DIRECTORY cmake DESTINATION share/${PROJECT_NAME})
+install(PROGRAMS ${PROJECT_NAME}/${PROJECT_NAME} DESTINATION lib/${PROJECT_NAME})
+
+# Make this package available to other ROS-2 packages.
+ament_python_install_package(${PROJECT_NAME})
+ament_package(CONFIG_EXTRAS "${PROJECT_NAME}-extras.cmake")
