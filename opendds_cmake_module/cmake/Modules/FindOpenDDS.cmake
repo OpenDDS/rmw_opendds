@@ -17,11 +17,15 @@ if(DEFINED ENV{DDS_ROOT})
   # Ensure existence of tao_idl compiler.
   if(NOT EXISTS "$ENV{TAO_ROOT}/TAO_IDL/tao_idl")
   	message(FATAL_ERROR "tao_idl compiler not found. Is $TAO_ROOT configured correctly?")
+  else()
+    set(OpenDDS_TaoIdlProcessor "$ENV{TAO_ROOT}/TAO_IDL/tao_idl")
   endif()
 
   # Ensure existence of opendds_idl compiler.
   if(NOT EXISTS "$ENV{DDS_ROOT}/bin/opendds_idl")
   	message(FATAL_ERROR "opendds_idl compiler not found. Is $DDS_ROOT configured correctly?")
+  else()
+    set(OpenDDS_OpenDdsIdlProcessor "$ENV{DDS_ROOT}/bin/opendds_idl")
   endif()
 
   # Set OpenDDS library directory.

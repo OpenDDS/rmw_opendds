@@ -21,17 +21,43 @@ rosidl_generate_dds_interfaces(
 )
 
 # Print output location of OMG IDLs.
-get_filename_component(_msg_destination "${_msg_destination}" ABSOLUTE)
-get_filename_component(_srv_destination "${_srv_destination}" ABSOLUTE)
-message("    Installed OMG IDLs for msg files [${_generated_msg_files}] to ${_msg_destination}")
-message("    Installed OMG IDLs for srv files [${_generated_srv_files}] to ${_srv_destination}")
+# get_filename_component(_msg_destination "${_msg_destination}" ABSOLUTE)
+# get_filename_component(_srv_destination "${_srv_destination}" ABSOLUTE)
+# message("    Installed OMG IDLs for msg files [${_generated_msg_files}] to ${_msg_destination}")
+# message("    Installed OMG IDLs for srv files [${_generated_srv_files}] to ${_srv_destination}")
+
+# Create a list of all the header and source files we expect the Tao and OpenDDS IDL processors to produce.
+message("    Generating list of expected IDL processor artifacts.")
+unset(OpenDDS_idlArtifacts)
+foreach(file ${_generated_msg_files})
+
+    # TODO: Prepend OpenDDS #pragma statements to each file.
+
+    # Add artifacts for file to list.
+    get_filename_component(file "${file}" NAME_WE)
+    list(APPEND OpenDDS_idlArtifacts
+        "${file}C.cpp"
+        "${file}C.h"
+        "${file}C.inl"
+        "${file}S.cpp"
+        "${file}S.h"
+        "${file}TypeSupport.idl"
+        "${file}TypeSupportImpl.cpp"
+        "${file}TypeSupportImpl.h"
+    )
+endforeach()
+
+# Process OMG IDLs.
+message("    Processing OMG IDLs via Tao and OpenDDS.")
+add_custom_command(
+    OUTPUT ${OpenDDS_idlArtifacts}
+    COMMAND ${OpenDDS_TaoIdlProcessor} ${_generated_msg_files} ${_generated_srv_files}
+    COMMAND ${OpenDDS_OpenDdsIdlProcessor} ${_generated_msg_files} ${_generated_srv_files}
+)
 
 # Install OMG IDL target.
-add_library(${rosidl_generate_interfaces_TARGET}${_target_suffix} SHARED
-  ${_generated_msg_files}
-  ${_generated_srv_files})
-
-# Set OMG IDL target language.
+message("    Adding IDL processor artifacts to CXX target ${rosidl_generate_interfaces_TARGET}${_target_suffix}.")
+add_library(${rosidl_generate_interfaces_TARGET}${_target_suffix} SHARED ${OpenDDS_idlArtifacts})
 set_target_properties(${rosidl_generate_interfaces_TARGET}${_target_suffix} PROPERTIES LINKER_LANGUAGE CXX)
 
 # Add OMG IDL target dependencies.
@@ -58,6 +84,3 @@ if(NOT rosidl_generate_interfaces_SKIP_INSTALL)
     ${rosidl_generate_interfaces_TARGET}${_target_suffix}
   )
 endif()
-
-# Complete!
-message("Generated OpenDDS C Interfaces!")
