@@ -48,9 +48,11 @@ foreach(file ${_generated_msg_files})
 endforeach()
 
 # Process OMG IDLs.
+# TODO Need to set appropriate working dir dynamically. Duh!
 message("    Processing OMG IDLs via Tao and OpenDDS.")
 add_custom_command(
     OUTPUT ${OpenDDS_idlArtifacts}
+    WORKING_DIRECTORY /home/crahda/ros2_ws/build/rosidl_generator_py/rosidl_generator_dds_idl
     COMMAND ${OpenDDS_TaoIdlProcessor} ${_generated_msg_files} ${_generated_srv_files}
     COMMAND ${OpenDDS_OpenDdsIdlProcessor} ${_generated_msg_files} ${_generated_srv_files}
 )
