@@ -26,8 +26,6 @@ endif()
 
 # Install CMake utilities.
 install(DIRECTORY cmake DESTINATION share/${PROJECT_NAME})
-install(PROGRAMS ${PROJECT_NAME}/${PROJECT_NAME} DESTINATION lib/${PROJECT_NAME})
 
 # Make this package available to other ROS-2 packages.
-ament_python_install_package(${PROJECT_NAME})
 ament_package(CONFIG_EXTRAS "${PROJECT_NAME}-extras.cmake")

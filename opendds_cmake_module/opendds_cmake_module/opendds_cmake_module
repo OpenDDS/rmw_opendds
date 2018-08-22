@@ -1,0 +1,10 @@
+#!/usr/bin/env python3
+
+import sys
+
+def openDdsPreprocessIdls(argv=sys.argv[1:]):
+    print("Hello, Python!")
+    return 0
+
+if __name__ == '__main__':
+    sys.exit(openDdsPreprocessIdls())

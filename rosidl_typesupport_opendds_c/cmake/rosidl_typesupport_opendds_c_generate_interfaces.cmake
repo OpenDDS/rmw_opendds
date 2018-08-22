@@ -20,19 +20,10 @@ rosidl_generate_dds_interfaces(
   DEPENDENCY_PACKAGE_NAMES ${target_dependencies}
 )
 
-# Print output location of OMG IDLs.
-# get_filename_component(_msg_destination "${_msg_destination}" ABSOLUTE)
-# get_filename_component(_srv_destination "${_srv_destination}" ABSOLUTE)
-# message("    Installed OMG IDLs for msg files [${_generated_msg_files}] to ${_msg_destination}")
-# message("    Installed OMG IDLs for srv files [${_generated_srv_files}] to ${_srv_destination}")
-
 # Create a list of all the header and source files we expect the Tao and OpenDDS IDL processors to produce.
 message("    Generating list of expected IDL processor artifacts.")
 unset(OpenDDS_idlArtifacts)
 foreach(file ${_generated_msg_files})
-
-    # TODO: Prepend OpenDDS #pragma statements to each file.
-    # A regex search followed by a simple sed prepend should do the trick in 90% of cases.
 
     # Add artifacts for file to list.
     get_filename_component(file "${file}" NAME_WE)
@@ -48,12 +39,17 @@ foreach(file ${_generated_msg_files})
     )
 endforeach()
 
-# Process OMG IDLs.
+# Change working directory to handle relative paths in generated IDLs.
 set(OpenDDS_idlArtifactsWorkingDirectory "${CMAKE_CURRENT_BINARY_DIR}/rosidl_generator_dds_idl")
-message("    Processing OMG IDLs via Tao and OpenDDS in ${OpenDDS_idlArtifactsWorkingDirectory}.")
+
+# Process OMG IDLs with Preprocessor, Tao, and OpenDDS IDL processors.
+message("    Processing OMG IDLs via Tao and OpenDDS in ${OpenDDS_idlArtifactsWorkingDirectory} with ${opendds_cmake_module_BIN}.")
 add_custom_command(
     OUTPUT ${OpenDDS_idlArtifacts}
     WORKING_DIRECTORY ${OpenDDS_idlArtifactsWorkingDirectory}
+    # TODO: Need a way to get the path to the Python IDL preprocessor set correctly.
+    #       This preprocessor is located in opendds_cmake_module/opendds_cmake_module/opendds_cmake_module
+    # COMMAND ${PYTHON_EXECUTABLE} ${OpenDDS_rosidlPreprocessorExecutable}
     COMMAND ${OpenDDS_TaoIdlProcessor} ${_generated_msg_files} ${_generated_srv_files}
     COMMAND ${OpenDDS_OpenDdsIdlProcessor} ${_generated_msg_files} ${_generated_srv_files}
 )
