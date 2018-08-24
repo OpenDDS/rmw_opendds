@@ -17,10 +17,12 @@ All packages must be installed to the `src/ros2/` folder within the ROS-2 worksp
 Once the packages are installed, you can test how they are working by invoking `colcon build --packages-up-to demo_nodes_cpp --parallel-workers 1` within the ROS-2 workspace folder. This will build one of the simpler ROS-2 demo projects, causing all of the packages in this RMW to be built. The `--parallel-workers 1` flag is used to make debugging parallel execution of CMake targets easier.
 
 ## Project Status
-1. `rosidl_typesupport_opendds_cpp` is largely incorrect or unimplemented. It should be re-written based on the `rosidl_typesupport_opendds_c` package once that package is complete.
+1. `rosidl_typesupport_opendds_c` is partially implemented. Currently, it correctly converts any MSG/SRV files to OMG IDLs, detects the OpenDDS and Tao libraries/preprocessors, and attemps to process the IDLs using those preprocessors. The next step is to integrate the Python script from the `opendds_cmake_module` (which is not written/implemented) into this module's root CMake file so that it runs *before* the OpenDDS and Tao processors. Once that is done, all of the expected C/C++ output files from OpenDDS/Tao must be added to a library that ROS-2 can detect (which should happen automatically). 
 
-2. `rmw_opendds_cpp` contains buildable stubs of the implementation of `rmw.h`. They must be filled in with the appropriate calls to the underlying OpenDDS functions.
+2. `rosidl_typesupport_opendds_cpp` is largely incorrect or unimplemented. It should be re-written based on the `rosidl_typesupport_opendds_c` package once that package is complete.
 
-3. `opendds_cmake_module` contains a Python file with no extension (`opendds_cmake_module/opendds_cmake_module`) which contains a method `openDdsPreprocessIdls`. This method must be tested against different ROS-2-produced IDLs to ensure it correctly:
+3. `rmw_opendds_cpp` contains buildable stubs of the implementation of `rmw.h`. They must be filled in with the appropriate calls to the underlying OpenDDS functions.
+
+4. `opendds_cmake_module` contains a Python file with no extension (`opendds_cmake_module/opendds_cmake_module`) which contains a method `openDdsPreprocessIdls`. This method must be implemented and tested against different ROS-2-produced IDLs to ensure it correctly:
     - Inserts `#pragma` statements for the fields in those IDLs.
     - Inserts `typedef` statements for the fields which would be anonymous in those IDLs.
