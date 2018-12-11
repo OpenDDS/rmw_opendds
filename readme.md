@@ -4,7 +4,7 @@ This project contains a work-in-progress implementation of the ROS-2 Middleware 
 ## Packages
 This project contains several CMake/ROS-2 packages:
 
-- `opendds_cmake_module`: Responsible for detecting the OpenDDS library and configuring paths to the Tao/OpenDDS IDL processors and headers.
+- `opendds_cmake_module`: Responsible for detecting the OpenDDS library and configuring paths to the TAO/OpenDDS IDL processors and headers.
 - `rosidl_typesupport_opendds_c`: Responsible for generating OpenDDS C headers based on the OMG IDLs produced by ROS-2 preprocessors.
 - `rosidl_typesupport_opendds_cpp`: Responsible for generating OpenDDS C++ headers based on the OMG IDLs produced by ROS-2 preprocessors.
 - `rmw_opendds`: Responsible for binding the ROS-2 `rmw.h` interface functions to the equivalent OpenDDS functions.
@@ -17,7 +17,7 @@ All packages must be installed to the `src/ros2/` folder within the ROS-2 worksp
 Once the packages are installed, you can test how they are working by invoking `colcon build --packages-up-to demo_nodes_cpp --parallel-workers 1` within the ROS-2 workspace folder. This will build one of the simpler ROS-2 demo projects, causing all of the packages in this RMW to be built. The `--parallel-workers 1` flag is used to make debugging parallel execution of CMake targets easier.
 
 ## Project Status
-1. `rosidl_typesupport_opendds_c` is partially implemented. Currently, it correctly converts any MSG/SRV files to OMG IDLs, detects the OpenDDS and Tao libraries/preprocessors, and attemps to process the IDLs using those preprocessors. The next step is to integrate the Python script from the `opendds_cmake_module` (which is not written/implemented) into this module's root CMake file so that it runs *before* the OpenDDS and Tao processors. Once that is done, all of the expected C/C++ output files from OpenDDS/Tao must be added to a library that ROS-2 can detect (which should happen automatically). 
+1. `rosidl_typesupport_opendds_c` is partially implemented. Currently, it correctly converts any MSG/SRV files to OMG IDLs, detects the OpenDDS and TAO libraries/preprocessors, and attemps to process the IDLs using those preprocessors. The next step is to integrate the Python script from the `opendds_cmake_module` (which is not written/implemented) into this module's root CMake file so that it runs *before* the OpenDDS and TAO processors. Once that is done, all of the expected C/C++ output files from OpenDDS/TAO must be added to a library that ROS-2 can detect (which should happen automatically).
 
 2. `rosidl_typesupport_opendds_cpp` is largely incorrect or unimplemented. It should be re-written based on the `rosidl_typesupport_opendds_c` package once that package is complete.
 
