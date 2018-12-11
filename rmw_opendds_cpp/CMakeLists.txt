@@ -59,8 +59,8 @@ ament_export_dependencies(
   rmw_opendds_shared_cpp
   rosidl_generator_c
   rosidl_generator_cpp
-  rosidl_typesupport_connext_c
-  rosidl_typesupport_connext_cpp)
+  rosidl_typesupport_opendds_c
+  rosidl_typesupport_opendds_cpp)
 
 register_rmw_implementation(
   "c:rosidl_typesupport_c:rosidl_typesupport_opendds_c"
