@@ -96,7 +96,7 @@ __get_key(
   DDS::DomainParticipantQos dpqos;
   auto dds_ret = participant->get_qos(dpqos);
   if (dds_ret == DDS::RETCODE_OK && __is_node_match(dpqos.user_data, node_name, node_namespace)) {
-    DDS_InstanceHandle_to_GUID(&key, participant->get_instance_handle());
+    DDS::InstanceHandle_to_GUID(&key, participant->get_instance_handle());
     return RMW_RET_OK;
   }
 

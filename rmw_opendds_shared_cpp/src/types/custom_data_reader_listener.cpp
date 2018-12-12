@@ -152,7 +152,7 @@ CustomDataReaderListener::fill_service_names_and_types(
 void CustomDataReaderListener::fill_topic_names_and_types_by_guid(
   bool no_demangle,
   std::map<std::string, std::set<std::string>> & topic_names_to_types_by_guid,
-  DDS_GUID_t & participant_guid)
+  DDS::GUID_t & participant_guid)
 {
   std::lock_guard<std::mutex> lock(mutex_);
   const auto & map = topic_cache.get_topic_types_by_guid(participant_guid);

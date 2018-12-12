@@ -71,11 +71,6 @@ get_node_names(
     RMW_SET_ERROR_MSG("failed to get default participant qos");
     return RMW_RET_ERROR;
   }
-  node_names->data[0] = rcutils_strdup(participant_qos.participant_name.name, allocator);
-  if (!node_names->data[0]) {
-    RMW_SET_ERROR_MSG("could not allocate memory for node name");
-    return RMW_RET_BAD_ALLOC;
-  }
   node_namespaces->data[0] = rcutils_strdup(node->namespace_, allocator);
   if (!node_names->data[0]) {
     RMW_SET_ERROR_MSG("could not allocate memory for node namespace");
