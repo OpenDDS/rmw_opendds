@@ -156,7 +156,7 @@ void CustomDataReaderListener::fill_topic_names_and_types_by_guid(
 {
   std::lock_guard<std::mutex> lock(mutex_);
   const auto & map = topic_cache.get_topic_types_by_guid(participant_guid);
-  if (map.size() == 0) {
+  if (map.empty()) {
     RCUTILS_LOG_DEBUG_NAMED(
       "rmw_opensplice_cpp",
       "No topics for participant_guid");
@@ -178,7 +178,7 @@ void CustomDataReaderListener::fill_service_names_and_types_by_guid(
 {
   std::lock_guard<std::mutex> lock(mutex_);
   const auto & map = topic_cache.get_topic_types_by_guid(participant_guid);
-  if (map.size() == 0) {
+  if (map.empty()) {
     RCUTILS_LOG_DEBUG_NAMED(
       "rmw_opensplice_cpp",
       "No services for participant_guid");
