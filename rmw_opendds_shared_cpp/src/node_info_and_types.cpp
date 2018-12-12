@@ -106,7 +106,7 @@ __get_key(
     return RMW_RET_ERROR;
   }
 
-  for (CORBA::Long i = 0; i < handles.length(); ++i) {
+  for (auto i = 0; i < handles.length(); ++i) {
     DDS::ParticipantBuiltinTopicData pbtd;
     auto dds_ret = participant->get_discovered_participant_data(pbtd, handles[i]);
     if (dds_ret == DDS::RETCODE_OK) {

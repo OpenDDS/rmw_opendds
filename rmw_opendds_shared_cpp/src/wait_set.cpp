@@ -67,7 +67,7 @@ create_wait_set(const char * implementation_identifier, size_t max_conditions)
 
     RMW_TRY_PLACEMENT_NEW(
       wait_set_info->attached_conditions, wait_set_info->attached_conditions, goto fail,
-      DDSConditionSeq,
+      DDS::ConditionSeq,
       static_cast<CORBA::Long>(max_conditions))
   } else {
     // Else, don't preallocate: the vectors will size dynamically when rmw_wait is called.
