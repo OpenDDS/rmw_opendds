@@ -18,32 +18,25 @@
 #include <cstring>
 #include <iostream>
 #include "rmw_opendds_shared_cpp/opendds_include.hpp"
-#include "ndds/ndds_namespace_cpp.h"
+#include "dds/DCPS/GuidUtils.h"
 
-
-inline bool operator==(const DDS_GUID_t & lhs, const DDS_GUID_t & rhs)
+namespace DDS
 {
-  ///  http://community.rti.com/rti-doc/500/ndds.5.0.0/doc/html/api_cpp/group__DDSGUIDSupportModule.html#
-  return DDS::BOOLEAN_TRUE == DDS_GUID_equals(&lhs, &rhs);
+  typedef OpenDDS::DCPS::GUID_t GUID_t;
 }
-
-inline bool operator!=(const DDS_GUID_t & lhs, const DDS_GUID_t & rhs)
-{
-  return !operator==(lhs, rhs);
-}
-
-inline bool operator<(const DDS_GUID_t & lhs, const DDS_GUID_t & rhs)
+/*
+inline bool operator<(const DDS::GUID_t & lhs, const DDS::GUID_t & rhs)
 {
   ///  http://community.rti.com/rti-doc/500/ndds.5.0.0/doc/html/api_cpp/group__DDSGUIDSupportModule.html#
   return DDS_GUID_compare(&lhs, &rhs) < 0;
 }
 
-inline bool operator>(const DDS_GUID_t & lhs, const DDS_GUID_t & rhs) {return operator<(rhs, lhs);}
-inline bool operator<=(const DDS_GUID_t & lhs, const DDS_GUID_t & rhs)
+inline bool operator>(const DDS::GUID_t & lhs, const DDS::GUID_t & rhs) {return operator<(rhs, lhs);}
+inline bool operator<=(const DDS::GUID_t & lhs, const DDS::GUID_t & rhs)
 {
   return !operator>(lhs, rhs);
 }
-inline bool operator>=(const DDS_GUID_t & lhs, const DDS_GUID_t & rhs)
+inline bool operator>=(const DDS::GUID_t & lhs, const DDS::GUID_t & rhs)
 {
   return !operator<(lhs, rhs);
 }
@@ -64,14 +57,14 @@ inline void DDS_InstanceHandle_to_GUID(DDS_GUID_t * guid, DDS_InstanceHandle_t i
 {
   memcpy(guid->value, reinterpret_cast<DDS_Octet const *>(&instanceHandle), 16);
 }
-
+*/
 //  Taken from http://community.rti.com/comment/689#comment-689
+/*
 inline void DDS_BuiltinTopicKey_to_GUID(DDS_GUID_t * guid, DDS_BuiltinTopicKey_t builtinTopicKey)
 {
 #if BIG_ENDIAN
   memcpy(guid->value, reinterpret_cast<DDS_Octet const *>(&builtinTopicKey), 16);
 #else
-  /* little endian */
   DDS_Octet const * keyBuffer = reinterpret_cast<DDS_Octet *>(&builtinTopicKey);
   for (uint8_t i = 0; i < 4; ++i) {
     DDS_Octet * guidElement = &(guid->value[i * 4]);
@@ -83,5 +76,5 @@ inline void DDS_BuiltinTopicKey_to_GUID(DDS_GUID_t * guid, DDS_BuiltinTopicKey_t
   }
 #endif
 }
-
+*/
 #endif  // RMW_OPENDDS_SHARED_CPP__GUID_HELPER_HPP_

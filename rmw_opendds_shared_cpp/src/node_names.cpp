@@ -46,8 +46,8 @@ get_node_names(
     return RMW_RET_ERROR;
   }
 
-  DDSDomainParticipant * participant = static_cast<OpenDDSNodeInfo *>(node->data)->participant;
-  DDS_InstanceHandleSeq handles;
+  DDS::DomainParticipant * participant = static_cast<OpenDDSNodeInfo *>(node->data)->participant;
+  DDS::InstanceHandleSeq handles;
   if (participant->get_discovered_participants(handles) != DDS::RETCODE_OK) {
     RMW_SET_ERROR_MSG("unable to fetch discovered participants.");
     return RMW_RET_ERROR;
@@ -65,16 +65,11 @@ get_node_names(
     return rmw_convert_rcutils_ret_to_rmw_ret(rcutils_ret);
   }
 
-  DDS_DomainParticipantQos participant_qos;
-  DDS_ReturnCode_t status = participant->get_qos(participant_qos);
+  DDS::DomainParticipantQos participant_qos;
+  DDS::ReturnCode_t status = participant->get_qos(participant_qos);
   if (status != DDS::RETCODE_OK) {
     RMW_SET_ERROR_MSG("failed to get default participant qos");
     return RMW_RET_ERROR;
-  }
-  node_names->data[0] = rcutils_strdup(participant_qos.participant_name.name, allocator);
-  if (!node_names->data[0]) {
-    RMW_SET_ERROR_MSG("could not allocate memory for node name");
-    return RMW_RET_BAD_ALLOC;
   }
   node_namespaces->data[0] = rcutils_strdup(node->namespace_, allocator);
   if (!node_names->data[0]) {
@@ -88,7 +83,7 @@ get_node_names(
     std::string name;
     std::string namespace_;
     if (DDS::RETCODE_OK == dds_ret) {
-      auto data = static_cast<unsigned char *>(pbtd.user_data.value.get_contiguous_buffer());
+      auto data = static_cast<unsigned char *>(pbtd.user_data.value.get_buffer());
       std::vector<uint8_t> kv(data, data + pbtd.user_data.value.length());
       auto map = rmw::impl::cpp::parse_key_value(kv);
       auto name_found = map.find("name");
@@ -99,12 +94,6 @@ get_node_names(
       }
       if (name_found != map.end()) {
         namespace_ = std::string(ns_found->second.begin(), ns_found->second.end());
-      }
-      if (name.empty()) {
-        // use participant name if no name was found in the user data
-        if (pbtd.participant_name.name) {
-          name = pbtd.participant_name.name;
-        }
       }
     }
     if (name.empty()) {

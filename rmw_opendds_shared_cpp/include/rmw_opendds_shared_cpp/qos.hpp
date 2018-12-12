@@ -28,16 +28,16 @@
 RMW_OPENDDS_SHARED_CPP_PUBLIC
 bool
 get_datareader_qos(
-  DDSDomainParticipant * participant,
+  DDS::DomainParticipant * participant,
   const rmw_qos_profile_t & qos_profile,
-  DDS_DataReaderQos & datareader_qos);
+  DDS::DataReaderQos & datareader_qos);
 
 RMW_OPENDDS_SHARED_CPP_PUBLIC
 bool
 get_datawriter_qos(
-  DDSDomainParticipant * participant,
+  DDS::DomainParticipant * participant,
   const rmw_qos_profile_t & qos_profile,
-  DDS_DataWriterQos & datawriter_qos);
+  DDS::DataWriterQos & datawriter_qos);
 
 template<typename DDSEntityQos>
 bool

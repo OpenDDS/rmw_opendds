@@ -19,6 +19,8 @@
 #include "rmw/error_handling.h"
 #include "rmw/impl/cpp/macros.hpp"
 
+#include "dds/DCPS/GuardCondition.h"
+
 rmw_guard_condition_t *
 create_guard_condition(const char * implementation_identifier)
 {
@@ -28,14 +30,14 @@ create_guard_condition(const char * implementation_identifier)
     return NULL;
   }
   // Allocate memory for the DDSGuardCondition object.
-  DDSGuardCondition * dds_guard_condition = nullptr;
-  void * buf = rmw_allocate(sizeof(DDSGuardCondition));
+  DDS::GuardCondition * dds_guard_condition = nullptr;
+  void * buf = rmw_allocate(sizeof(DDS::GuardCondition));
   if (!buf) {
     RMW_SET_ERROR_MSG("failed to allocate memory");
     goto fail;
   }
   // Use a placement new to construct the DDSGuardCondition in the preallocated buffer.
-  RMW_TRY_PLACEMENT_NEW(dds_guard_condition, buf, goto fail, DDSGuardCondition, )
+  RMW_TRY_PLACEMENT_NEW(dds_guard_condition, buf, goto fail, DDS::GuardCondition, )
   buf = nullptr;  // Only free the dds_guard_condition pointer; don't need the buf pointer anymore.
   guard_condition->implementation_identifier = implementation_identifier;
   guard_condition->data = dds_guard_condition;
@@ -66,8 +68,8 @@ destroy_guard_condition(
 
   auto result = RMW_RET_OK;
   RMW_TRY_DESTRUCTOR(
-    static_cast<DDSGuardCondition *>(guard_condition->data)->~DDSGuardCondition(),
-    DDSGuardCondition, result = RMW_RET_ERROR)
+    static_cast<DDS::GuardCondition *>(guard_condition->data)->~GuardCondition(),
+    DDS::GuardCondition, result = RMW_RET_ERROR)
   rmw_free(guard_condition->data);
   rmw_guard_condition_free(guard_condition);
   return result;

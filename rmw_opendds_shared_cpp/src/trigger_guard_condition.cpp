@@ -20,6 +20,8 @@
 #include "rmw_opendds_shared_cpp/trigger_guard_condition.hpp"
 #include "rmw_opendds_shared_cpp/types.hpp"
 
+#include "dds/DCPS/GuardCondition.h"
+
 rmw_ret_t
 trigger_guard_condition(
   const char * implementation_identifier,
@@ -34,13 +36,13 @@ trigger_guard_condition(
     guard_condition_handle->implementation_identifier, implementation_identifier,
     return RMW_RET_ERROR)
 
-  DDSGuardCondition * guard_condition =
-    static_cast<DDSGuardCondition *>(guard_condition_handle->data);
+  DDS::GuardCondition * guard_condition =
+    static_cast<DDS::GuardCondition *>(guard_condition_handle->data);
   if (!guard_condition) {
     RMW_SET_ERROR_MSG("guard condition is null");
     return RMW_RET_ERROR;
   }
-  DDS_ReturnCode_t status = guard_condition->set_trigger_value(DDS::BOOLEAN_TRUE);
+  DDS::ReturnCode_t status = guard_condition->set_trigger_value(true);
   if (status != DDS::RETCODE_OK) {
     RMW_SET_ERROR_MSG("failed to set trigger value");
     return RMW_RET_ERROR;

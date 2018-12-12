@@ -13,14 +13,13 @@
 // limitations under the License.
 
 #include "rmw_opendds_shared_cpp/init.hpp"
-#include "rmw_opendds_shared_cpp/opendds_include.hpp"
-
 #include "rmw/error_handling.h"
+#include "dds/DCPS/Service_Participant.h"
 
 rmw_ret_t
 init()
 {
-  DDS::DomainParticipantFactory * dpf_ = DDS::DomainParticipantFactory::get_instance();
+  DDS::DomainParticipantFactory * dpf_ = TheParticipantFactory;
   if (!dpf_) {
     RMW_SET_ERROR_MSG("failed to get participant factory");
     return RMW_RET_ERROR;
