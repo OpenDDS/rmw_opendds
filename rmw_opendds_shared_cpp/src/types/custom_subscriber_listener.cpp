@@ -16,11 +16,12 @@
 
 #include "rmw_opendds_shared_cpp/guid_helper.hpp"
 #include "rmw_opendds_shared_cpp/types.hpp"
+#include "dds/DdsDcpsCoreTypeSupportC.h"
 
 void CustomSubscriberListener::on_data_available(DDS::DataReader * reader)
 {
   DDS::SubscriptionBuiltinTopicDataDataReader * builtin_reader =
-    static_cast<DDS::SubscriptionBuiltinTopicDataDataReader *>(reader);
+    dynamic_cast<DDS::SubscriptionBuiltinTopicDataDataReader *>(reader);
 
   DDS::SubscriptionBuiltinTopicDataSeq data_seq;
   DDS::SampleInfoSeq info_seq;
@@ -41,15 +42,15 @@ void CustomSubscriberListener::on_data_available(DDS::DataReader * reader)
 
     DDS::InstanceHandle_to_GUID(&guid, info_seq[i].instance_handle);
     if (info_seq[i].valid_data &&
-      info_seq[i].instance_state == DDS_InstanceStateKind::DDS_ALIVE_INSTANCE_STATE)
+      info_seq[i].instance_state == DDS::ALIVE_INSTANCE_STATE)
     {
       DDS::GUID_t participant_guid;
       DDS::BuiltinTopicKey_to_GUID(&participant_guid, data_seq[i].participant_key);
       add_information(
         participant_guid,
         guid,
-        data_seq[i].topic_name,
-        data_seq[i].type_name,
+        data_seq[i].topic_name.in (),
+        data_seq[i].type_name.in (),
         EntityType::Subscriber);
     } else {
       remove_information(
