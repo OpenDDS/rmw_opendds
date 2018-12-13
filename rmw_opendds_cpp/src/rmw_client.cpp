@@ -47,7 +47,7 @@ rmw_create_client(
   }
   RMW_CHECK_TYPE_IDENTIFIERS_MATCH(
     node handle,
-    node->implementation_identifier, rti_opendds_identifier,
+    node->implementation_identifier, opendds_identifier,
     return NULL)
 
   RMW_OPENDDS_EXTRACT_SERVICE_TYPESUPPORT(type_supports, type_support, NULL)
@@ -186,7 +186,7 @@ rmw_create_client(
   client_info->response_datareader_ = response_datareader;
   client_info->read_condition_ = read_condition;
 
-  client->implementation_identifier = rti_opendds_identifier;
+  client->implementation_identifier = opendds_identifier;
   client->data = client_info;
   client->service_name = reinterpret_cast<const char *>(rmw_allocate(strlen(service_name) + 1));
   if (!client->service_name) {
@@ -272,7 +272,7 @@ rmw_destroy_client(rmw_node_t * node, rmw_client_t * client)
   }
   RMW_CHECK_TYPE_IDENTIFIERS_MATCH(
     client handle,
-    client->implementation_identifier, rti_opendds_identifier,
+    client->implementation_identifier, opendds_identifier,
     return RMW_RET_ERROR)
 
   auto result = RMW_RET_OK;

@@ -15,6 +15,6 @@
 #ifndef RMW_OPENDDS_CPP__IDENTIFIER_HPP_
 #define RMW_OPENDDS_CPP__IDENTIFIER_HPP_
 
-extern const char * const rti_opendds_identifier;
+extern const char * const opendds_identifier;
 
 #endif  // RMW_OPENDDS_CPP__IDENTIFIER_HPP_

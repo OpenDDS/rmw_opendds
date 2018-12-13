@@ -28,15 +28,15 @@ rmw_create_guard_condition(rmw_context_t * context)
   RMW_CHECK_TYPE_IDENTIFIERS_MATCH(
     init context,
     context->implementation_identifier,
-    rti_opendds_identifier,
+    opendds_identifier,
     // TODO(wjwwood): replace this with RMW_RET_INCORRECT_RMW_IMPLEMENTATION when refactored
     return NULL);
-  return create_guard_condition(rti_opendds_identifier);
+  return create_guard_condition(opendds_identifier);
 }
 
 rmw_ret_t
 rmw_destroy_guard_condition(rmw_guard_condition_t * guard_condition)
 {
-  return destroy_guard_condition(rti_opendds_identifier, guard_condition);
+  return destroy_guard_condition(opendds_identifier, guard_condition);
 }
 }  // extern "C"

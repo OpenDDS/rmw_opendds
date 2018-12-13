@@ -26,7 +26,7 @@ get_replier(rmw_service_t * service)
   if (!service) {
     return NULL;
   }
-  if (service->implementation_identifier != rti_opendds_identifier) {
+  if (service->implementation_identifier != opendds_identifier) {
     return NULL;
   }
   OpenDDSStaticServiceInfo * impl = static_cast<OpenDDSStaticServiceInfo *>(service->data);

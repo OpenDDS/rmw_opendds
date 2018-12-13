@@ -25,7 +25,7 @@ get_participant(rmw_node_t * node)
   if (!node) {
     return NULL;
   }
-  if (node->implementation_identifier != rti_opendds_identifier) {
+  if (node->implementation_identifier != opendds_identifier) {
     return NULL;
   }
   return static_cast<DDSDomainParticipant *>(node->data);

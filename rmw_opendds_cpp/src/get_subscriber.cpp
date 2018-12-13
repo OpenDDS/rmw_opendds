@@ -26,7 +26,7 @@ get_data_reader(rmw_subscription_t * subscription)
   if (!subscription) {
     return NULL;
   }
-  if (subscription->implementation_identifier != rti_opendds_identifier) {
+  if (subscription->implementation_identifier != opendds_identifier) {
     return NULL;
   }
   OpenDDSStaticSubscriberInfo * impl =

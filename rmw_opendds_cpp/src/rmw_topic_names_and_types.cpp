@@ -29,7 +29,7 @@ rmw_get_topic_names_and_types(
   rmw_names_and_types_t * topic_names_and_types)
 {
   return get_topic_names_and_types(
-    rti_opendds_identifier,
+    opendds_identifier,
     node,
     allocator,
     no_demangle,

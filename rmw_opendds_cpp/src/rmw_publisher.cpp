@@ -52,7 +52,7 @@ rmw_create_publisher(
   }
   RMW_CHECK_TYPE_IDENTIFIERS_MATCH(
     node handle,
-    node->implementation_identifier, rti_opendds_identifier,
+    node->implementation_identifier, opendds_identifier,
     return NULL)
 
   RMW_OPENDDS_EXTRACT_MESSAGE_TYPESUPPORT(type_supports, type_support, NULL)
@@ -211,7 +211,7 @@ rmw_create_publisher(
   publisher_info->dds_publisher_ = dds_publisher;
   publisher_info->topic_writer_ = topic_writer;
   publisher_info->callbacks_ = callbacks;
-  publisher_info->publisher_gid.implementation_identifier = rti_opendds_identifier;
+  publisher_info->publisher_gid.implementation_identifier = opendds_identifier;
   publisher_info->listener_ = publisher_listener;
   publisher_listener = nullptr;
   static_assert(
@@ -225,9 +225,9 @@ rmw_create_publisher(
       reinterpret_cast<OpenDDSPublisherGID *>(publisher_info->publisher_gid.data);
     publisher_gid->publication_handle = topic_writer->get_instance_handle();
   }
-  publisher_info->publisher_gid.implementation_identifier = rti_opendds_identifier;
+  publisher_info->publisher_gid.implementation_identifier = opendds_identifier;
 
-  publisher->implementation_identifier = rti_opendds_identifier;
+  publisher->implementation_identifier = opendds_identifier;
   publisher->data = publisher_info;
   publisher->topic_name = reinterpret_cast<const char *>(rmw_allocate(strlen(topic_name) + 1));
   if (!publisher->topic_name) {
@@ -348,7 +348,7 @@ rmw_destroy_publisher(rmw_node_t * node, rmw_publisher_t * publisher)
   }
   RMW_CHECK_TYPE_IDENTIFIERS_MATCH(
     node handle,
-    node->implementation_identifier, rti_opendds_identifier,
+    node->implementation_identifier, opendds_identifier,
     return RMW_RET_ERROR)
 
   if (!publisher) {
@@ -357,7 +357,7 @@ rmw_destroy_publisher(rmw_node_t * node, rmw_publisher_t * publisher)
   }
   RMW_CHECK_TYPE_IDENTIFIERS_MATCH(
     publisher handle,
-    publisher->implementation_identifier, rti_opendds_identifier,
+    publisher->implementation_identifier, opendds_identifier,
     return RMW_RET_ERROR)
 
   auto node_info = static_cast<OpenDDSNodeInfo *>(node->data);

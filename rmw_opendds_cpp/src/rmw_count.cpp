@@ -26,7 +26,7 @@ rmw_count_publishers(
   const char * topic_name,
   size_t * count)
 {
-  return count_publishers(rti_opendds_identifier, node, topic_name, count);
+  return count_publishers(opendds_identifier, node, topic_name, count);
 }
 
 rmw_ret_t
@@ -35,6 +35,6 @@ rmw_count_subscribers(
   const char * topic_name,
   size_t * count)
 {
-  return count_subscribers(rti_opendds_identifier, node, topic_name, count);
+  return count_subscribers(opendds_identifier, node, topic_name, count);
 }
 }  // extern "C"
