@@ -20,7 +20,7 @@ get_datareader_qos(
   const rmw_qos_profile_t & qos_profile,
   DDS::DataReaderQos & datareader_qos)
 {
-  DDS::ReturnCode_t status = participant->get_default_datareader_qos(datareader_qos);
+  DDS::ReturnCode_t status; // @todo jwi = participant->get_default_datareader_qos(datareader_qos);
   if (status != DDS::RETCODE_OK) {
     RMW_SET_ERROR_MSG("failed to get default datareader qos");
     return false;
@@ -39,7 +39,7 @@ get_datawriter_qos(
   const rmw_qos_profile_t & qos_profile,
   DDS::DataWriterQos & datawriter_qos)
 {
-  DDS::ReturnCode_t status = participant->get_default_datawriter_qos(datawriter_qos);
+  DDS::ReturnCode_t status; // @todo jwi = participant->get_default_datawriter_qos(datawriter_qos);
   if (status != DDS::RETCODE_OK) {
     RMW_SET_ERROR_MSG("failed to get default datawriter qos");
     return false;

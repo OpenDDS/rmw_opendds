@@ -16,7 +16,7 @@
 
 #include "rmw_opendds_shared_cpp/guid_helper.hpp"
 #include "rmw_opendds_shared_cpp/types.hpp"
-
+#include "dds/DdsDcpsCoreTypeSupportC.h"
 // Uncomment this to get extra console output about discovery.
 // #define DISCOVERY_DEBUG_LOGGING 1
 
@@ -28,8 +28,8 @@ void CustomPublisherListener::on_data_available(DDS::DataReader * reader)
   DDS::PublicationBuiltinTopicDataSeq data_seq;
   DDS::SampleInfoSeq info_seq;
   DDS::ReturnCode_t retcode = builtin_reader->take(
-    data_seq, info_seq, DDS_LENGTH_UNLIMITED,
-    DDS_ANY_SAMPLE_STATE, DDS_ANY_VIEW_STATE, DDS_ANY_INSTANCE_STATE);
+    data_seq, info_seq, DDS::LENGTH_UNLIMITED,
+    DDS::ANY_SAMPLE_STATE, DDS::ANY_VIEW_STATE, DDS::ANY_INSTANCE_STATE);
 
   if (retcode == DDS::RETCODE_NO_DATA) {
     return;
@@ -43,15 +43,15 @@ void CustomPublisherListener::on_data_available(DDS::DataReader * reader)
     DDS::GUID_t guid;
     DDS::InstanceHandle_to_GUID(&guid, info_seq[i].instance_handle);
     if (info_seq[i].valid_data &&
-      info_seq[i].instance_state == DDS_InstanceStateKind::DDS_ALIVE_INSTANCE_STATE)
+      info_seq[i].instance_state == DDS::ALIVE_INSTANCE_STATE)
     {
       DDS::GUID_t participant_guid;
       DDS::BuiltinTopicKey_to_GUID(&participant_guid, data_seq[i].participant_key);
       add_information(
         participant_guid,
         guid,
-        data_seq[i].topic_name,
-        data_seq[i].type_name,
+        data_seq[i].topic_name.in (),
+        data_seq[i].type_name.in (),
         EntityType::Publisher);
     } else {
       remove_information(
