@@ -74,7 +74,40 @@ link_directories(${OpenDDS_LIBRARY_DIRS})
 add_library(
   rmw_opendds_cpp
   SHARED
-  src/rmw_opendds.cpp)
+  src/get_client.cpp
+  src/get_participant.cpp
+  src/get_publisher.cpp
+  src/get_service.cpp
+  src/get_subscriber.cpp
+  src/identifier.cpp
+  src/process_topic_and_service_names.cpp
+  src/rmw_client.cpp
+  src/rmw_compare_gid_equals.cpp
+  src/rmw_count.cpp
+  src/rmw_get_gid_for_publisher.cpp
+  src/rmw_get_implementation_identifier.cpp
+  src/rmw_get_serialization_format.cpp
+  src/rmw_guard_condition.cpp
+  src/rmw_init.cpp
+  src/rmw_logging.cpp
+  src/rmw_node.cpp
+  src/rmw_node_info_and_types.cpp
+  src/rmw_node_names.cpp
+  src/rmw_publish.cpp
+  src/rmw_publisher.cpp
+  src/rmw_request.cpp
+  src/rmw_response.cpp
+  src/rmw_serialize.cpp
+  src/rmw_service.cpp
+  src/rmw_service_names_and_types.cpp
+  src/rmw_service_server_is_available.cpp
+  src/rmw_subscription.cpp
+  src/rmw_take.cpp
+  src/rmw_topic_names_and_types.cpp
+  src/rmw_trigger_guard_condition.cpp
+  src/rmw_wait.cpp
+  src/rmw_wait_set.cpp
+  src/serialization_format.cpp)
 
 # Declare external package dependencies for building.
 ament_target_dependencies(rmw_opendds_cpp
