@@ -15,6 +15,6 @@
 #ifndef RMW_OPENDDS_CPP__SERIALIZATION_FORMAT_HPP_
 #define RMW_OPENDDS_CPP__SERIALIZATION_FORMAT_HPP_
 
-extern const char * const rti_opendds_serialization_format;
+extern const char * const opendds_serialization_format;
 
 #endif  // RMW_OPENDDS_CPP__SERIALIZATION_FORMAT_HPP_

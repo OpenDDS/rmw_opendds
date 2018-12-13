@@ -21,6 +21,6 @@ extern "C"
 const char *
 rmw_get_serialization_format()
 {
-  return rti_opendds_serialization_format;
+  return opendds_serialization_format;
 }
 }  // extern "C"
