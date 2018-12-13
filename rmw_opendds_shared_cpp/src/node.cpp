@@ -291,7 +291,7 @@ destroy_node(const char * implementation_identifier, rmw_node_t * node)
     node->implementation_identifier, implementation_identifier,
     return RMW_RET_ERROR)
 
-  DDS::DomainParticipantFactory * dpf_ = DDS::DomainParticipantFactory::get_instance();
+  DDS::DomainParticipantFactory * dpf_ = TheParticipantFactory;
   if (!dpf_) {
     RMW_SET_ERROR_MSG("failed to get participant factory");
     return RMW_RET_ERROR;
