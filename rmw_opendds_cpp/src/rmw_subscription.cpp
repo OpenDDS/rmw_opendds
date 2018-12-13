@@ -67,7 +67,7 @@ rmw_create_subscription(
     RMW_SET_ERROR_MSG("node info handle is null");
     return NULL;
   }
-  auto participant = static_cast<DDSDomainParticipant *>(node_info->participant);
+  auto participant = static_cast<DDS::DomainParticipant *>(node_info->participant);
   if (!participant) {
     RMW_SET_ERROR_MSG("participant handle is null");
     return NULL;
@@ -81,15 +81,15 @@ rmw_create_subscription(
   }
   std::string type_name = _create_type_name(callbacks, "msg");
   // Past this point, a failure results in unrolling code in the goto fail block.
-  DDS_TypeCode * type_code = nullptr;
-  DDS_DataReaderQos datareader_qos;
-  DDS_SubscriberQos subscriber_qos;
-  DDS_ReturnCode_t status;
-  DDSSubscriber * dds_subscriber = nullptr;
-  DDSTopic * topic = nullptr;
-  DDSTopicDescription * topic_description = nullptr;
-  DDSDataReader * topic_reader = nullptr;
-  DDSReadCondition * read_condition = nullptr;
+  DDS::TypeCode * type_code = nullptr;
+  DDS::DataReaderQos datareader_qos;
+  DDS::SubscriberQos subscriber_qos;
+  DDS::ReturnCode_t status;
+  DDS::Subscriber * dds_subscriber = nullptr;
+  DDS::Topic * topic = nullptr;
+  DDS::TopicDescription * topic_description = nullptr;
+  DDS::DataReader * topic_reader = nullptr;
+  DDS::ReadCondition * read_condition = nullptr;
   void * info_buf = nullptr;
   void * listener_buf = nullptr;
   OpenDDSSubscriberListener * subscriber_listener = nullptr;
@@ -150,7 +150,7 @@ rmw_create_subscription(
   listener_buf = nullptr;  // Only free the buffer pointer.
 
   dds_subscriber = participant->create_subscriber(
-    subscriber_qos, subscriber_listener, DDS_SUBSCRIPTION_MATCHED_STATUS);
+    subscriber_qos, subscriber_listener, DDS::SUBSCRIPTION_MATCHED_STATUS);
   if (!dds_subscriber) {
     RMW_SET_ERROR_MSG("failed to create subscriber");
     goto fail;
@@ -158,7 +158,7 @@ rmw_create_subscription(
 
   topic_description = participant->lookup_topicdescription(topic_str);
   if (!topic_description) {
-    DDS_TopicQos default_topic_qos;
+    DDS::TopicQos default_topic_qos;
     status = participant->get_default_topic_qos(default_topic_qos);
     if (status != DDS::RETCODE_OK) {
       RMW_SET_ERROR_MSG("failed to get default topic qos");
@@ -173,7 +173,7 @@ rmw_create_subscription(
       goto fail;
     }
   } else {
-    DDS_Duration_t timeout = DDS_Duration_t::from_seconds(0);
+    DDS_Duration_t timeout = DDS::Duration_t::from_seconds(0);
     topic = participant->find_topic(topic_str, timeout);
     if (!topic) {
       RMW_SET_ERROR_MSG("failed to find topic");
@@ -190,7 +190,7 @@ rmw_create_subscription(
 
   topic_reader = dds_subscriber->create_datareader(
     topic, datareader_qos,
-    NULL, DDS_STATUS_MASK_NONE);
+    NULL, DDS::STATUS_MASK_NONE);
   if (!topic_reader) {
     RMW_SET_ERROR_MSG("failed to create datareader");
     goto fail;

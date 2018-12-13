@@ -28,7 +28,7 @@ get_participant(rmw_node_t * node)
   if (node->implementation_identifier != opendds_identifier) {
     return NULL;
   }
-  return static_cast<DDSDomainParticipant *>(node->data);
+  return static_cast<DDS::DomainParticipant *>(node->data);
 }
 
 }  // namespace rmw_opendds_cpp

@@ -20,7 +20,7 @@
 namespace rmw_opendds_cpp
 {
 
-DDSDataWriter *
+DDS::DataWriter *
 get_data_writer(rmw_publisher_t * publisher)
 {
   if (!publisher) {

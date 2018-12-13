@@ -62,7 +62,7 @@ rmw_create_client(
     RMW_SET_ERROR_MSG("node info handle is null");
     return NULL;
   }
-  auto participant = static_cast<DDSDomainParticipant *>(node_info->participant);
+  auto participant = static_cast<DDS::DomainParticipant *>(node_info->participant);
   if (!participant) {
     RMW_SET_ERROR_MSG("participant handle is null");
     return NULL;
@@ -75,11 +75,11 @@ rmw_create_client(
     return NULL;
   }
   // Past this point, a failure results in unrolling code in the goto fail block.
-  DDS_SubscriberQos subscriber_qos;
-  DDS_ReturnCode_t status;
-  DDS_PublisherQos publisher_qos;
-  DDS_DataReaderQos datareader_qos;
-  DDS_DataWriterQos datawriter_qos;
+  DDS::SubscriberQos subscriber_qos;
+  DDS::ReturnCode_t status;
+  DDS::PublisherQos publisher_qos;
+  DDS::DataReaderQos datareader_qos;
+  DDS::DataWriterQos datawriter_qos;
   DDS::Publisher * dds_publisher = nullptr;
   DDS::Subscriber * dds_subscriber = nullptr;
   DDS::DataReader * response_datareader = nullptr;
