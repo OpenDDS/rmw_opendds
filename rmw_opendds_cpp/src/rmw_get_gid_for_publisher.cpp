@@ -31,7 +31,7 @@ rmw_get_gid_for_publisher(const rmw_publisher_t * publisher, rmw_gid_t * gid)
   RMW_CHECK_TYPE_IDENTIFIERS_MATCH(
     publisher handle,
     publisher->implementation_identifier,
-    rti_opendds_identifier,
+    opendds_identifier,
     return RMW_RET_ERROR)
   if (!gid) {
     RMW_SET_ERROR_MSG("gid is null");

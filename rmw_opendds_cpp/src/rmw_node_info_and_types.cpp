@@ -35,7 +35,7 @@ rmw_get_subscriber_names_and_types_by_node(
   rmw_names_and_types_t * topic_names_and_types)
 {
   return get_subscriber_names_and_types_by_node(
-    rti_opendds_identifier, node, allocator, node_name, node_namespace, no_demangle,
+    opendds_identifier, node, allocator, node_name, node_namespace, no_demangle,
     topic_names_and_types);
 }
 
@@ -49,7 +49,7 @@ rmw_get_publisher_names_and_types_by_node(
   rmw_names_and_types_t * topic_names_and_types)
 {
   return get_publisher_names_and_types_by_node(
-    rti_opendds_identifier, node, allocator, node_name, node_namespace, no_demangle,
+    opendds_identifier, node, allocator, node_name, node_namespace, no_demangle,
     topic_names_and_types);
 }
 
@@ -62,6 +62,6 @@ rmw_get_service_names_and_types_by_node(
   rmw_names_and_types_t * service_names_and_types)
 {
   return get_service_names_and_types_by_node(
-    rti_opendds_identifier, node, allocator, node_name, node_namespace, service_names_and_types);
+    opendds_identifier, node, allocator, node_name, node_namespace, service_names_and_types);
 }
 }  // extern "C"

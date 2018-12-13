@@ -79,7 +79,7 @@ rmw_publish(const rmw_publisher_t * publisher, const void * ros_message)
     RMW_SET_ERROR_MSG("publisher handle is null");
     return RMW_RET_ERROR;
   }
-  if (publisher->implementation_identifier != rti_opendds_identifier) {
+  if (publisher->implementation_identifier != opendds_identifier) {
     RMW_SET_ERROR_MSG("publisher handle is not from this rmw implementation");
     return RMW_RET_ERROR;
   }
@@ -143,7 +143,7 @@ rmw_publish_serialized_message(
     RMW_SET_ERROR_MSG("publisher handle is null");
     return RMW_RET_ERROR;
   }
-  if (publisher->implementation_identifier != rti_opendds_identifier) {
+  if (publisher->implementation_identifier != opendds_identifier) {
     RMW_SET_ERROR_MSG("publisher handle is not from this rmw implementation");
     return RMW_RET_ERROR;
   }

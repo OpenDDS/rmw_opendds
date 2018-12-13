@@ -14,4 +14,4 @@
 
 #include "rmw_opendds_cpp/identifier.hpp"
 
-const char * const rti_opendds_identifier = "rmw_opendds_cpp";
+const char * const opendds_identifier = "rmw_opendds_cpp";

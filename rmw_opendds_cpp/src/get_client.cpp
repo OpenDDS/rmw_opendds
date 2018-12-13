@@ -26,7 +26,7 @@ get_requester(rmw_client_t * client)
   if (!client) {
     return NULL;
   }
-  if (client->implementation_identifier != rti_opendds_identifier) {
+  if (client->implementation_identifier != opendds_identifier) {
     return NULL;
   }
   OpenDDSStaticClientInfo * impl = static_cast<OpenDDSStaticClientInfo *>(client->data);

@@ -33,7 +33,7 @@ rmw_wait(
   const rmw_time_t * wait_timeout)
 {
   return wait<OpenDDSStaticSubscriberInfo, OpenDDSStaticServiceInfo, OpenDDSStaticClientInfo>(
-    rti_opendds_identifier, subscriptions, guard_conditions, services, clients, wait_set,
+    opendds_identifier, subscriptions, guard_conditions, services, clients, wait_set,
     wait_timeout);
 }
 }  // extern "C"

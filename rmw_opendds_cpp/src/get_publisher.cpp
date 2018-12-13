@@ -26,7 +26,7 @@ get_data_writer(rmw_publisher_t * publisher)
   if (!publisher) {
     return NULL;
   }
-  if (publisher->implementation_identifier != rti_opendds_identifier) {
+  if (publisher->implementation_identifier != opendds_identifier) {
     return NULL;
   }
   OpenDDSStaticPublisherInfo * impl = static_cast<OpenDDSStaticPublisherInfo *>(publisher->data);

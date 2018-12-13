@@ -21,6 +21,6 @@ extern "C"
 const char *
 rmw_get_implementation_identifier()
 {
-  return rti_opendds_identifier;
+  return opendds_identifier;
 }
 }  // extern "C"

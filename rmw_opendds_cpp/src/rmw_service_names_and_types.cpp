@@ -29,7 +29,7 @@ rmw_get_service_names_and_types(
   rmw_names_and_types_t * service_names_and_types)
 {
   return get_service_names_and_types(
-    rti_opendds_identifier,
+    opendds_identifier,
     node,
     allocator,
     service_names_and_types);

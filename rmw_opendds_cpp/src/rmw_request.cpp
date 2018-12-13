@@ -34,7 +34,7 @@ rmw_send_request(
   }
   RMW_CHECK_TYPE_IDENTIFIERS_MATCH(
     client handle,
-    client->implementation_identifier, rti_opendds_identifier,
+    client->implementation_identifier, opendds_identifier,
     return RMW_RET_ERROR)
 
   if (!ros_request) {
@@ -75,7 +75,7 @@ rmw_take_request(
   }
   RMW_CHECK_TYPE_IDENTIFIERS_MATCH(
     service handle,
-    service->implementation_identifier, rti_opendds_identifier,
+    service->implementation_identifier, opendds_identifier,
     return RMW_RET_ERROR)
 
   if (!request_header) {

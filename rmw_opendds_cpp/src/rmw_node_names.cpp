@@ -28,6 +28,6 @@ rmw_get_node_names(
   rcutils_string_array_t * node_names,
   rcutils_string_array_t * node_namespaces)
 {
-  return get_node_names(rti_opendds_identifier, node, node_names, node_namespaces);
+  return get_node_names(opendds_identifier, node, node_names, node_namespaces);
 }
 }  // extern "C"

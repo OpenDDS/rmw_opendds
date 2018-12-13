@@ -52,7 +52,7 @@ rmw_create_subscription(
   }
   RMW_CHECK_TYPE_IDENTIFIERS_MATCH(
     node handle,
-    node->implementation_identifier, rti_opendds_identifier,
+    node->implementation_identifier, opendds_identifier,
     return NULL)
 
   RMW_OPENDDS_EXTRACT_MESSAGE_TYPESUPPORT(type_supports, type_support, NULL)
@@ -220,7 +220,7 @@ rmw_create_subscription(
   subscriber_info->listener_ = subscriber_listener;
   subscriber_listener = nullptr;
 
-  subscription->implementation_identifier = rti_opendds_identifier;
+  subscription->implementation_identifier = opendds_identifier;
   subscription->data = subscriber_info;
 
   subscription->topic_name = reinterpret_cast<const char *>(
@@ -351,7 +351,7 @@ rmw_destroy_subscription(rmw_node_t * node, rmw_subscription_t * subscription)
   }
   RMW_CHECK_TYPE_IDENTIFIERS_MATCH(
     node handle,
-    node->implementation_identifier, rti_opendds_identifier,
+    node->implementation_identifier, opendds_identifier,
     return RMW_RET_ERROR)
 
   if (!subscription) {
@@ -360,7 +360,7 @@ rmw_destroy_subscription(rmw_node_t * node, rmw_subscription_t * subscription)
   }
   RMW_CHECK_TYPE_IDENTIFIERS_MATCH(
     subscription handle,
-    subscription->implementation_identifier, rti_opendds_identifier,
+    subscription->implementation_identifier, opendds_identifier,
     return RMW_RET_ERROR)
 
   auto node_info = static_cast<OpenDDSNodeInfo *>(node->data);

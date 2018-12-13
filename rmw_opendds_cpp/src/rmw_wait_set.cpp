@@ -23,12 +23,12 @@ extern "C"
 rmw_wait_set_t *
 rmw_create_wait_set(size_t max_conditions)
 {
-  return create_wait_set(rti_opendds_identifier, max_conditions);
+  return create_wait_set(opendds_identifier, max_conditions);
 }
 
 rmw_ret_t
 rmw_destroy_wait_set(rmw_wait_set_t * wait_set)
 {
-  return destroy_wait_set(rti_opendds_identifier, wait_set);
+  return destroy_wait_set(opendds_identifier, wait_set);
 }
 }  // extern "C"

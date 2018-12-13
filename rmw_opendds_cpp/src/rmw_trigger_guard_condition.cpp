@@ -23,6 +23,6 @@ extern "C"
 rmw_ret_t
 rmw_trigger_guard_condition(const rmw_guard_condition_t * guard_condition_handle)
 {
-  return trigger_guard_condition(rti_opendds_identifier, guard_condition_handle);
+  return trigger_guard_condition(opendds_identifier, guard_condition_handle);
 }
 }  // extern "C"

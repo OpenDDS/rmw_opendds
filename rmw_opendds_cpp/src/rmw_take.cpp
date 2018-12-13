@@ -141,7 +141,7 @@ _take(
   }
   RMW_CHECK_TYPE_IDENTIFIERS_MATCH(
     subscription handle,
-    subscription->implementation_identifier, rti_opendds_identifier,
+    subscription->implementation_identifier, opendds_identifier,
     return RMW_RET_ERROR)
 
   if (!ros_message) {
@@ -217,7 +217,7 @@ rmw_take_with_info(
   }
 
   rmw_gid_t * sender_gid = &message_info->publisher_gid;
-  sender_gid->implementation_identifier = rti_opendds_identifier;
+  sender_gid->implementation_identifier = opendds_identifier;
   memset(sender_gid->data, 0, RMW_GID_STORAGE_SIZE);
   auto detail = reinterpret_cast<OpenDDSPublisherGID *>(sender_gid->data);
   detail->publication_handle = sending_publication_handle;
@@ -238,7 +238,7 @@ _take_serialized_message(
   }
   RMW_CHECK_TYPE_IDENTIFIERS_MATCH(
     subscription handle,
-    subscription->implementation_identifier, rti_opendds_identifier,
+    subscription->implementation_identifier, opendds_identifier,
     return RMW_RET_ERROR)
 
   if (!serialized_message) {
@@ -308,7 +308,7 @@ rmw_take_serialized_message_with_info(
   }
 
   rmw_gid_t * sender_gid = &message_info->publisher_gid;
-  sender_gid->implementation_identifier = rti_opendds_identifier;
+  sender_gid->implementation_identifier = opendds_identifier;
   memset(sender_gid->data, 0, RMW_GID_STORAGE_SIZE);
   auto detail = reinterpret_cast<OpenDDSPublisherGID *>(sender_gid->data);
   detail->publication_handle = sending_publication_handle;

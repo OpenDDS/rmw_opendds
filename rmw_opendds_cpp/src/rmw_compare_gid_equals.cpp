@@ -32,7 +32,7 @@ rmw_compare_gids_equal(const rmw_gid_t * gid1, const rmw_gid_t * gid2, bool * re
   RMW_CHECK_TYPE_IDENTIFIERS_MATCH(
     gid1,
     gid1->implementation_identifier,
-    rti_opendds_identifier,
+    opendds_identifier,
     return RMW_RET_ERROR)
   if (!gid2) {
     RMW_SET_ERROR_MSG("gid2 is null");
@@ -41,7 +41,7 @@ rmw_compare_gids_equal(const rmw_gid_t * gid1, const rmw_gid_t * gid2, bool * re
   RMW_CHECK_TYPE_IDENTIFIERS_MATCH(
     gid2,
     gid2->implementation_identifier,
-    rti_opendds_identifier,
+    opendds_identifier,
     return RMW_RET_ERROR)
   if (!result) {
     RMW_SET_ERROR_MSG("result is null");
