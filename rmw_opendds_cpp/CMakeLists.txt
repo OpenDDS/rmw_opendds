@@ -113,6 +113,7 @@ add_library(
 ament_target_dependencies(rmw_opendds_cpp
   "rcutils"
   "rmw"
+  "rmw_opendds_shared_cpp"
   "rosidl_generator_c"
   "rosidl_generator_cpp"
   "rosidl_typesupport_opendds_c"

@@ -14,4 +14,4 @@
 
 #include "rmw_opendds_cpp/serialization_format.hpp"
 
-const char * const rti_opendds_serialization_format = "cdr";
+const char * const opendds_serialization_format = "cdr";
