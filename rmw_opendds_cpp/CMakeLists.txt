@@ -52,6 +52,8 @@ find_package(rmw_opendds_shared_cpp REQUIRED)
 find_package(rosidl_generator_c REQUIRED)
 find_package(rosidl_generator_cpp REQUIRED)
 
+include_directories(include)
+
 ament_export_include_directories(include)
 ament_export_dependencies(
   rcutils
