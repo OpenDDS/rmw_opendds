@@ -27,10 +27,10 @@ extern "C"
 {
 struct OpenDDSStaticSubscriberInfo
 {
-  DDSSubscriber * dds_subscriber_;
+  DDS::Subscriber * dds_subscriber_;
   OpenDDSSubscriberListener * listener_;
-  DDSDataReader * topic_reader_;
-  DDSReadCondition * read_condition_;
+  DDS::DataReader * topic_reader_;
+  DDS::ReadCondition * read_condition_;
   bool ignore_local_publications;
   const message_type_support_callbacks_t * callbacks_;
 };

@@ -58,8 +58,8 @@ rmw_compare_gids_equal(const rmw_gid_t * gid1, const rmw_gid_t * gid2, bool * re
     return RMW_RET_ERROR;
   }
   auto matches =
-    DDS_InstanceHandle_equals(&detail1->publication_handle, &detail2->publication_handle);
-  *result = (matches == DDS::BOOLEAN_TRUE);
+    detail1->publication_handle == detail2->publication_handle;
+  *result = (matches == true);
   return RMW_RET_OK;
 }
 }  // extern "C"

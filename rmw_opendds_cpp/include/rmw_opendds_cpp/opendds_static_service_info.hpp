@@ -15,7 +15,7 @@
 #ifndef RMW_OPENDDS_CPP__CONNEXT_STATIC_SERVICE_INFO_HPP_
 #define RMW_OPENDDS_CPP__CONNEXT_STATIC_SERVICE_INFO_HPP_
 
-#include "rmw_opendds_shared_cpp/ndds_include.hpp"
+#include "rmw_opendds_shared_cpp/opendds_include.hpp"
 
 #include "rosidl_typesupport_opendds_cpp/service_type_support.h"
 
@@ -24,8 +24,8 @@ extern "C"
 struct OpenDDSStaticServiceInfo
 {
   void * replier_;
-  DDSDataReader * request_datareader_;
-  DDSReadCondition * read_condition_;
+  DDS::DataReader * request_datareader_;
+  DDS::ReadCondition * read_condition_;
   const service_type_support_callbacks_t * callbacks_;
 };
 }  // extern "C"

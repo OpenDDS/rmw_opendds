@@ -19,7 +19,7 @@
 namespace rmw_opendds_cpp
 {
 
-DDSDomainParticipant *
+DDS::DomainParticipant *
 get_participant(rmw_node_t * node)
 {
   if (!node) {
