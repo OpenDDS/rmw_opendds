@@ -121,16 +121,29 @@ ament_target_dependencies(rmw_opendds_cpp
   "rosidl_typesupport_opendds_c"
   "rosidl_typesupport_opendds_cpp"
   "OpenDDS")
-configure_rmw_library(rmw_opendds_cpp)
+target_include_directories(rmw_connext_cpp PUBLIC ${patched_directory})
 ament_export_libraries(rmw_opendds_cpp)
+
+# Causes the visibility macros to use dllexport rather than dllimport
+# which is appropriate when building the library but not consuming it.
+target_compile_definitions(rmw_opendds_cpp
+  PRIVATE "RMW_OPENDDS_CPP_BUILDING_DLL")
+
+# On Windows this adds the RMW_BUILDING_DLL definition.
+# On Unix (GCC or Clang) it hides the symbols with -fvisibility=hidden.
+configure_rmw_library(rmw_opendds_cpp)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
   ament_lint_auto_find_test_dependencies()
 endif()
 
-# Make this package available to other ROS-2 packages.
 ament_package(CONFIG_EXTRAS "${PROJECT_NAME}-extras.cmake")
+
+install(
+  DIRECTORY include/
+  DESTINATION include
+)
 
 install(
   TARGETS rmw_opendds_cpp
