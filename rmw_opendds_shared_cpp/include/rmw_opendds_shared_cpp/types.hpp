@@ -46,19 +46,6 @@ public:
     implementation_identifier_(implementation_identifier)
   {}
 
-  RMW_OPENDDS_SHARED_CPP_PUBLIC
-  virtual void add_information(
-    const DDS::GUID_t & participant_guid,
-    const DDS::GUID_t & guid,
-    const std::string & topic_name,
-    const std::string & type_name,
-    EntityType entity_type);
-
-  RMW_OPENDDS_SHARED_CPP_PUBLIC
-  virtual void remove_information(
-    const DDS::GUID_t & guid,
-    EntityType entity_type);
-
   virtual void add_information(
     const DDS::InstanceHandle_t & participant_instance_handle,
     const DDS::InstanceHandle_t & instance_handle,
@@ -86,11 +73,11 @@ public:
   void fill_topic_names_and_types_by_guid(
     bool no_demangle,
     std::map<std::string, std::set<std::string>> & topic_names_to_types_by_guid,
-    DDS::GUID_t & participant_guid);
+    DDS::InstanceHandle_t & participant_guid);
 
   void fill_service_names_and_types_by_guid(
     std::map<std::string, std::set<std::string>> & services,
-    DDS::GUID_t & participant_guid);
+    DDS::InstanceHandle_t & participant_guid);
 
   virtual void on_requested_deadline_missed(
     ::DDS::DataReader_ptr reader,
@@ -118,7 +105,7 @@ public:
 
 protected:
   std::mutex mutex_;
-  TopicCache<DDS::GUID_t> topic_cache;
+  TopicCache<DDS::InstanceHandle_t> topic_cache;
 
 private:
   rmw_guard_condition_t * graph_guard_condition_;

@@ -79,16 +79,16 @@ __is_node_match(
  * @param node_info to discover nodes
  * @param node_name to match
  * @param node_namespace to match
- * @param key [out] guid key that matches the node name and namespace
+ * @param key [out] instancehandle_t that matches the node name and namespace
  *
  * @return RMW_RET_OK if success, ERROR otherwise
  */
 rmw_ret_t
-__get_key(
+__get_instancehandle(
   OpenDDSNodeInfo * node_info,
   const char * node_name,
   const char * node_namespace,
-  DDS::GUID_t & key)
+  DDS::InstanceHandle_t & handle)
 {
   auto participant = node_info->participant;
   RMW_CHECK_FOR_NULL_WITH_MSG(participant, "participant handle is null", return RMW_RET_ERROR);
@@ -96,7 +96,7 @@ __get_key(
   DDS::DomainParticipantQos dpqos;
   auto dds_ret = participant->get_qos(dpqos);
   if (dds_ret == DDS::RETCODE_OK && __is_node_match(dpqos.user_data, node_name, node_namespace)) {
-    DDS::InstanceHandle_to_GUID(&key, participant->get_instance_handle());
+    handle = participant->get_instance_handle();
     return RMW_RET_OK;
   }
 
@@ -106,7 +106,7 @@ __get_key(
     return RMW_RET_ERROR;
   }
 
-  for (auto i = 0; i < handles.length(); ++i) {
+  for (CORBA::ULong i = 0; i < handles.length(); ++i) {
     DDS::ParticipantBuiltinTopicData pbtd;
     auto dds_ret = participant->get_discovered_participant_data(pbtd, handles[i]);
     if (dds_ret == DDS::RETCODE_OK) {
@@ -122,7 +122,7 @@ __get_key(
           std::string ns(ns_found->second.begin(), ns_found->second.end());
           if ((name == node_name) && (node_namespace == ns))
           {
-            DDS::BuiltinTopicKey_to_GUID(&key, pbtd.key);
+            handle = handles[i];
             return RMW_RET_OK;
           }
         }
@@ -186,15 +186,15 @@ get_subscriber_names_and_types_by_node(
     return RMW_RET_ERROR;
   }
 
-  DDS::GUID_t key;
-  auto get_guid_err = __get_key(node_info, node_name, node_namespace, key);
+  DDS::InstanceHandle_t handle;
+  auto get_guid_err = __get_instancehandle(node_info, node_name, node_namespace, handle);
   if (get_guid_err != RMW_RET_OK) {
     return get_guid_err;
   }
 
   // combine publisher and subscriber information
   std::map<std::string, std::set<std::string>> topics;
-  node_info->subscriber_listener->fill_topic_names_and_types_by_guid(no_demangle, topics, key);
+  node_info->subscriber_listener->fill_topic_names_and_types_by_guid(no_demangle, topics, handle);
 
   return copy_topics_names_and_types(topics, allocator, no_demangle, topic_names_and_types);
 }
@@ -233,15 +233,15 @@ get_publisher_names_and_types_by_node(
     return RMW_RET_ERROR;
   }
 
-  DDS::GUID_t key;
-  auto get_guid_err = __get_key(node_info, node_name, node_namespace, key);
+  DDS::InstanceHandle_t handle;
+  auto get_guid_err = __get_instancehandle(node_info, node_name, node_namespace, handle);
   if (get_guid_err != RMW_RET_OK) {
     return get_guid_err;
   }
 
   // combine publisher and subscriber information
   std::map<std::string, std::set<std::string>> topics;
-  node_info->publisher_listener->fill_topic_names_and_types_by_guid(no_demangle, topics, key);
+  node_info->publisher_listener->fill_topic_names_and_types_by_guid(no_demangle, topics, handle);
 
   return copy_topics_names_and_types(topics, allocator, no_demangle, topic_names_and_types);
 }
@@ -275,15 +275,15 @@ get_service_names_and_types_by_node(
     return RMW_RET_ERROR;
   }
 
-  DDS::GUID_t key;
-  auto get_guid_err = __get_key(node_info, node_name, node_namespace, key);
+  DDS::InstanceHandle_t handle;
+  auto get_guid_err = __get_instancehandle(node_info, node_name, node_namespace, handle);
   if (get_guid_err != RMW_RET_OK) {
     return get_guid_err;
   }
 
   // combine publisher and subscriber information
   std::map<std::string, std::set<std::string>> services;
-  node_info->subscriber_listener->fill_service_names_and_types_by_guid(services, key);
+  node_info->subscriber_listener->fill_service_names_and_types_by_guid(services, handle);
 
   rmw_ret_t rmw_ret;
   rmw_ret = copy_services_to_names_and_types(services, allocator, service_names_and_types);

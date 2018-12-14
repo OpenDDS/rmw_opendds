@@ -77,7 +77,7 @@ get_node_names(
     return RMW_RET_BAD_ALLOC;
   }
 
-  for (auto i = 1; i < length; ++i) {
+  for (CORBA::ULong i = 1; i < length; ++i) {
     DDS::ParticipantBuiltinTopicData pbtd;
     auto dds_ret = participant->get_discovered_participant_data(pbtd, handles[i - 1]);
     std::string name;

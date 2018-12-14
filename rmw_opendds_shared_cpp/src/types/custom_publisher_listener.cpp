@@ -39,23 +39,22 @@ void CustomPublisherListener::on_data_available(DDS::DataReader * reader)
     return;
   }
 
-  for (auto i = 0; i < data_seq.length(); ++i) {
-    DDS::GUID_t guid;
-    DDS::InstanceHandle_to_GUID(&guid, info_seq[i].instance_handle);
+  for (CORBA::ULong i = 0; i < data_seq.length(); ++i) {
     if (info_seq[i].valid_data &&
       info_seq[i].instance_state == DDS::ALIVE_INSTANCE_STATE)
     {
-      DDS::GUID_t participant_guid;
-      DDS::BuiltinTopicKey_to_GUID(&participant_guid, data_seq[i].participant_key);
+      DDS::InstanceHandle_t participant_guid;
+      // @todo jwi
+      //DDS::BuiltinTopicKey_to_GUID(&participant_guid, data_seq[i].participant_key);
       add_information(
         participant_guid,
-        guid,
+        info_seq[i].instance_handle,
         data_seq[i].topic_name.in (),
         data_seq[i].type_name.in (),
         EntityType::Publisher);
     } else {
       remove_information(
-        guid,
+        info_seq[i].instance_handle,
         EntityType::Publisher);
     }
   }

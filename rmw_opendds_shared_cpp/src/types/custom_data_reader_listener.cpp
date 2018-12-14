@@ -30,8 +30,8 @@
 // #define DISCOVERY_DEBUG_LOGGING 1
 
 void CustomDataReaderListener::add_information(
-  const DDS::GUID_t & participant_guid,
-  const DDS::GUID_t & guid,
+  const DDS::InstanceHandle_t & participant_guid,
+  const DDS::InstanceHandle_t & guid,
   const std::string & topic_name,
   const std::string & type_name,
   EntityType entity_type)
@@ -54,7 +54,7 @@ void CustomDataReaderListener::add_information(
 }
 
 void CustomDataReaderListener::remove_information(
-  const DDS::GUID_t & guid,
+  const DDS::InstanceHandle_t & guid,
   EntityType entity_type)
 {
   (void)entity_type;
@@ -69,28 +69,6 @@ void CustomDataReaderListener::remove_information(
     entity_type == EntityType::Publisher ? "P" : "S",
     ss.str().c_str());
 #endif
-}
-
-void CustomDataReaderListener::add_information(
-  const DDS::InstanceHandle_t & participant_instance_handle,
-  const DDS::InstanceHandle_t & instance_handle,
-  const std::string & topic_name,
-  const std::string & type_name,
-  EntityType entity_type)
-{
-  DDS::GUID_t guid, participant_guid;
-  DDS::InstanceHandle_to_GUID(&guid, instance_handle);
-  DDS::InstanceHandle_to_GUID(&participant_guid, participant_instance_handle);
-  add_information(participant_guid, guid, topic_name, type_name, entity_type);
-}
-
-void CustomDataReaderListener::remove_information(
-  const DDS::InstanceHandle_t & instance_handle,
-  EntityType entity_type)
-{
-  DDS::GUID_t guid;
-  DDS::InstanceHandle_to_GUID(&guid, instance_handle);
-  remove_information(guid, entity_type);
 }
 
 void CustomDataReaderListener::trigger_graph_guard_condition()
@@ -152,7 +130,7 @@ CustomDataReaderListener::fill_service_names_and_types(
 void CustomDataReaderListener::fill_topic_names_and_types_by_guid(
   bool no_demangle,
   std::map<std::string, std::set<std::string>> & topic_names_to_types_by_guid,
-  DDS::GUID_t & participant_guid)
+  DDS::InstanceHandle_t & participant_guid)
 {
   std::lock_guard<std::mutex> lock(mutex_);
   const auto & map = topic_cache.get_topic_types_by_guid(participant_guid);
@@ -174,7 +152,7 @@ void CustomDataReaderListener::fill_topic_names_and_types_by_guid(
 
 void CustomDataReaderListener::fill_service_names_and_types_by_guid(
   std::map<std::string, std::set<std::string>> & services,
-  DDS::GUID_t & participant_guid)
+  DDS::InstanceHandle_t & participant_guid)
 {
   std::lock_guard<std::mutex> lock(mutex_);
   const auto & map = topic_cache.get_topic_types_by_guid(participant_guid);
