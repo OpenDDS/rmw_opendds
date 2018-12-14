@@ -15,7 +15,7 @@
 #ifndef RMW_OPENDDS_CPP__GET_PUBLISHER_HPP_
 #define RMW_OPENDDS_CPP__GET_PUBLISHER_HPP_
 
-#include "rmw_opendds_shared_cpp/ndds_include.hpp"
+#include "rmw_opendds_shared_cpp/opendds_include.hpp"
 #include "rmw/rmw.h"
 #include "rmw_opendds_cpp/visibility_control.h"
 
@@ -30,7 +30,7 @@ namespace rmw_opendds_cpp
  * \return native OpenDDS data writer handle if successful, otherwise `NULL`
  */
 RMW_OPENDDS_CPP_PUBLIC
-DDSDataWriter *
+DDS::DataWriter *
 get_data_writer(rmw_publisher_t * publisher);
 
 }  // namespace rmw_opendds_cpp

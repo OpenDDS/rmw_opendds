@@ -27,9 +27,9 @@ extern "C"
 {
 struct OpenDDSStaticPublisherInfo
 {
-  DDSPublisher * dds_publisher_;
+  DDS::Publisher * dds_publisher_;
   OpenDDSPublisherListener * listener_;
-  DDSDataWriter * topic_writer_;
+  DDS::DataWriter * topic_writer_;
   const message_type_support_callbacks_t * callbacks_;
   rmw_gid_t publisher_gid;
 };

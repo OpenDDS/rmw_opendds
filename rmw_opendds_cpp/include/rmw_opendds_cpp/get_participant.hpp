@@ -15,7 +15,7 @@
 #ifndef RMW_OPENDDS_CPP__GET_PARTICIPANT_HPP_
 #define RMW_OPENDDS_CPP__GET_PARTICIPANT_HPP_
 
-#include "rmw_opendds_shared_cpp/ndds_include.hpp"
+#include "rmw_opendds_shared_cpp/opendds_include.hpp"
 #include "rmw/rmw.h"
 #include "rmw_opendds_cpp/visibility_control.h"
 
@@ -30,7 +30,7 @@ namespace rmw_opendds_cpp
  * \return native OpenDDS participant handle if successful, otherwise `NULL`
  */
 RMW_OPENDDS_CPP_PUBLIC
-DDSDomainParticipant *
+DDS::DomainParticipant *
 get_participant(rmw_node_t * node);
 
 }  // namespace rmw_opendds_cpp
