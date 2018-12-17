@@ -35,14 +35,13 @@ struct OpenDDSStaticPublisherInfo
 };
 }  // extern "C"
 
-class OpenDDSPublisherListener : public DDSPublisherListener
+class OpenDDSPublisherListener : public DDS::PublisherListener
 {
 public:
   virtual void on_publication_matched(
-    DDSDataWriter * writer,
-    const DDS_PublicationMatchedStatus & status)
+    DDS::DataWriter *,
+    const DDS::PublicationMatchedStatus & status)
   {
-    (void) writer;
     current_count_ = status.current_count;
   }
 

@@ -25,7 +25,7 @@
 #include "opendds_static_serialized_dataSupport.h"
 
 bool
-publish(DDSDataWriter * dds_data_writer, const rcutils_uint8_array_t * cdr_stream)
+publish(DDS::DataWriter * dds_data_writer, const rcutils_uint8_array_t * cdr_stream)
 {
   OpenDDSStaticSerializedDataDataWriter * data_writer =
     OpenDDSStaticSerializedDataDataWriter::narrow(dds_data_writer);
@@ -163,7 +163,7 @@ rmw_publish_serialized_message(
     RMW_SET_ERROR_MSG("callbacks handle is null");
     return RMW_RET_ERROR;
   }
-  DDSDataWriter * topic_writer = publisher_info->topic_writer_;
+  DDS::DataWriter * topic_writer = publisher_info->topic_writer_;
   if (!topic_writer) {
     RMW_SET_ERROR_MSG("topic writer handle is null");
     return RMW_RET_ERROR;

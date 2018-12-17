@@ -18,7 +18,7 @@
 #include "rmw/types.h"
 
 #include "rmw_opendds_shared_cpp/count.hpp"
-#include "rmw_opendds_shared_cpp/ndds_include.hpp"
+#include "rmw_opendds_shared_cpp/opendds_include.hpp"
 
 #include "rmw_opendds_cpp/identifier.hpp"
 #include "rmw_opendds_cpp/opendds_static_client_info.hpp"
@@ -31,8 +31,8 @@
 rmw_ret_t
 _publisher_count_matched_subscriptions(DDS::DataWriter * datawriter, size_t * count)
 {
-  DDS_ReturnCode_t ret;
-  DDS_PublicationMatchedStatus s;
+  DDS::ReturnCode_t ret;
+  DDS::PublicationMatchedStatus s;
   ret = datawriter->get_publication_matched_status(s);
   if (ret != DDS::RETCODE_OK) {
     RMW_SET_ERROR_MSG("failed to get publication matched status");
@@ -62,8 +62,8 @@ _publisher_count_matched_subscriptions(DDS::DataWriter * datawriter, size_t * co
 rmw_ret_t
 _subscription_count_matched_publishers(DDS::DataReader * datareader, size_t * count)
 {
-  DDS_ReturnCode_t ret;
-  DDS_SubscriptionMatchedStatus s;
+  DDS::ReturnCode_t ret;
+  DDS::SubscriptionMatchedStatus s;
   ret = datareader->get_subscription_matched_status(s);
   if (ret != DDS::RETCODE_OK) {
     RMW_SET_ERROR_MSG("failed to get subscription matched status");

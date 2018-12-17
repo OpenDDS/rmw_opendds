@@ -128,9 +128,9 @@ rmw_create_client(
     reinterpret_cast<void **>(&response_datareader),
     reinterpret_cast<void **>(&request_datawriter),
     &rmw_allocate);
-  DDS_String_free(request_topic_str);
+  CORBA::string_free(request_topic_str);
   request_topic_str = nullptr;
-  DDS_String_free(response_topic_str);
+  CORBA::string_free(response_topic_str);
   response_topic_str = nullptr;
 
   if (!requester) {
@@ -167,7 +167,7 @@ rmw_create_client(
   dds_publisher->set_qos(publisher_qos);
 
   read_condition = response_datareader->create_readcondition(
-    DDS_ANY_SAMPLE_STATE, DDS_ANY_VIEW_STATE, DDS_ANY_INSTANCE_STATE);
+    DDS::ANY_SAMPLE_STATE, DDS::ANY_VIEW_STATE, DDS::ANY_INSTANCE_STATE);
   if (!read_condition) {
     RMW_SET_ERROR_MSG("failed to create read condition");
     goto fail;
@@ -228,18 +228,18 @@ rmw_create_client(
   return client;
 fail:
   if (request_topic_str) {
-    DDS_String_free(request_topic_str);
+    CORBA::string_free(request_topic_str);
     request_topic_str = nullptr;
   }
   if (response_topic_str) {
-    DDS_String_free(response_topic_str);
+    CORBA::string_free(response_topic_str);
     response_topic_str = nullptr;
   }
   if (client) {
     rmw_client_free(client);
   }
   if (response_datareader) {
-    if (participant->delete_datareader(response_datareader) != DDS::RETCODE_OK) {
+    if (dds_subscriber->delete_datareader(response_datareader) != DDS::RETCODE_OK) {
       std::stringstream ss;
       ss << "leaking datareader while handling failure at " <<
         __FILE__ << ":" << __LINE__ << '\n';

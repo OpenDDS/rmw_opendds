@@ -17,7 +17,7 @@
 
 #include <atomic>
 
-#include "rmw_opendds_shared_cpp/ndds_include.hpp"
+#include "rmw_opendds_shared_cpp/opendds_include.hpp"
 
 #include "rosidl_typesupport_opendds_cpp/message_type_support.h"
 
@@ -36,14 +36,13 @@ struct OpenDDSStaticSubscriberInfo
 };
 }  // extern "C"
 
-class OpenDDSSubscriberListener : public DDSSubscriberListener
+class OpenDDSSubscriberListener : public DDS::SubscriberListener
 {
 public:
   virtual void on_subscription_matched(
-    DDSDataReader * reader,
-    const DDS_SubscriptionMatchedStatus & status)
+    DDS::DataReader *,
+    const DDS::SubscriptionMatchedStatus & status)
   {
-    (void) reader;
     current_count_ = status.current_count;
   }
 
