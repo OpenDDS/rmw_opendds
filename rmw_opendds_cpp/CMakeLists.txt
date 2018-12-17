@@ -121,7 +121,7 @@ ament_target_dependencies(rmw_opendds_cpp
   "rosidl_typesupport_opendds_c"
   "rosidl_typesupport_opendds_cpp"
   "OpenDDS")
-target_include_directories(rmw_connext_cpp PUBLIC ${patched_directory})
+target_include_directories(rmw_opendds_cpp PUBLIC ${patched_directory})
 ament_export_libraries(rmw_opendds_cpp)
 
 # Causes the visibility macros to use dllexport rather than dllimport
