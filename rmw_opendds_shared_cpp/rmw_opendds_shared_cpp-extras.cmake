@@ -1,4 +1,4 @@
-# Copyright 2017 Open Source Robotics Foundation, Inc.
+# Copyright 2016 Open Source Robotics Foundation, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,15 +12,5 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# copied from rmw_opendds/rmw_opendds_cpp-extras.cmake
-
-find_package(opendds_cmake_module QUIET)
-find_package(OpenDDS MODULE QUIET)
-
-if(NOT OpenDDS_FOUND)
-  message(STATUS
-    "Could not find OpenDDS - skipping rmw_opendds_cpp")
-  set(rmw_opendds_cpp_FOUND FALSE)
-else()
-  list(APPEND rmw_opendsd_cpp_LIBRARIES ${OpenDDS_LIBRARIES})
-endif()
+include(
+  "${rmw_opendds_shared_cpp_DIR}/get_rmw_opendds_output_filter.cmake")
