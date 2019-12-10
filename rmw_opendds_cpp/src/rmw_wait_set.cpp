@@ -21,7 +21,7 @@
 extern "C"
 {
 rmw_wait_set_t *
-rmw_create_wait_set(size_t max_conditions)
+rmw_create_wait_set(rmw_context_t * context, size_t max_conditions)
 {
   return create_wait_set(opendds_identifier, max_conditions);
 }

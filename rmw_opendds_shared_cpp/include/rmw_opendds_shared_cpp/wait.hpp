@@ -216,7 +216,7 @@ wait(
   // invoke wait until one of the conditions triggers
   DDS::Duration_t timeout;
   if (!wait_timeout) {
-    timeout = ::DDS::DURATION_INFINITE_SEC;
+    timeout = { DDS::DURATION_INFINITE_SEC, DDS::DURATION_INFINITE_NSEC };
   } else {
     timeout.sec = static_cast<::CORBA::ULong>(wait_timeout->sec);
     timeout.nanosec = static_cast<::CORBA::ULong>(wait_timeout->nsec);
@@ -278,7 +278,7 @@ wait(
       ::CORBA::ULong j = 0;
       for (; j < active_conditions->length(); ++j) {
         if ((*active_conditions)[j] == condition) {
-          DDS::GuardCondition * guard = static_cast<DDS::GuardCondition *>(condition);
+          DDS::GuardCondition_var guard = DDS::GuardCondition::_narrow(condition);
           DDS::ReturnCode_t status = guard->set_trigger_value(false);
           if (status != DDS::RETCODE_OK) {
             RMW_SET_ERROR_MSG("failed to set trigger value");
