@@ -30,7 +30,7 @@
 #include "rmw_opendds_cpp/opendds_static_publisher_info.hpp"
 
 // include patched generated code from the build folder
-#include "opendds_static_serialized_dataSupport.h"
+#include "opendds_static_serialized_dataTypeSupportC.h"
 
 // Uncomment this to get extra console output about discovery.
 // This affects code in this file, but there is a similar variable in:

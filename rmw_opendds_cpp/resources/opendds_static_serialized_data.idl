@@ -1,3 +1,5 @@
+#include <dds/DdsDcpsCore.idl>
+
 const long KEY_HASH_LENGTH_16 = 16;
 typedef octet OctetArray16[KEY_HASH_LENGTH_16]; 
 
