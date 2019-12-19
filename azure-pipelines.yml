@@ -8,7 +8,7 @@ schedules:
 
 resources:
   pipelines:
-  - pipeline: rosidl_typesupport_opendds
+  - pipeline: adamsj-oci.rosidl_typesupport_opendds
     source: rosidl_typesupport_opendds
     trigger: 
       branches:
