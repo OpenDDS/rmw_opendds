@@ -6,6 +6,14 @@ schedules:
     - master
   always: true
 
+resources:
+  pipelines:
+  - pipeline: adamsj-oci.rosidl_typesupport_opendds
+    source: adamsj-oci.rosidl_typesupport_opendds
+    trigger: 
+      branches:
+      - master
+
 jobs:
 - job: Linux
   timeoutInMinutes: 90
