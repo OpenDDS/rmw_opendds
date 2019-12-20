@@ -23,10 +23,13 @@ jobs:
   steps:
   - script: |
       printenv
-        echo hello
-        pwd
-        ls
+      echo hello
+      pwd
+      ls
     displayName: filesystem check
+  - script: |
+      git clone https://github.com/adamsj-oci/rosidl_typesupport_opendds.git
+    displayName: clone rosidl_typesupport_opendds
   - script: |
         source /opt/OpenDDS/setenv.sh
         source /opt/ros/eloquent/setup.bash
