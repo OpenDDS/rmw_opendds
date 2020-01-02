@@ -1,0 +1,39 @@
+schedules:
+- cron: "0 7 * * SUN"
+  displayName: Weekly Sunday
+  branches:
+    include:
+    - master
+  always: true
+
+resources:
+  pipelines:
+  - pipeline: adamsj-oci.rosidl_typesupport_opendds
+    source: adamsj-oci.rosidl_typesupport_opendds
+    trigger: 
+      branches:
+      - master
+
+jobs:
+- job: Linux
+  timeoutInMinutes: 90
+  pool:
+    vmImage: 'ubuntu-18.04'
+  container: adamsjoci/opendds_ros2_docker:latest
+  steps:
+  - script: |
+      printenv
+      echo hello
+      pwd
+      ls
+    displayName: filesystem check
+  - script: |
+      git clone https://github.com/adamsj-oci/rosidl_typesupport_opendds.git
+    displayName: clone rosidl_typesupport_opendds
+  - script: |
+        source /opt/OpenDDS/setenv.sh
+        source /opt/ros/eloquent/setup.bash
+        printenv|grep DDS
+        printenv|grep ROS
+        colcon build --symlink-install
+    displayName:  environment setup and build

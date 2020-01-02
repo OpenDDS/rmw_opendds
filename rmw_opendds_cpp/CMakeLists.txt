@@ -16,20 +16,22 @@ endif()
 
 find_package(ament_cmake REQUIRED)
 
-find_package(opendds_cmake_module REQUIRED)
-find_package(OpenDDS QUIET MODULE)
-if(OpenDDS_FOUND)
-  find_package(OpenDDS MODULE)
-endif()
-if(NOT OpenDDS_FOUND OR OPENDDS_STATIC_DISABLE)
-  ament_package()
-  if(NOT OpenDDS_FOUND)
-    message(WARNING "Could not find OpenDDS - skipping '${PROJECT_NAME}'")
-  else()
-    message(STATUS "OpenDDS static rmw implementation explicitly disabled - skipping '${PROJECT_NAME}'")
-  endif()
-  return()
-endif()
+#find_package(opendds_cmake_module REQUIRED)
+find_package(OpenDDS)
+
+# find_package(OpenDDS QUIET MODULE)
+# if(OpenDDS_FOUND)
+#   find_package(OpenDDS MODULE)
+# endif()
+# if(NOT OpenDDS_FOUND OR OPENDDS_STATIC_DISABLE)
+#   ament_package()
+#   if(NOT OpenDDS_FOUND)
+#     message(WARNING "Could not find OpenDDS - skipping '${PROJECT_NAME}'")
+#   else()
+#     message(STATUS "OpenDDS static rmw implementation explicitly disabled - skipping '${PROJECT_NAME}'")
+#   endif()
+#   return()
+# endif()
 
 find_package(rcutils REQUIRED)
 
@@ -52,6 +54,7 @@ find_package(rmw_opendds_shared_cpp REQUIRED)
 find_package(rosidl_generator_c REQUIRED)
 find_package(rosidl_generator_cpp REQUIRED)
 
+#include_directories(include ${OpenDDS_INCLUDE_DIRS})
 include_directories(include)
 
 ament_export_include_directories(include)
@@ -110,6 +113,8 @@ add_library(
   src/rmw_wait.cpp
   src/rmw_wait_set.cpp
   src/serialization_format.cpp)
+
+OPENDDS_TARGET_SOURCES(rmw_opendds_cpp resources/opendds_static_serialized_data.idl)
 
 # Declare external package dependencies for building.
 ament_target_dependencies(rmw_opendds_cpp

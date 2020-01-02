@@ -24,8 +24,8 @@
 #include "rmw_opendds_cpp/identifier.hpp"
 
 // include patched generated code from the build folder
-#include "./opendds_static_serialized_dataSupport.h"
-#include "./opendds_static_serialized_data.h"
+#include "opendds_static_serialized_dataTypeSupportC.h"
+// #include "./opendds_static_serialized_data.h"
 
 static bool
 take(

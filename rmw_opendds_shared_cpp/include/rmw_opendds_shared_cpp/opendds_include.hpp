@@ -17,5 +17,7 @@
 
 #include <dds/DdsDcpsInfrastructureC.h>
 #include <dds/DdsDcpsDomainC.h>
+#include <dds/DCPS/WaitSet.h>
+#include <dds/DCPS/GuardCondition.h>
 
 #endif  // RMW_OPENDDS_SHARED_CPP__NDDS_INCLUDE_HPP_

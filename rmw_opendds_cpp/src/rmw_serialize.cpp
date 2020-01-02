@@ -18,7 +18,7 @@
 #include "./type_support_common.hpp"
 
 // include patched generated code from the build folder
-#include "opendds_static_serialized_dataSupport.h"
+#include "opendds_static_serialized_dataTypeSupportC.h"
 
 extern "C"
 {
