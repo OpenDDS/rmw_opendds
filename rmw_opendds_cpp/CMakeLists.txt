@@ -114,7 +114,7 @@ add_library(
   src/rmw_wait_set.cpp
   src/serialization_format.cpp)
 
-OPENDDS_TARGET_SOURCES(rmw_opendds_cpp resources/opendds_static_serialized_data.idl)
+OPENDDS_TARGET_SOURCES(rmw_opendds_cpp resources/opendds_static_serialized_data.idl TAO_IDL_OPTIONS "-Sa -St")
 
 # Declare external package dependencies for building.
 ament_target_dependencies(rmw_opendds_cpp
