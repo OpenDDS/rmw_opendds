@@ -15,7 +15,7 @@ This project contains several ROS2 packages:
 These packages are built using ROS2's `Colcon` and `Ament` build tools. `rosidl_typesupport_c` and `rosidl_typesupport_cpp` are almost identical, but must be provided as separate packages in order to satisfy the build-time requirements of the ROS2 demo projects.
 
 ## Usage
-Add the two repos above to the `src/` folder within a ROS2 workspace that you want to compile with support for OpenDDS. You can pull the `objectcomputing/opendds_ros2` docker image as a build environment. A [volume mapped docker container](https://github.com/adamsj-oci/workspace_tools/blob/master/start_docker.sh) to the ROS2 workspace, can be built using the following steps:
+Add the two repos above to the `src/` folder within a ROS2 workspace that you want to compile with support for OpenDDS. You can pull the `objectcomputing/opendds_ros2` docker image as a build environment. A [volume mapped docker container](https://github.com/adamsj-oci/workspace_tools/blob/master/start_docker.sh) to the ROS2 workspace, can be used to build the sources from the following steps:
 
 - `source /opt/OpenDDS/setenv.sh`
 - `source /opt/ros/eloquent/setup.bash`
