@@ -22,13 +22,13 @@
 #include "rmw_opendds_cpp/identifier.hpp"
 
 // include patched generated code from the build folder
-#include "opendds_static_serialized_dataSupport.h"
+#include "opendds_static_serialized_dataTypeSupportC.h"
 
 bool
 publish(DDS::DataWriter * dds_data_writer, const rcutils_uint8_array_t * cdr_stream)
 {
   OpenDDSStaticSerializedDataDataWriter * data_writer =
-    OpenDDSStaticSerializedDataDataWriter::narrow(dds_data_writer);
+    OpenDDSStaticSerializedDataDataWriter::_narrow(dds_data_writer);
   if (!data_writer) {
     RMW_SET_ERROR_MSG("failed to narrow data writer");
     return false;

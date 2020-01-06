@@ -1,10 +1,10 @@
-#pragma DCPS_DATA_TYPE "ConnextStaticSerializedData"
-#pragma DCPS_DATA_KEY "ConnextStaticSerializedData key_hash"
+#include <dds/DdsDcpsCore.idl>
 
 const long KEY_HASH_LENGTH_16 = 16;
+typedef octet OctetArray16[KEY_HASH_LENGTH_16]; 
 
-struct ConnextStaticSerializedData {
-  @key octet       key_hash[KEY_HASH_LENGTH_16];
-  sequence<octet>  serialized_key;
-  sequence<octet>  serialized_data;
+@topic struct OpenDDSStaticSerializedData {
+  @key OctetArray16       key_hash;
+  DDS::OctetSeq  serialized_key;
+  DDS::OctetSeq  serialized_data;
 };
