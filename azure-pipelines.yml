@@ -8,8 +8,8 @@ schedules:
 
 resources:
   pipelines:
-  - pipeline: adamsj-oci.rosidl_typesupport_opendds
-    source: adamsj-oci.rosidl_typesupport_opendds
+  - pipeline: oci-labs.rosidl_typesupport_opendds
+    source: oci-labs.rosidl_typesupport_opendds
     trigger: 
       branches:
       - master
@@ -19,7 +19,7 @@ jobs:
   timeoutInMinutes: 90
   pool:
     vmImage: 'ubuntu-18.04'
-  container: adamsjoci/opendds_ros2_docker:latest
+  container: objectcomputing/opendds_ros2:latest
   steps:
   - script: |
       printenv
@@ -28,7 +28,7 @@ jobs:
       ls
     displayName: filesystem check
   - script: |
-      git clone https://github.com/adamsj-oci/rosidl_typesupport_opendds.git
+      git clone https://github.com/oci-labs/rosidl_typesupport_opendds.git
     displayName: clone rosidl_typesupport_opendds
   - script: |
         source /opt/OpenDDS/setenv.sh
