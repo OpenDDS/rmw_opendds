@@ -73,7 +73,10 @@ cleanup:
 extern "C"
 {
 rmw_ret_t
-rmw_publish(const rmw_publisher_t * publisher, const void * ros_message)
+rmw_publish(
+  const rmw_publisher_t * publisher,
+  const void * ros_message,
+  rmw_publisher_allocation_t * allocation)
 {
   if (!publisher) {
     RMW_SET_ERROR_MSG("publisher handle is null");
@@ -137,7 +140,9 @@ fail:
 
 rmw_ret_t
 rmw_publish_serialized_message(
-  const rmw_publisher_t * publisher, const rmw_serialized_message_t * serialized_message)
+  const rmw_publisher_t * publisher,
+  const rmw_serialized_message_t * serialized_message,
+  rmw_publisher_allocation_t * allocation)
 {
   if (!publisher) {
     RMW_SET_ERROR_MSG("publisher handle is null");
@@ -175,5 +180,19 @@ rmw_publish_serialized_message(
     return RMW_RET_ERROR;
   }
   return RMW_RET_OK;
+}
+
+rmw_ret_t
+rmw_publish_loaned_message(
+  const rmw_publisher_t * publisher,
+  void * ros_message,
+  rmw_publisher_allocation_t * allocation)
+{
+  (void) publisher;
+  (void) ros_message;
+  (void) allocation;
+
+  RMW_SET_ERROR_MSG("rmw_publish_loaned_message not implemented for rmw_opendds_cpp");
+  return RMW_RET_UNSUPPORTED;
 }
 }  // extern "C"
