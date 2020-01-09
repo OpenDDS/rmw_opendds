@@ -39,12 +39,36 @@
 
 extern "C"
 {
+rmw_ret_t
+rmw_init_publisher_allocation(
+  const rosidl_message_type_support_t * type_support,
+  const rosidl_message_bounds_t * message_bounds,
+  rmw_publisher_allocation_t * allocation)
+{
+  // Unused in current implementation.
+  (void) type_support;
+  (void) message_bounds;
+  (void) allocation;
+  RMW_SET_ERROR_MSG("unimplemented");
+  return RMW_RET_ERROR;
+}
+
+rmw_ret_t
+rmw_fini_publisher_allocation(rmw_publisher_allocation_t * allocation)
+{
+  // Unused in current implementation.
+  (void) allocation;
+  RMW_SET_ERROR_MSG("unimplemented");
+  return RMW_RET_ERROR;
+}
+
 rmw_publisher_t *
 rmw_create_publisher(
   const rmw_node_t * node,
   const rosidl_message_type_support_t * type_supports,
   const char * topic_name,
-  const rmw_qos_profile_t * qos_profile)
+  const rmw_qos_profile_t * qos_policies,
+  const rmw_publisher_options_t * publisher_options)
 {
   if (!node) {
     RMW_SET_ERROR_MSG("node handle is null");
@@ -337,6 +361,86 @@ rmw_publisher_count_matched_subscriptions(
   *subscription_count = info->listener_->current_count();
 
   return RMW_RET_OK;
+}
+
+rmw_ret_t
+rmw_publisher_get_actual_qos(
+  const rmw_publisher_t * publisher,
+  rmw_qos_profile_t * qos)
+{
+  RMW_CHECK_ARGUMENT_FOR_NULL(publisher, RMW_RET_INVALID_ARGUMENT);
+  RMW_CHECK_ARGUMENT_FOR_NULL(qos, RMW_RET_INVALID_ARGUMENT);
+
+  auto info = static_cast<ConnextStaticPublisherInfo *>(publisher->data);
+  if (!info) {
+    RMW_SET_ERROR_MSG("publisher internal data is invalid");
+    return RMW_RET_ERROR;
+  }
+  DDS::DataWriter * data_writer = info->topic_writer_;
+  if (!data_writer) {
+    RMW_SET_ERROR_MSG("publisher internal data writer is invalid");
+    return RMW_RET_ERROR;
+  }
+  DDS::DataWriterQos dds_qos;
+  DDS::ReturnCode_t status = data_writer->get_qos(dds_qos);
+  if (DDS::RETCODE_OK != status) {
+    RMW_SET_ERROR_MSG("publisher can't get data writer qos policies");
+    return RMW_RET_ERROR;
+  }
+
+  dds_qos_to_rmw_qos(dds_qos, qos);
+
+  return RMW_RET_OK;
+}
+
+rmw_ret_t
+rmw_publisher_assert_liveliness(const rmw_publisher_t * publisher)
+{
+  RMW_CHECK_ARGUMENT_FOR_NULL(publisher, RMW_RET_INVALID_ARGUMENT);
+
+  auto info = static_cast<ConnextStaticPublisherInfo *>(publisher->data);
+  if (nullptr == info) {
+    RMW_SET_ERROR_MSG("publisher internal data is invalid");
+    return RMW_RET_ERROR;
+  }
+  if (nullptr == info->topic_writer_) {
+    RMW_SET_ERROR_MSG("publisher internal datawriter is invalid");
+    return RMW_RET_ERROR;
+  }
+
+  if (info->topic_writer_->assert_liveliness() != DDS::RETCODE_OK) {
+    RMW_SET_ERROR_MSG("failed to assert liveliness of datawriter");
+    return RMW_RET_ERROR;
+  }
+
+  return RMW_RET_OK;
+}
+
+rmw_ret_t
+rmw_borrow_loaned_message(
+  const rmw_publisher_t * publisher,
+  const rosidl_message_type_support_t * type_support,
+  void ** ros_message)
+{
+  (void) publisher;
+  (void) type_support;
+  (void) ros_message;
+
+  RMW_SET_ERROR_MSG("rmw_borrow_loaned_message not implemented for rmw_connext_cpp");
+  return RMW_RET_UNSUPPORTED;
+}
+
+rmw_ret_t
+rmw_return_loaned_message_from_publisher(
+  const rmw_publisher_t * publisher,
+  void * loaned_message)
+{
+  (void) publisher;
+  (void) loaned_message;
+
+  RMW_SET_ERROR_MSG(
+    "rmw_return_loaned_message_from_publisher not implemented for rmw_connext_cpp");
+  return RMW_RET_UNSUPPORTED;
 }
 
 rmw_ret_t

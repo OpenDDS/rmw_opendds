@@ -192,7 +192,11 @@ _take(
 }
 
 rmw_ret_t
-rmw_take(const rmw_subscription_t * subscription, void * ros_message, bool * taken)
+rmw_take(
+  const rmw_subscription_t * subscription,
+  void * ros_message,
+  bool * taken,
+  rmw_subscription_allocation_t * allocation)
 {
   return _take(subscription, ros_message, taken, nullptr);
 }
@@ -282,7 +286,8 @@ rmw_ret_t
 rmw_take_serialized_message(
   const rmw_subscription_t * subscription,
   rmw_serialized_message_t * serialized_message,
-  bool * taken)
+  bool * taken,
+  rmw_subscription_allocation_t * allocation)
 {
   return _take_serialized_message(subscription, serialized_message, taken, nullptr);
 }
@@ -292,7 +297,8 @@ rmw_take_serialized_message_with_info(
   const rmw_subscription_t * subscription,
   rmw_serialized_message_t * serialized_message,
   bool * taken,
-  rmw_message_info_t * message_info)
+  rmw_message_info_t * message_info,
+  rmw_subscription_allocation_t * allocation)
 {
   if (!message_info) {
     RMW_SET_ERROR_MSG("message info is null");
@@ -313,5 +319,52 @@ rmw_take_serialized_message_with_info(
   detail->publication_handle = sending_publication_handle;
 
   return RMW_RET_OK;
+}
+
+rmw_ret_t
+rmw_take_loaned_message(
+  const rmw_subscription_t * subscription,
+  void ** loaned_message,
+  bool * taken,
+  rmw_subscription_allocation_t * allocation)
+{
+  (void) subscription;
+  (void) loaned_message;
+  (void) taken;
+  (void) allocation;
+
+  RMW_SET_ERROR_MSG("rmw_take_loaned_message not implemented for rmw_connext_cpp");
+  return RMW_RET_UNSUPPORTED;
+}
+
+rmw_ret_t
+rmw_take_loaned_message_with_info(
+  const rmw_subscription_t * subscription,
+  void ** loaned_message,
+  bool * taken,
+  rmw_message_info_t * message_info,
+  rmw_subscription_allocation_t * allocation)
+{
+  (void) subscription;
+  (void) loaned_message;
+  (void) taken;
+  (void) message_info;
+  (void) allocation;
+
+  RMW_SET_ERROR_MSG("rmw_take_loaned_message_with_info not implemented for rmw_connext_cpp");
+  return RMW_RET_UNSUPPORTED;
+}
+
+rmw_ret_t
+rmw_return_loaned_message_from_subscription(
+  const rmw_subscription_t * subscription,
+  void * loaned_message)
+{
+  (void) subscription;
+  (void) loaned_message;
+
+  RMW_SET_ERROR_MSG(
+    "rmw_release_loaned_message not implemented for rmw_connext_cpp");
+  return RMW_RET_UNSUPPORTED;
 }
 }  // extern "C"
