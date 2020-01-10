@@ -190,20 +190,20 @@ rmw_create_subscription(
 
     topic = participant->create_topic(
       topic_str, type_name.c_str(),
-      default_topic_qos, NULL, DDS_STATUS_MASK_NONE);
+      default_topic_qos, NULL, DDS::STATUS_MASK_NONE);
     if (!topic) {
       RMW_SET_ERROR_MSG("failed to create topic");
       goto fail;
     }
   } else {
-    DDS_Duration_t timeout = DDS::Duration_t::from_seconds(0);
+    DDS::Duration_t timeout = DDS::Duration_t::from_seconds(0);
     topic = participant->find_topic(topic_str, timeout);
     if (!topic) {
       RMW_SET_ERROR_MSG("failed to find topic");
       goto fail;
     }
   }
-  DDS_String_free(topic_str);
+  DDS::String_free(topic_str);
   topic_str = nullptr;
 
   if (!get_datareader_qos(participant, *qos_profile, datareader_qos)) {
@@ -220,7 +220,7 @@ rmw_create_subscription(
   }
 
   read_condition = topic_reader->create_readcondition(
-    DDS_ANY_SAMPLE_STATE, DDS_ANY_VIEW_STATE, DDS_ANY_INSTANCE_STATE);
+    DDS::ANY_SAMPLE_STATE, DDS::ANY_VIEW_STATE, DDS::ANY_INSTANCE_STATE);
   if (!read_condition) {
     RMW_SET_ERROR_MSG("failed to create read condition");
     goto fail;
@@ -279,7 +279,7 @@ rmw_create_subscription(
   return subscription;
 fail:
   if (topic_str) {
-    DDS_String_free(topic_str);
+    DDS::String_free(topic_str);
     topic_str = nullptr;
   }
   if (subscription) {
@@ -421,7 +421,7 @@ rmw_destroy_subscription(rmw_node_t * node, rmw_subscription_t * subscription)
     RMW_SET_ERROR_MSG("node info handle is null");
     return RMW_RET_ERROR;
   }
-  auto participant = static_cast<DDSDomainParticipant *>(node_info->participant);
+  auto participant = static_cast<DDS::DomainParticipant *>(node_info->participant);
   if (!participant) {
     RMW_SET_ERROR_MSG("participant handle is null");
     return RMW_RET_ERROR;

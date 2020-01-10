@@ -248,7 +248,7 @@ fail:
         (std::cerr << ss.str()).flush();
       }
     }
-    if (dds_subscriber->delete_datareader(request_datareader) != RMW_RET_OK) {
+    if (dds_subscriber->delete_datareader(request_datareader) != DDS::RETCODE_OK) {
       std::stringstream ss;
       ss << "leaking datareader while handling failure at " <<
         __FILE__ << ":" << __LINE__ << '\n';
