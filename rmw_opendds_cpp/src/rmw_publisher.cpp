@@ -208,7 +208,7 @@ rmw_create_publisher(
       goto fail;
     }
   }
-  DDS::String_free(topic_str);
+  CORBA::string_free(topic_str);
   topic_str = nullptr;
 
   if (!get_datawriter_qos(participant, *qos_profile, datawriter_qos)) {
@@ -285,7 +285,7 @@ rmw_create_publisher(
   return publisher;
 fail:
   if (topic_str) {
-    DDS::String_free(topic_str);
+    CORBA::string_free(topic_str);
     topic_str = nullptr;
   }
   if (publisher) {
