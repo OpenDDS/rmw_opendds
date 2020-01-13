@@ -203,7 +203,7 @@ rmw_create_subscription(
       goto fail;
     }
   }
-  DDS::String_free(topic_str);
+  CORBA::string_free(topic_str);
   topic_str = nullptr;
 
   if (!get_datareader_qos(participant, *qos_profile, datareader_qos)) {
@@ -279,7 +279,7 @@ rmw_create_subscription(
   return subscription;
 fail:
   if (topic_str) {
-    DDS::String_free(topic_str);
+    CORBA::string_free(topic_str);
     topic_str = nullptr;
   }
   if (subscription) {

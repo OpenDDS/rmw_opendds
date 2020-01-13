@@ -87,9 +87,9 @@ take(
     DDS::InstanceHandle_t receiver_instance_handle = dds_data_reader->get_instance_handle();
     ignore_sample = true;
     for (size_t i = 0; i < 12; ++i) {
-      DDS::Octet * sender_element = &(sender_guid.value[i]);
-      DDS::Octet * receiver_element =
-        &(reinterpret_cast<DDS::Octet *>(&receiver_instance_handle)[i]);
+      CORBA::Octet * sender_element = &(sender_guid.value[i]);
+      CORBA::Octet * receiver_element =
+        &(reinterpret_cast<CORBA::Octet *>(&receiver_instance_handle)[i]);
       if (*sender_element != *receiver_element) {
         ignore_sample = false;
         break;
