@@ -96,7 +96,7 @@ rmw_create_publisher(
     RMW_SET_ERROR_MSG("node info handle is null");
     return NULL;
   }
-  auto participant = static_cast<DDSDomainParticipant *>(node_info->participant);
+  auto participant = static_cast<DDS::DomainParticipant *>(node_info->participant);
   if (!participant) {
     RMW_SET_ERROR_MSG("participant handle is null");
     return NULL;
@@ -110,14 +110,14 @@ rmw_create_publisher(
   }
   std::string type_name = _create_type_name(callbacks, "msg");
   // Past this point, a failure results in unrolling code in the goto fail block.
-  DDS_TypeCode * type_code = nullptr;
-  DDS_DataWriterQos datawriter_qos;
-  DDS_PublisherQos publisher_qos;
-  DDS_ReturnCode_t status;
-  DDSPublisher * dds_publisher = nullptr;
-  DDSDataWriter * topic_writer = nullptr;
-  DDSTopic * topic = nullptr;
-  DDSTopicDescription * topic_description = nullptr;
+  DDS::TypeCode * type_code = nullptr;
+  DDS::DataWriterQos datawriter_qos;
+  DDS::PublisherQos publisher_qos;
+  DDS::ReturnCode_t status;
+  DDS::Publisher * dds_publisher = nullptr;
+  DDS::DataWriter * topic_writer = nullptr;
+  DDS::Topic * topic = nullptr;
+  DDS::TopicDescription * topic_description = nullptr;
   void * info_buf = nullptr;
   void * listener_buf = nullptr;
   OpenDDSPublisherListener * publisher_listener = nullptr;
@@ -178,7 +178,7 @@ rmw_create_publisher(
   listener_buf = nullptr;  // Only free the buffer pointer.
 
   dds_publisher = participant->create_publisher(
-    publisher_qos, publisher_listener, DDS_PUBLICATION_MATCHED_STATUS);
+    publisher_qos, publisher_listener, DDS::PUBLICATION_MATCHED_STATUS);
   if (!dds_publisher) {
     RMW_SET_ERROR_MSG("failed to create publisher");
     goto fail;
@@ -186,7 +186,7 @@ rmw_create_publisher(
 
   topic_description = participant->lookup_topicdescription(topic_str);
   if (!topic_description) {
-    DDS_TopicQos default_topic_qos;
+    DDS::TopicQos default_topic_qos;
     status = participant->get_default_topic_qos(default_topic_qos);
     if (status != DDS::RETCODE_OK) {
       RMW_SET_ERROR_MSG("failed to get default topic qos");
@@ -195,20 +195,20 @@ rmw_create_publisher(
 
     topic = participant->create_topic(
       topic_str, type_name.c_str(),
-      default_topic_qos, NULL, DDS_STATUS_MASK_NONE);
+      default_topic_qos, NULL, DDS::STATUS_MASK_NONE);
     if (!topic) {
       RMW_SET_ERROR_MSG("failed to create topic");
       goto fail;
     }
   } else {
-    DDS_Duration_t timeout = DDS_Duration_t::from_seconds(0);
+    DDS::Duration_t timeout = DDS::Duration_t::from_seconds(0);
     topic = participant->find_topic(topic_str, timeout);
     if (!topic) {
       RMW_SET_ERROR_MSG("failed to find topic");
       goto fail;
     }
   }
-  DDS_String_free(topic_str);
+  CORBA::string_free(topic_str);
   topic_str = nullptr;
 
   if (!get_datawriter_qos(participant, *qos_profile, datawriter_qos)) {
@@ -217,7 +217,7 @@ rmw_create_publisher(
   }
 
   topic_writer = dds_publisher->create_datawriter(
-    topic, datawriter_qos, NULL, DDS_STATUS_MASK_NONE);
+    topic, datawriter_qos, NULL, DDS::STATUS_MASK_NONE);
   if (!topic_writer) {
     RMW_SET_ERROR_MSG("failed to create datawriter");
     goto fail;
@@ -285,7 +285,7 @@ rmw_create_publisher(
   return publisher;
 fail:
   if (topic_str) {
-    DDS_String_free(topic_str);
+    CORBA::string_free(topic_str);
     topic_str = nullptr;
   }
   if (publisher) {
@@ -469,7 +469,7 @@ rmw_destroy_publisher(rmw_node_t * node, rmw_publisher_t * publisher)
     RMW_SET_ERROR_MSG("node info handle is null");
     return RMW_RET_ERROR;
   }
-  auto participant = static_cast<DDSDomainParticipant *>(node_info->participant);
+  auto participant = static_cast<DDS::DomainParticipant *>(node_info->participant);
   if (!participant) {
     RMW_SET_ERROR_MSG("participant handle is null");
     return RMW_RET_ERROR;
@@ -481,7 +481,7 @@ rmw_destroy_publisher(rmw_node_t * node, rmw_publisher_t * publisher)
     node_info->publisher_listener->remove_information(
       publisher_info->dds_publisher_->get_instance_handle(), EntityType::Publisher);
     node_info->publisher_listener->trigger_graph_guard_condition();
-    DDSPublisher * dds_publisher = publisher_info->dds_publisher_;
+    DDS::Publisher * dds_publisher = publisher_info->dds_publisher_;
 
     if (dds_publisher) {
       if (publisher_info->topic_writer_) {

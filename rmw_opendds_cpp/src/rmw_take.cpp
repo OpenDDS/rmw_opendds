@@ -28,7 +28,7 @@
 
 static bool
 take(
-  DDSDataReader * dds_data_reader,
+  DDS::DataReader * dds_data_reader,
   bool ignore_local_publications,
   rcutils_uint8_array_t * cdr_stream,
   bool * taken,
@@ -55,16 +55,16 @@ take(
   }
 
   OpenDDSStaticSerializedDataSeq dds_messages;
-  DDS_SampleInfoSeq sample_infos;
+  DDS::SampleInfoSeq sample_infos;
   bool ignore_sample = false;
 
-  DDS_ReturnCode_t status = data_reader->take(
+  DDS::ReturnCode_t status = data_reader->take(
     dds_messages,
     sample_infos,
     1,
-    DDS_ANY_SAMPLE_STATE,
-    DDS_ANY_VIEW_STATE,
-    DDS_ANY_INSTANCE_STATE);
+    DDS::ANY_SAMPLE_STATE,
+    DDS::ANY_VIEW_STATE,
+    DDS::ANY_INSTANCE_STATE);
   if (status == DDS::RETCODE_NO_DATA) {
     data_reader->return_loan(dds_messages, sample_infos);
     *taken = false;
@@ -76,19 +76,20 @@ take(
     return false;
   }
 
-  DDS_SampleInfo & sample_info = sample_infos[0];
+  DDS::SampleInfo & sample_info = sample_infos[0];
   if (!sample_info.valid_data) {
     // skip sample without data
     ignore_sample = true;
   } else if (ignore_local_publications) {
     // compare the lower 12 octets of the guids from the sender and this receiver
     // if they are equal the sample has been sent from this process and should be ignored
-    DDS_GUID_t sender_guid = sample_info.original_publication_virtual_guid;
-    DDS_InstanceHandle_t receiver_instance_handle = dds_data_reader->get_instance_handle();
+    DDS::GUID_t sender_guid = sample_info.original_publication_virtual_guid;
+    DDS::InstanceHandle_t receiver_instance_handle = dds_data_reader->get_instance_handle();
     ignore_sample = true;
     for (size_t i = 0; i < 12; ++i) {
-      DDS_Octet * sender_element = &(sender_guid.value[i]);
-      DDS_Octet * receiver_element = &(reinterpret_cast<DDS_Octet *>(&receiver_instance_handle)[i]);
+      CORBA::Octet * sender_element = &(sender_guid.value[i]);
+      CORBA::Octet * receiver_element =
+        &(reinterpret_cast<CORBA::Octet *>(&receiver_instance_handle)[i]);
       if (*sender_element != *receiver_element) {
         ignore_sample = false;
         break;
@@ -96,7 +97,7 @@ take(
     }
   }
   if (sample_info.valid_data && sending_publication_handle) {
-    *static_cast<DDS_InstanceHandle_t *>(sending_publication_handle) =
+    *static_cast<DDS::InstanceHandle_t *>(sending_publication_handle) =
       sample_info.publication_handle;
   }
 
@@ -132,7 +133,7 @@ _take(
   const rmw_subscription_t * subscription,
   void * ros_message,
   bool * taken,
-  DDS_InstanceHandle_t * sending_publication_handle)
+  DDS::InstanceHandle_t * sending_publication_handle,
 {
   if (!subscription) {
     RMW_SET_ERROR_MSG("subscription handle is null");
@@ -158,7 +159,7 @@ _take(
     RMW_SET_ERROR_MSG("subscriber info handle is null");
     return RMW_RET_ERROR;
   }
-  DDSDataReader * topic_reader = subscriber_info->topic_reader_;
+  DDS::DataReader * topic_reader = subscriber_info->topic_reader_;
   if (!topic_reader) {
     RMW_SET_ERROR_MSG("topic reader handle is null");
     return RMW_RET_ERROR;
@@ -212,7 +213,7 @@ rmw_take_with_info(
     RMW_SET_ERROR_MSG("message info is null");
     return RMW_RET_ERROR;
   }
-  DDS_InstanceHandle_t sending_publication_handle;
+  DDS::InstanceHandle_t sending_publication_handle;
   auto ret = _take(subscription, ros_message, taken, &sending_publication_handle);
   if (ret != RMW_RET_OK) {
     // Error string is already set.
@@ -233,7 +234,7 @@ _take_serialized_message(
   const rmw_subscription_t * subscription,
   rmw_serialized_message_t * serialized_message,
   bool * taken,
-  DDS_InstanceHandle_t * sending_publication_handle)
+  DDS::InstanceHandle_t * sending_publication_handle)
 {
   if (!subscription) {
     RMW_SET_ERROR_MSG("subscription handle is null");
@@ -304,7 +305,7 @@ rmw_take_serialized_message_with_info(
     RMW_SET_ERROR_MSG("message info is null");
     return RMW_RET_ERROR;
   }
-  DDS_InstanceHandle_t sending_publication_handle;
+  DDS::InstanceHandle_t sending_publication_handle;
   auto ret =
     _take_serialized_message(subscription, serialized_message, taken, &sending_publication_handle);
   if (ret != RMW_RET_OK) {

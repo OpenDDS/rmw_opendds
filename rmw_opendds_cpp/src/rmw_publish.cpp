@@ -40,23 +40,23 @@ publish(DDS::DataWriter * dds_data_writer, const rcutils_uint8_array_t * cdr_str
     return false;
   }
 
-  DDS_ReturnCode_t status = DDS::RETCODE_ERROR;
+  DDS::ReturnCode_t status = DDS::RETCODE_ERROR;
 
   instance->serialized_data.maximum(0);
-  if (cdr_stream->buffer_length > (std::numeric_limits<DDS_Long>::max)()) {
+  if (cdr_stream->buffer_length > (std::numeric_limits<CORBA::Long>::max)()) {
     RMW_SET_ERROR_MSG("cdr_stream->buffer_length unexpectedly larger than DDS_Long's max value");
     return false;
   }
   if (!instance->serialized_data.loan_contiguous(
-      reinterpret_cast<DDS_Octet *>(cdr_stream->buffer),
-      static_cast<DDS_Long>(cdr_stream->buffer_length),
-      static_cast<DDS_Long>(cdr_stream->buffer_length)))
+      reinterpret_cast<CORBA::Octet *>(cdr_stream->buffer),
+      static_cast<CORBA::Long>(cdr_stream->buffer_length),
+      static_cast<CORBA::Long>(cdr_stream->buffer_length)))
   {
     RMW_SET_ERROR_MSG("failed to loan memory for message");
     goto cleanup;
   }
 
-  status = data_writer->write(*instance, DDS_HANDLE_NIL);
+  status = data_writer->write(*instance, DDS::HANDLE_NIL);
 
 cleanup:
   if (instance) {
@@ -102,7 +102,7 @@ rmw_publish(
     RMW_SET_ERROR_MSG("callbacks handle is null");
     return RMW_RET_ERROR;
   }
-  DDSDataWriter * topic_writer = publisher_info->topic_writer_;
+  DDS::DataWriter * topic_writer = publisher_info->topic_writer_;
   if (!topic_writer) {
     RMW_SET_ERROR_MSG("topic writer handle is null");
     return RMW_RET_ERROR;
