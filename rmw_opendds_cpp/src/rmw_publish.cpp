@@ -27,46 +27,24 @@
 bool
 publish(DDS::DataWriter * dds_data_writer, const rcutils_uint8_array_t * cdr_stream)
 {
-  OpenDDSStaticSerializedDataDataWriter * data_writer =
+  OpenDDSStaticSerializedDataDataWriter_var data_writer =
     OpenDDSStaticSerializedDataDataWriter::_narrow(dds_data_writer);
   if (!data_writer) {
     RMW_SET_ERROR_MSG("failed to narrow data writer");
     return false;
   }
 
-  OpenDDSStaticSerializedData * instance = OpenDDSStaticSerializedDataTypeSupport::create_data();
-  if (!instance) {
-    RMW_SET_ERROR_MSG("failed to create dds message instance");
+  OpenDDSStaticSerializedData instance;
+  DDS::ReturnCode_t status = DDS::RETCODE_ERROR;
+
+  // instance.serialized_data.maximum(0);  # Unlikely to be needed here, but investigating.
+  if (cdr_stream->buffer_length > (std::numeric_limits<CORBA::Long>::max)()) {
+    RMW_SET_ERROR_MSG("cdr_stream->buffer_length unexpectedly larger than CORBA::Long's max value");
     return false;
   }
+//  TODO:fill the payload
 
-  DDS_ReturnCode_t status = DDS::RETCODE_ERROR;
-
-  instance->serialized_data.maximum(0);
-  if (cdr_stream->buffer_length > (std::numeric_limits<DDS_Long>::max)()) {
-    RMW_SET_ERROR_MSG("cdr_stream->buffer_length unexpectedly larger than DDS_Long's max value");
-    return false;
-  }
-  if (!instance->serialized_data.loan_contiguous(
-      reinterpret_cast<DDS_Octet *>(cdr_stream->buffer),
-      static_cast<DDS_Long>(cdr_stream->buffer_length),
-      static_cast<DDS_Long>(cdr_stream->buffer_length)))
-  {
-    RMW_SET_ERROR_MSG("failed to loan memory for message");
-    goto cleanup;
-  }
-
-  status = data_writer->write(*instance, DDS_HANDLE_NIL);
-
-cleanup:
-  if (instance) {
-    if (!instance->serialized_data.unloan()) {
-      fprintf(stderr, "failed to return loaned memory\n");
-      status = DDS::RETCODE_ERROR;
-    }
-    OpenDDSStaticSerializedDataTypeSupport::delete_data(instance);
-  }
-
+  status = data_writer->write(instance, DDS::HANDLE_NIL);
   return status == DDS::RETCODE_OK;
 }
 

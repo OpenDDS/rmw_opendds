@@ -34,6 +34,16 @@ get_publisher_names_and_types_by_node(
   rmw_names_and_types_t * topic_names_and_types);
 
 RMW_OPENDDS_SHARED_CPP_PUBLIC
+        rmw_ret_t
+get_client_names_and_types_by_node(
+        const char * implementation_identifier,
+        const rmw_node_t * node,
+        rcutils_allocator_t * allocator,
+        const char * node_name,
+        const char * node_namespace,
+        rmw_names_and_types_t * client_names_and_types);
+
+RMW_OPENDDS_SHARED_CPP_PUBLIC
 rmw_ret_t
 get_service_names_and_types_by_node(
   const char * implementation_identifier,

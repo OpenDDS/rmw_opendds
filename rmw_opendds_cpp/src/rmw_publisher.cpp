@@ -86,7 +86,7 @@ rmw_create_publisher(
     return NULL;
   }
 
-  if (!qos_profile) {
+  if (!qos_policies) {
     RMW_SET_ERROR_MSG("qos_profile is null");
     return NULL;
   }
@@ -96,7 +96,7 @@ rmw_create_publisher(
     RMW_SET_ERROR_MSG("node info handle is null");
     return NULL;
   }
-  auto participant = static_cast<DDSDomainParticipant *>(node_info->participant);
+  auto participant = static_cast<DDS::DomainParticipant *>(node_info->participant);
   if (!participant) {
     RMW_SET_ERROR_MSG("participant handle is null");
     return NULL;
@@ -110,14 +110,14 @@ rmw_create_publisher(
   }
   std::string type_name = _create_type_name(callbacks, "msg");
   // Past this point, a failure results in unrolling code in the goto fail block.
-  DDS_TypeCode * type_code = nullptr;
-  DDS_DataWriterQos datawriter_qos;
-  DDS_PublisherQos publisher_qos;
-  DDS_ReturnCode_t status;
-  DDSPublisher * dds_publisher = nullptr;
-  DDSDataWriter * topic_writer = nullptr;
-  DDSTopic * topic = nullptr;
-  DDSTopicDescription * topic_description = nullptr;
+  DDS::TypeCode * type_code = nullptr;
+  DDS::DataWriterQos datawriter_qos;
+  DDS::PublisherQos publisher_qos;
+  DDS::ReturnCode_t status;
+  DDS::Publisher * dds_publisher = nullptr;
+  DDS::DataWriter * topic_writer = nullptr;
+  DDS::Topic * topic = nullptr;
+  DDS::TopicDescription * topic_description = nullptr;
   void * info_buf = nullptr;
   void * listener_buf = nullptr;
   OpenDDSPublisherListener * publisher_listener = nullptr;
@@ -139,18 +139,20 @@ rmw_create_publisher(
     RMW_SET_ERROR_MSG("failed to fetch type code\n");
     goto fail;
   }
+  // TODO: OpenDDS equivalent?
   // This is a non-standard RTI OpenDDS function
   // It allows to register an external type to a static data writer
   // In this case, we register the custom message type to a data writer,
   // which only publishes DDS_Octets
   // The purpose of this is to send only raw data DDS_Octets over the wire,
   // advertise the topic however with a type of the message, e.g. std_msgs::msg::dds_::String
-  status = OpenDDSStaticSerializedDataSupport_register_external_type(
+ /* status = OpenDDSStaticSerializedDataSupport_register_external_type(
     participant, type_name.c_str(), type_code);
   if (status != DDS::RETCODE_OK) {
     RMW_SET_ERROR_MSG("failed to register external type");
     goto fail;
   }
+  */
 
   status = participant->get_default_publisher_qos(publisher_qos);
   if (status != DDS::RETCODE_OK) {
@@ -161,7 +163,7 @@ rmw_create_publisher(
   // allocating memory for topic_str
   if (!_process_topic_name(
       topic_name,
-      qos_profile->avoid_ros_namespace_conventions,
+      qos_policies->avoid_ros_namespace_conventions,
       &topic_str))
   {
     goto fail;
