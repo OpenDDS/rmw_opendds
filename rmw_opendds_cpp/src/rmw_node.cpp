@@ -47,11 +47,11 @@ rmw_destroy_node(rmw_node_t * node)
 {
   return destroy_node(opendds_identifier, node);
 }
-rmw_ret_t
-rmw_node_assert_liveliness(const rmw_node_t * node)
-{
-  return assert_liveliness(rti_opendds_identifier, node);
-}
+//rmw_ret_t
+//rmw_node_assert_liveliness(const rmw_node_t * node)
+//{
+//  return assert_liveliness(opendds_identifier, node);
+//}
 
 const rmw_guard_condition_t *
 rmw_node_get_graph_guard_condition(const rmw_node_t * node)

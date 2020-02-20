@@ -67,7 +67,7 @@ rmw_create_subscription(
   const rosidl_message_type_support_t * type_supports,
   const char * topic_name,
   const rmw_qos_profile_t * qos_profile,
-  bool ignore_local_publications)
+  const rmw_subscription_options_t* subscription_options)
 {
   if (!node) {
     RMW_SET_ERROR_MSG("node handle is null");
@@ -104,7 +104,7 @@ rmw_create_subscription(
   }
   std::string type_name = _create_type_name(callbacks, "msg");
   // Past this point, a failure results in unrolling code in the goto fail block.
-  DDS::TypeCode * type_code = nullptr;
+  //DDS::TypeCode * type_code = nullptr;
   DDS::DataReaderQos datareader_qos;
   DDS::SubscriberQos subscriber_qos;
   DDS::ReturnCode_t status;
@@ -129,23 +129,23 @@ rmw_create_subscription(
     goto fail;
   }
 
-  type_code = callbacks->get_type_code();
-  if (!type_code) {
-    RMW_SET_ERROR_MSG("failed to fetch type code\n");
-    goto fail;
-  }
+  //type_code = callbacks->get_type_code();
+  //if (!type_code) {
+  //  RMW_SET_ERROR_MSG("failed to fetch type code\n");
+  //  goto fail;
+  //}
   // This is a non-standard RTI OpenDDS function
   // It allows to register an external type to a static data writer
   // In this case, we register the custom message type to a data writer,
   // which only publishes DDS_Octets
   // The purpose of this is to send only raw data DDS_Octets over the wire,
   // advertise the topic however with a type of the message, e.g. std_msgs::msg::dds_::String
-  status = OpenDDSStaticSerializedDataSupport_register_external_type(
-    participant, type_name.c_str(), type_code);
-  if (status != DDS::RETCODE_OK) {
-    RMW_SET_ERROR_MSG("failed to register external type");
-    goto fail;
-  }
+  //status = OpenDDSStaticSerializedDataSupport_register_external_type(
+  //  participant, type_name.c_str(), type_code);
+  //if (status != DDS::RETCODE_OK) {
+  //  RMW_SET_ERROR_MSG("failed to register external type");
+  //  goto fail;
+  //}
 
   status = participant->get_default_subscriber_qos(subscriber_qos);
   if (status != DDS::RETCODE_OK) {
@@ -169,7 +169,7 @@ rmw_create_subscription(
     goto fail;
   }
   // Use a placement new to construct the OpenDDSSubscriberListener in the preallocated buffer.
-  RMW_TRY_PLACEMENT_NEW(subscriber_listener, listener_buf, goto fail, OpenDDSSubscriberListener, )
+  //RMW_TRY_PLACEMENT_NEW(subscriber_listener, listener_buf, goto fail, OpenDDSSubscriberListener, )
   listener_buf = nullptr;  // Only free the buffer pointer.
 
   dds_subscriber = participant->create_subscriber(
@@ -188,20 +188,20 @@ rmw_create_subscription(
       goto fail;
     }
 
-    topic = participant->create_topic(
-      topic_str, type_name.c_str(),
-      default_topic_qos, NULL, DDS::STATUS_MASK_NONE);
-    if (!topic) {
-      RMW_SET_ERROR_MSG("failed to create topic");
-      goto fail;
-    }
+    //topic = participant->create_topic(
+    //  topic_str, type_name.c_str(),
+    //  default_topic_qos, NULL, DDS::STATUS_MASK_NONE);
+    //if (!topic) {
+    //  RMW_SET_ERROR_MSG("failed to create topic");
+    //  goto fail;
+    //}
   } else {
-    DDS::Duration_t timeout = DDS::Duration_t::from_seconds(0);
-    topic = participant->find_topic(topic_str, timeout);
-    if (!topic) {
-      RMW_SET_ERROR_MSG("failed to find topic");
-      goto fail;
-    }
+    //DDS::Duration_t timeout = DDS::Duration_t::from_seconds(0);
+    //topic = participant->find_topic(topic_str, timeout);
+    //if (!topic) {
+    //  RMW_SET_ERROR_MSG("failed to find topic");
+    //  goto fail;
+    //}
   }
   CORBA::string_free(topic_str);
   topic_str = nullptr;
@@ -211,13 +211,13 @@ rmw_create_subscription(
     goto fail;
   }
 
-  topic_reader = dds_subscriber->create_datareader(
-    topic, datareader_qos,
-    NULL, DDS::STATUS_MASK_NONE);
-  if (!topic_reader) {
-    RMW_SET_ERROR_MSG("failed to create datareader");
-    goto fail;
-  }
+  //topic_reader = dds_subscriber->create_datareader(
+  //  topic, datareader_qos,
+  //  NULL, DDS::STATUS_MASK_NONE);
+  //if (!topic_reader) {
+  //  RMW_SET_ERROR_MSG("failed to create datareader");
+  //  goto fail;
+  //}
 
   read_condition = topic_reader->create_readcondition(
     DDS::ANY_SAMPLE_STATE, DDS::ANY_VIEW_STATE, DDS::ANY_INSTANCE_STATE);
@@ -239,7 +239,7 @@ rmw_create_subscription(
   subscriber_info->topic_reader_ = topic_reader;
   subscriber_info->read_condition_ = read_condition;
   subscriber_info->callbacks_ = callbacks;
-  subscriber_info->ignore_local_publications = ignore_local_publications;
+  //subscriber_info->ignore_local_publications = ignore_local_publications;
   subscriber_info->listener_ = subscriber_listener;
   subscriber_listener = nullptr;
 
@@ -373,24 +373,24 @@ rmw_subscription_get_actual_qos(
   RMW_CHECK_ARGUMENT_FOR_NULL(subscription, RMW_RET_INVALID_ARGUMENT);
   RMW_CHECK_ARGUMENT_FOR_NULL(qos, RMW_RET_INVALID_ARGUMENT);
 
-  auto info = static_cast<ConnextStaticSubscriberInfo *>(subscription->data);
-  if (!info) {
-    RMW_SET_ERROR_MSG("subscription internal data is invalid");
-    return RMW_RET_ERROR;
-  }
-  DDS::DataReader * data_reader = info->topic_reader_;
-  if (!data_reader) {
-    RMW_SET_ERROR_MSG("subscription internal data reader is invalid");
-    return RMW_RET_ERROR;
-  }
-  DDS::DataReaderQos dds_qos;
-  DDS::ReturnCode_t status = data_reader->get_qos(dds_qos);
-  if (DDS::RETCODE_OK != status) {
-    RMW_SET_ERROR_MSG("subscription can't get data reader qos policies");
-    return RMW_RET_ERROR;
-  }
+  //auto info = static_cast<ConnextStaticSubscriberInfo *>(subscription->data);
+  //if (!info) {
+  //  RMW_SET_ERROR_MSG("subscription internal data is invalid");
+  //  return RMW_RET_ERROR;
+  //}
+  //DDS::DataReader * data_reader = info->topic_reader_;
+  //if (!data_reader) {
+  //  RMW_SET_ERROR_MSG("subscription internal data reader is invalid");
+  //  return RMW_RET_ERROR;
+  //}
+  //DDS::DataReaderQos dds_qos;
+  //DDS::ReturnCode_t status = data_reader->get_qos(dds_qos);
+  //if (DDS::RETCODE_OK != status) {
+  //  RMW_SET_ERROR_MSG("subscription can't get data reader qos policies");
+  //  return RMW_RET_ERROR;
+  //}
 
-  dds_qos_to_rmw_qos(dds_qos, qos);
+  //dds_qos_to_rmw_qos(dds_qos, qos);
 
   return RMW_RET_OK;
 }
