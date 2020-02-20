@@ -47,32 +47,33 @@ take(
     return false;
   }
 
-  OpenDDSStaticSerializedDataDataReader * data_reader =
-    OpenDDSStaticSerializedDataDataReader::narrow(dds_data_reader);
-  if (!data_reader) {
-    RMW_SET_ERROR_MSG("failed to narrow data reader");
-    return false;
-  }
+  //OpenDDSStaticSerializedDataDataReader * data_reader =
+  //  OpenDDSStaticSerializedDataDataReader::narrow(dds_data_reader);
+  //if (!data_reader) {
+  //  RMW_SET_ERROR_MSG("failed to narrow data reader");
+  //  return false;
+  //}
 
   OpenDDSStaticSerializedDataSeq dds_messages;
   DDS::SampleInfoSeq sample_infos;
   bool ignore_sample = false;
 
-  DDS::ReturnCode_t status = data_reader->take(
-    dds_messages,
-    sample_infos,
-    1,
-    DDS::ANY_SAMPLE_STATE,
-    DDS::ANY_VIEW_STATE,
-    DDS::ANY_INSTANCE_STATE);
+  DDS::ReturnCode_t status;
+  //DDS::ReturnCode_t status = data_reader->take(
+  //  dds_messages,
+  //  sample_infos,
+  //  1,
+  //  DDS::ANY_SAMPLE_STATE,
+  //  DDS::ANY_VIEW_STATE,
+  //  DDS::ANY_INSTANCE_STATE);
   if (status == DDS::RETCODE_NO_DATA) {
-    data_reader->return_loan(dds_messages, sample_infos);
+    //data_reader->return_loan(dds_messages, sample_infos);
     *taken = false;
     return true;
   }
   if (status != DDS::RETCODE_OK) {
     RMW_SET_ERROR_MSG("take failed");
-    data_reader->return_loan(dds_messages, sample_infos);
+    //data_reader->return_loan(dds_messages, sample_infos);
     return false;
   }
 
@@ -83,17 +84,17 @@ take(
   } else if (ignore_local_publications) {
     // compare the lower 12 octets of the guids from the sender and this receiver
     // if they are equal the sample has been sent from this process and should be ignored
-    DDS::GUID_t sender_guid = sample_info.original_publication_virtual_guid;
+    //DDS::GUID_t sender_guid = sample_info.original_publication_virtual_guid;
     DDS::InstanceHandle_t receiver_instance_handle = dds_data_reader->get_instance_handle();
     ignore_sample = true;
     for (size_t i = 0; i < 12; ++i) {
-      CORBA::Octet * sender_element = &(sender_guid.value[i]);
+      //CORBA::Octet * sender_element = &(sender_guid.value[i]);
       CORBA::Octet * receiver_element =
         &(reinterpret_cast<CORBA::Octet *>(&receiver_instance_handle)[i]);
-      if (*sender_element != *receiver_element) {
-        ignore_sample = false;
-        break;
-      }
+      //if (*sender_element != *receiver_element) {
+      //  ignore_sample = false;
+      //  break;
+      //}
     }
   }
   if (sample_info.valid_data && sending_publication_handle) {
@@ -109,7 +110,7 @@ take(
 
     if (cdr_stream->buffer_length > (std::numeric_limits<unsigned int>::max)()) {
       RMW_SET_ERROR_MSG("cdr_stream->buffer_length unexpectedly larger than max unsiged int value");
-      data_reader->return_loan(dds_messages, sample_infos);
+      //data_reader->return_loan(dds_messages, sample_infos);
       *taken = false;
       return false;
     }
@@ -121,7 +122,7 @@ take(
     *taken = false;
   }
 
-  data_reader->return_loan(dds_messages, sample_infos);
+  //data_reader->return_loan(dds_messages, sample_infos);
 
   return status == DDS::RETCODE_OK;
 }
@@ -133,7 +134,7 @@ _take(
   const rmw_subscription_t * subscription,
   void * ros_message,
   bool * taken,
-  DDS::InstanceHandle_t * sending_publication_handle,
+  DDS::InstanceHandle_t * sending_publication_handle)
 {
   if (!subscription) {
     RMW_SET_ERROR_MSG("subscription handle is null");
@@ -207,7 +208,8 @@ rmw_take_with_info(
   const rmw_subscription_t * subscription,
   void * ros_message,
   bool * taken,
-  rmw_message_info_t * message_info)
+  rmw_message_info_t * message_info,
+  rmw_subscription_allocation_t* allocation)
 {
   if (!message_info) {
     RMW_SET_ERROR_MSG("message info is null");
@@ -260,11 +262,11 @@ _take_serialized_message(
     RMW_SET_ERROR_MSG("subscriber info handle is null");
     return RMW_RET_ERROR;
   }
-  DDSDataReader * topic_reader = subscriber_info->topic_reader_;
-  if (!topic_reader) {
-    RMW_SET_ERROR_MSG("topic reader handle is null");
-    return RMW_RET_ERROR;
-  }
+  //DDSDataReader * topic_reader = subscriber_info->topic_reader_;
+  //if (!topic_reader) {
+  //  RMW_SET_ERROR_MSG("topic reader handle is null");
+  //  return RMW_RET_ERROR;
+  //}
   const message_type_support_callbacks_t * callbacks = subscriber_info->callbacks_;
   if (!callbacks) {
     RMW_SET_ERROR_MSG("callbacks handle is null");
@@ -272,13 +274,13 @@ _take_serialized_message(
   }
 
   // fetch the incoming message as cdr stream
-  if (!take(
-      topic_reader, subscriber_info->ignore_local_publications, serialized_message, taken,
-      sending_publication_handle))
-  {
-    RMW_SET_ERROR_MSG("error occured while taking message");
-    return RMW_RET_ERROR;
-  }
+  //if (!take(
+  //    topic_reader, subscriber_info->ignore_local_publications, serialized_message, taken,
+  //    sending_publication_handle))
+  //{
+  //  RMW_SET_ERROR_MSG("error occured while taking message");
+  //  return RMW_RET_ERROR;
+  //}
 
   return RMW_RET_OK;
 }

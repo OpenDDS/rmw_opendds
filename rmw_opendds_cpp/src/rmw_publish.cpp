@@ -34,38 +34,38 @@ publish(DDS::DataWriter * dds_data_writer, const rcutils_uint8_array_t * cdr_str
     return false;
   }
 
-  OpenDDSStaticSerializedData * instance = OpenDDSStaticSerializedDataTypeSupport::create_data();
-  if (!instance) {
-    RMW_SET_ERROR_MSG("failed to create dds message instance");
-    return false;
-  }
+  //OpenDDSStaticSerializedData* instance = OpenDDSStaticSerializedDataTypeSupport::create_data();
+  //if (!instance) {
+  //  RMW_SET_ERROR_MSG("failed to create dds message instance");
+  //  return false;
+  //}
 
   DDS::ReturnCode_t status = DDS::RETCODE_ERROR;
 
-  instance->serialized_data.maximum(0);
+  //instance->serialized_data.maximum(0);
   if (cdr_stream->buffer_length > (std::numeric_limits<CORBA::Long>::max)()) {
     RMW_SET_ERROR_MSG("cdr_stream->buffer_length unexpectedly larger than DDS_Long's max value");
     return false;
   }
-  if (!instance->serialized_data.loan_contiguous(
-      reinterpret_cast<CORBA::Octet *>(cdr_stream->buffer),
-      static_cast<CORBA::Long>(cdr_stream->buffer_length),
-      static_cast<CORBA::Long>(cdr_stream->buffer_length)))
-  {
-    RMW_SET_ERROR_MSG("failed to loan memory for message");
-    goto cleanup;
-  }
+  //if (!instance->serialized_data.loan_contiguous(
+  //    reinterpret_cast<CORBA::Octet *>(cdr_stream->buffer),
+  //    static_cast<CORBA::Long>(cdr_stream->buffer_length),
+  //    static_cast<CORBA::Long>(cdr_stream->buffer_length)))
+  //{
+  //  RMW_SET_ERROR_MSG("failed to loan memory for message");
+  //  goto cleanup;
+  //}
 
-  status = data_writer->write(*instance, DDS::HANDLE_NIL);
+  //status = data_writer->write(*instance, DDS::HANDLE_NIL);
 
 cleanup:
-  if (instance) {
-    if (!instance->serialized_data.unloan()) {
-      fprintf(stderr, "failed to return loaned memory\n");
-      status = DDS::RETCODE_ERROR;
-    }
-    OpenDDSStaticSerializedDataTypeSupport::delete_data(instance);
-  }
+  //if (instance) {
+  //  if (!instance->serialized_data.unloan()) {
+  //    fprintf(stderr, "failed to return loaned memory\n");
+  //    status = DDS::RETCODE_ERROR;
+  //  }
+  //  OpenDDSStaticSerializedDataTypeSupport::delete_data(instance);
+  //}
 
   return status == DDS::RETCODE_OK;
 }
