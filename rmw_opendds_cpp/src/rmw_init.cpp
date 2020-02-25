@@ -76,20 +76,6 @@ rmw_get_zero_initialized_context(void)
 }
 
 rmw_ret_t
-rmw_context_fini(rmw_context_t * context)
-{
-  RMW_CHECK_ARGUMENT_FOR_NULL(context, RMW_RET_INVALID_ARGUMENT);
-  RMW_CHECK_ARGUMENT_FOR_NULL(context->implementation_identifier, RMW_RET_INVALID_ARGUMENT);
-  RMW_CHECK_TYPE_IDENTIFIERS_MATCH(
-    context,
-    context->implementation_identifier,
-    opendds_identifier,
-    return RMW_RET_INCORRECT_RMW_IMPLEMENTATION);
-  *context = rmw_get_zero_initialized_context();
-  return RMW_RET_OK;
-}
-
-rmw_ret_t
 rmw_init(const rmw_init_options_t * options, rmw_context_t * context)
 {
   RCUTILS_CHECK_ARGUMENT_FOR_NULL(options, RMW_RET_INVALID_ARGUMENT);
@@ -109,6 +95,22 @@ rmw_ret_t
 rmw_shutdown(rmw_context_t * context)
 {
   RCUTILS_CHECK_ARGUMENT_FOR_NULL(context, RMW_RET_INVALID_ARGUMENT);
+  RMW_CHECK_TYPE_IDENTIFIERS_MATCH(
+    context,
+    context->implementation_identifier,
+    opendds_identifier,
+    return RMW_RET_INCORRECT_RMW_IMPLEMENTATION);
+  // context impl is explicitly supposed to be nullptr for now, see rmw_init's code
+  // RCUTILS_CHECK_ARGUMENT_FOR_NULL(context->impl, RMW_RET_INVALID_ARGUMENT);
+  *context = rmw_get_zero_initialized_context();
+  return RMW_RET_OK;
+}
+
+rmw_ret_t
+rmw_context_fini(rmw_context_t * context)
+{
+  RCUTILS_CHECK_ARGUMENT_FOR_NULL(context, RMW_RET_INVALID_ARGUMENT);
+  RMW_CHECK_ARGUMENT_FOR_NULL(context->implementation_identifier, RMW_RET_INVALID_ARGUMENT);
   RMW_CHECK_TYPE_IDENTIFIERS_MATCH(
     context,
     context->implementation_identifier,
