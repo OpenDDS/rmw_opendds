@@ -13,26 +13,31 @@ endif()
 
 find_package(ament_cmake REQUIRED)
 find_package(opendds_cmake_module REQUIRED)
-find_package(OpenDDS QUIET MODULE)
-if(OpenDDS_FOUND)
-  find_package(OpenDDS MODULE)
-endif()
+
+find_package(OpenDDS QUIET)
+
 if(NOT OpenDDS_FOUND)
   ament_package()
   message(WARNING "Could not find OpenDDS - skipping '${PROJECT_NAME}'")
   return()
 endif()
 find_package(rcutils REQUIRED)
+
+# rcutils package changes CXX standard to 11
+if(${CMAKE_CXX_STANDARD} LESS 14)
+  set(CMAKE_CXX_STANDARD 14)
+endif()
+
 find_package(rmw REQUIRED)
 
+set(opendds_libs_1
+  OpenDDS::Rtps_Udp
+)
+
 include_directories(include)
-
-ament_export_definitions(${OpenDDS_DEFINITIONS})
-ament_export_include_directories(include ${OpenDDS_INCLUDE_DIRS})
-
+ament_export_include_directories(include)
 ament_export_dependencies(rmw)
 
-link_directories(${OpenDDS_LIBRARY_DIRS})
 add_library(
   rmw_opendds_shared_cpp
   SHARED
@@ -54,11 +59,13 @@ add_library(
   src/types/custom_data_reader_listener.cpp
   src/types/custom_publisher_listener.cpp
   src/types/custom_subscriber_listener.cpp)
+
+target_link_libraries(rmw_opendds_shared_cpp ${opendds_libs_1})
+
 ament_target_dependencies(rmw_opendds_shared_cpp
   "rcutils"
-  "rmw"
-  "OpenDDS")
-ament_export_libraries(rmw_opendds_shared_cpp ${OpenDDS_LIBRARIES})
+  "rmw")
+ament_export_libraries(rmw_opendds_shared_cpp ${opendds_libs_1})
 
 if(WIN32)
   # Causes the visibility macros to use dllexport rather than dllimport

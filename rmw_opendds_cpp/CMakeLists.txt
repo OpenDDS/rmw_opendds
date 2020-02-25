@@ -2,9 +2,6 @@ cmake_minimum_required(VERSION 3.5)
 
 project(rmw_opendds_cpp)
 
-set(OPENDDS_STATIC_DISABLE $ENV{OPENDDS_STATIC_DISABLE}
-  CACHE BOOL "If OpenDDS Static should be disabled.")
-
 # Default to C++14
 if(NOT CMAKE_CXX_STANDARD)
   set(CMAKE_CXX_STANDARD 14)
@@ -16,22 +13,20 @@ endif()
 
 find_package(ament_cmake REQUIRED)
 
-#find_package(opendds_cmake_module REQUIRED)
-find_package(OpenDDS)
+find_package(opendds_cmake_module REQUIRED)
+find_package(OpenDDS QUIET)
 
-# find_package(OpenDDS QUIET MODULE)
-# if(OpenDDS_FOUND)
-#   find_package(OpenDDS MODULE)
-# endif()
-# if(NOT OpenDDS_FOUND OR OPENDDS_STATIC_DISABLE)
-#   ament_package()
-#   if(NOT OpenDDS_FOUND)
-#     message(WARNING "Could not find OpenDDS - skipping '${PROJECT_NAME}'")
-#   else()
-#     message(STATUS "OpenDDS static rmw implementation explicitly disabled - skipping '${PROJECT_NAME}'")
-#   endif()
-#   return()
-# endif()
+if(NOT OpenDDS_FOUND)
+  ament_package()
+  if(NOT OpenDDS_FOUND)
+    message(WARNING "Could not find OpenDDS - skipping '${PROJECT_NAME}'")
+  else()
+    message(STATUS "OpenDDS static rmw implementation explicitly disabled - skipping '${PROJECT_NAME}'")
+  endif()
+  return()
+else()
+  message(STATUS "OpenDDS package found for '${PROJECT_NAME}'")
+endif()
 
 find_package(rcutils REQUIRED)
 
@@ -54,7 +49,10 @@ find_package(rmw_opendds_shared_cpp REQUIRED)
 find_package(rosidl_generator_c REQUIRED)
 find_package(rosidl_generator_cpp REQUIRED)
 
-#include_directories(include ${OpenDDS_INCLUDE_DIRS})
+set(opendds_libs
+  OpenDDS::Rtps_Udp
+)
+
 include_directories(include)
 
 ament_export_include_directories(include)
@@ -74,8 +72,6 @@ register_rmw_implementation(
 
 
 # Build RMW library.
-include_directories(${OpenDDS_HEADER_DIRS})
-link_directories(${OpenDDS_LIBRARY_DIRS})
 add_library(
   rmw_opendds_cpp
   SHARED
@@ -115,6 +111,7 @@ add_library(
   src/serialization_format.cpp)
 
 OPENDDS_TARGET_SOURCES(rmw_opendds_cpp resources/opendds_static_serialized_data.idl TAO_IDL_OPTIONS "-Sa -St")
+target_link_libraries(rmw_opendds_cpp ${opendds_libs})
 
 # Declare external package dependencies for building.
 ament_target_dependencies(rmw_opendds_cpp
@@ -124,8 +121,8 @@ ament_target_dependencies(rmw_opendds_cpp
   "rosidl_generator_c"
   "rosidl_generator_cpp"
   "rosidl_typesupport_opendds_c"
-  "rosidl_typesupport_opendds_cpp"
-  "OpenDDS")
+  "rosidl_typesupport_opendds_cpp")
+
 target_include_directories(rmw_opendds_cpp PUBLIC ${patched_directory})
 ament_export_libraries(rmw_opendds_cpp)
 
@@ -143,7 +140,7 @@ if(BUILD_TESTING)
   ament_lint_auto_find_test_dependencies()
 endif()
 
-ament_package(CONFIG_EXTRAS "${PROJECT_NAME}-extras.cmake")
+ament_package()
 
 install(
   DIRECTORY include/
