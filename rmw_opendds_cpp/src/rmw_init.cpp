@@ -69,6 +69,26 @@ rmw_init_options_fini(rmw_init_options_t * init_options)
   return RMW_RET_OK;
 }
 
+rmw_context_t
+rmw_get_zero_initialized_context(void)
+{
+  return rmw_context_t{0, 0, 0};
+}
+
+rmw_ret_t
+rmw_context_fini(rmw_context_t * context)
+{
+  RMW_CHECK_ARGUMENT_FOR_NULL(context, RMW_RET_INVALID_ARGUMENT);
+  RMW_CHECK_ARGUMENT_FOR_NULL(context->implementation_identifier, RMW_RET_INVALID_ARGUMENT);
+  RMW_CHECK_TYPE_IDENTIFIERS_MATCH(
+    context,
+    context->implementation_identifier,
+    opendds_identifier,
+    return RMW_RET_INCORRECT_RMW_IMPLEMENTATION);
+  *context = rmw_get_zero_initialized_context();
+  return RMW_RET_OK;
+}
+
 rmw_ret_t
 rmw_init(const rmw_init_options_t * options, rmw_context_t * context)
 {
@@ -99,4 +119,5 @@ rmw_shutdown(rmw_context_t * context)
   *context = rmw_get_zero_initialized_context();
   return RMW_RET_OK;
 }
+
 }  // extern "C"
