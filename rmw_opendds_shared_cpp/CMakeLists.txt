@@ -80,14 +80,7 @@ if(BUILD_TESTING)
   ament_lint_auto_find_test_dependencies()
 endif()
 
-ament_package(
-  CONFIG_EXTRAS "rmw_opendds_shared_cpp-extras.cmake"
-)
-
-install(
-  DIRECTORY cmake
-  DESTINATION share/${PROJECT_NAME}
-)
+ament_package()
 
 install(
   DIRECTORY include/
