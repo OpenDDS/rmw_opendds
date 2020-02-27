@@ -117,7 +117,8 @@ rmw_shutdown(rmw_context_t * context)
     context->implementation_identifier,
     opendds_identifier,
     return RMW_RET_INCORRECT_RMW_IMPLEMENTATION);
-  return shutdown();
+  rmw_ret_t r = shutdown();
+  return (r != RMW_RET_OK) ? r : rmw_context_fini(context);
 }
 
 }  // extern "C"
