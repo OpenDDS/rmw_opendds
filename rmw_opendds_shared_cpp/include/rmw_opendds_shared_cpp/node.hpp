@@ -36,4 +36,9 @@ RMW_OPENDDS_SHARED_CPP_PUBLIC
 const rmw_guard_condition_t *
 node_get_graph_guard_condition(const rmw_node_t * node);
 
+RMW_OPENDDS_SHARED_CPP_PUBLIC
+rmw_ret_t
+//node_assert_liveliness(const char * implementation_identifier, const rmw_node_t * node);
+node_assert_liveliness(const rmw_node_t * node);
+
 #endif  // RMW_OPENDDS_SHARED_CPP__NODE_HPP_

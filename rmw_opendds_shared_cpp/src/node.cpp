@@ -127,8 +127,7 @@ create_node(
   }
 
   participant = dpf_->create_participant(
-    static_cast<DDS::DomainId_t>(domain_id), participant_qos, NULL,
-    0);
+    static_cast<DDS::DomainId_t>(domain_id), participant_qos, NULL, 0);
   if (!participant) {
     RMW_SET_ERROR_MSG("failed to create participant");
     goto fail;
@@ -192,7 +191,6 @@ create_node(
     goto fail;
   }
   node_handle->implementation_identifier = implementation_identifier;
-  node_handle->data = participant;
 
   node_handle->name =
     reinterpret_cast<const char *>(rmw_allocate(sizeof(char) * strlen(name) + 1));
@@ -357,7 +355,6 @@ const rmw_guard_condition_t *
 node_get_graph_guard_condition(const rmw_node_t * node)
 {
   // node argument is checked in calling function.
-
   OpenDDSNodeInfo * node_info = static_cast<OpenDDSNodeInfo *>(node->data);
   if (!node_info) {
     RMW_SET_ERROR_MSG("node info handle is null");
@@ -365,4 +362,12 @@ node_get_graph_guard_condition(const rmw_node_t * node)
   }
 
   return node_info->graph_guard_condition;
+}
+
+RMW_OPENDDS_SHARED_CPP_PUBLIC
+rmw_ret_t
+//node_assert_liveliness(const char * implementation_identifier, const rmw_node_t * node)
+node_assert_liveliness(const rmw_node_t * node)
+{
+  return RMW_RET_OK;
 }

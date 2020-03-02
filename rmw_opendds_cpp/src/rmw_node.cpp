@@ -38,8 +38,7 @@ rmw_create_node(
     opendds_identifier,
     // TODO(wjwwood): replace this with RMW_RET_INCORRECT_RMW_IMPLEMENTATION when refactored
     return NULL);
-  return create_node(
-    opendds_identifier, name, namespace_, domain_id, security_options);
+  return create_node(opendds_identifier, name, namespace_, domain_id, security_options);
 }
 
 rmw_ret_t
@@ -51,8 +50,12 @@ rmw_destroy_node(rmw_node_t * node)
 rmw_ret_t
 rmw_node_assert_liveliness(const rmw_node_t * node)
 {
-  // return assert_liveliness(opendds_identifier, node);
-  return RMW_RET_OK;
+  RMW_CHECK_ARGUMENT_FOR_NULL(node, RMW_RET_INVALID_ARGUMENT);
+  RMW_CHECK_ARGUMENT_FOR_NULL(node->implementation_identifier, RMW_RET_INVALID_ARGUMENT);
+  RMW_CHECK_TYPE_IDENTIFIERS_MATCH(
+    node, node->implementation_identifier, opendds_identifier,
+    return RMW_RET_INCORRECT_RMW_IMPLEMENTATION);
+  return node_assert_liveliness(node);
 }
 
 const rmw_guard_condition_t *
