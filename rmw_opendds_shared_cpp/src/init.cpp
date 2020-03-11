@@ -24,5 +24,6 @@ init()
     RMW_SET_ERROR_MSG("failed to get participant factory");
     return RMW_RET_ERROR;
   }
+  TheServiceParticipant->set_default_discovery(OpenDDS::DCPS::Discovery::DEFAULT_RTPS);
   return RMW_RET_OK;
 }

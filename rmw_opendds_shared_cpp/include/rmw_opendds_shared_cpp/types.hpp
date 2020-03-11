@@ -42,8 +42,8 @@ public:
   explicit
   CustomDataReaderListener(
     const char * implementation_identifier, rmw_guard_condition_t * graph_guard_condition)
-  : graph_guard_condition_(graph_guard_condition),
-    implementation_identifier_(implementation_identifier)
+  : implementation_identifier_(implementation_identifier),
+    graph_guard_condition_(graph_guard_condition)
   {}
 
   virtual void add_information(
@@ -80,36 +80,30 @@ public:
     DDS::InstanceHandle_t & participant_guid);
 
   virtual void on_requested_deadline_missed(
-    ::DDS::DataReader_ptr reader,
-    const ::DDS::RequestedDeadlineMissedStatus & status) {};
+    ::DDS::DataReader_ptr, const ::DDS::RequestedDeadlineMissedStatus&) {}
 
   virtual void on_requested_incompatible_qos(
-    ::DDS::DataReader_ptr reader,
-    const ::DDS::RequestedIncompatibleQosStatus & status) {};
+    ::DDS::DataReader_ptr, const ::DDS::RequestedIncompatibleQosStatus&) {}
 
   virtual void on_sample_rejected(
-    ::DDS::DataReader_ptr reader,
-    const ::DDS::SampleRejectedStatus & status) {};
+    ::DDS::DataReader_ptr, const ::DDS::SampleRejectedStatus&) {}
 
   virtual void on_liveliness_changed(
-    ::DDS::DataReader_ptr reader,
-    const ::DDS::LivelinessChangedStatus & status) {};
+    ::DDS::DataReader_ptr, const ::DDS::LivelinessChangedStatus&) {}
 
   virtual void on_subscription_matched(
-    ::DDS::DataReader_ptr reader,
-    const ::DDS::SubscriptionMatchedStatus & status) {};
+    ::DDS::DataReader_ptr, const ::DDS::SubscriptionMatchedStatus&) {}
 
   virtual void on_sample_lost(
-    ::DDS::DataReader_ptr reader,
-    const ::DDS::SampleLostStatus & status) {};
+    ::DDS::DataReader_ptr, const ::DDS::SampleLostStatus&) {}
 
 protected:
   std::mutex mutex_;
   TopicCache<DDS::InstanceHandle_t> topic_cache;
 
 private:
-  rmw_guard_condition_t * graph_guard_condition_;
   const char * implementation_identifier_;
+  rmw_guard_condition_t * graph_guard_condition_;
 };
 
 class CustomPublisherListener
@@ -142,6 +136,11 @@ struct OpenDDSNodeInfo
   CustomPublisherListener * publisher_listener;
   CustomSubscriberListener * subscriber_listener;
   rmw_guard_condition_t * graph_guard_condition;
+  OpenDDSNodeInfo() :
+    participant(nullptr),
+    publisher_listener(nullptr),
+    subscriber_listener(nullptr),
+    graph_guard_condition(nullptr) {}
 };
 
 struct OpenDDSPublisherGID
