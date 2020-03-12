@@ -225,6 +225,7 @@ create_node(
 #endif
 
   rmw_node_t * node = nullptr;
+  void * buf = nullptr;
   try {
     node = rmw_node_allocate();
     if (!node) {
@@ -245,7 +246,7 @@ create_node(
     }
     memcpy(const_cast<char *>(node->namespace_), namespace_, strlen(namespace_) + 1);
 
-    void * buf = rmw_allocate(sizeof(OpenDDSNodeInfo));
+    buf = rmw_allocate(sizeof(OpenDDSNodeInfo));
     if (!buf) {
       throw std::string("failed to allocate memory for OpenDDSNodeInfo");
     }
@@ -310,6 +311,9 @@ create_node(
   } catch (...) {}
 
   clean_node(dpf, node);
+  if (buf) {
+    rmw_free(buf);
+  }
   return nullptr;
 }
 

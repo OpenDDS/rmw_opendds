@@ -70,12 +70,6 @@ rmw_init_options_fini(rmw_init_options_t * init_options)
   return RMW_RET_OK;
 }
 
-rmw_context_t
-rmw_get_zero_initialized_context(void)
-{
-  return rmw_context_t{0, 0, 0};
-}
-
 rmw_ret_t
 rmw_context_fini(rmw_context_t * context)
 {
