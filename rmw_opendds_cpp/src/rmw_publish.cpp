@@ -43,6 +43,8 @@ publish(DDS::DataWriter * dds_data_writer, const rcutils_uint8_array_t * cdr_str
 
   OpenDDSStaticSerializedData_var instance = new OpenDDSStaticSerializedData();
 
+  // TODO: This implementation may be  temporary until typesupport is finalized
+
   // Populate instance
   instance->serialized_data.length(static_cast<CORBA::ULong>(cdr_stream->buffer_length));
   std::memcpy(instance->serialized_data.get_buffer(), cdr_stream->buffer, cdr_stream->buffer_length);

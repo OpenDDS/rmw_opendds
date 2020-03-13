@@ -51,8 +51,8 @@ public:
   }
 
   void on_offered_deadline_missed(
-    ::DDS::DataWriter_ptr writer,
-    const ::DDS::OfferedDeadlineMissedStatus& status
+    DDS::DataWriter_ptr writer,
+    const DDS::OfferedDeadlineMissedStatus& status
   )
   {
     ACE_UNUSED_ARG(writer);
@@ -61,8 +61,8 @@ public:
   }
 
   void on_offered_incompatible_qos(
-    ::DDS::DataWriter_ptr writer,
-    const ::DDS::OfferedIncompatibleQosStatus& status
+    DDS::DataWriter_ptr writer,
+    const DDS::OfferedIncompatibleQosStatus& status
   )
   {
     ACE_UNUSED_ARG(writer);
@@ -71,8 +71,8 @@ public:
   }
 
   void on_liveliness_lost(
-    ::DDS::DataWriter_ptr writer,
-    const ::DDS::LivelinessLostStatus& status
+    DDS::DataWriter_ptr writer,
+    const DDS::LivelinessLostStatus& status
   )
   {
     ACE_UNUSED_ARG(writer);
