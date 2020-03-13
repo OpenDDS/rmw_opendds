@@ -108,4 +108,11 @@ set_entity_qos_from_profile(
   return true;
 }
 
+template<typename AttributeT>
+void
+dds_qos_to_rmw_qos(
+  const AttributeT& dds_qos,
+  rmw_qos_profile_t* qos);
+
+
 #endif  // RMW_OPENDDS_SHARED_CPP__QOS_HPP_

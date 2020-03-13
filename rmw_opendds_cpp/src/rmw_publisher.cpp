@@ -30,7 +30,8 @@
 #include "rmw_opendds_cpp/opendds_static_publisher_info.hpp"
 
 // include patched generated code from the build folder
-#include "opendds_static_serialized_dataTypeSupportC.h"
+//#include "opendds_static_serialized_dataTypeSupportC.h"
+#include "opendds_static_serialized_dataTypeSupportImpl.h"
 
 // Uncomment this to get extra console output about discovery.
 // This affects code in this file, but there is a similar variable in:
@@ -86,10 +87,10 @@ rmw_create_publisher(
     return NULL;
   }
 
-  //if (!qos_profile) {
-  //  RMW_SET_ERROR_MSG("qos_profile is null");
-  //  return NULL;
-  //}
+  if (!qos_policies) {
+    RMW_SET_ERROR_MSG("qos_policies is null");
+    return NULL;
+  }
 
   auto node_info = static_cast<OpenDDSNodeInfo *>(node->data);
   if (!node_info) {
@@ -108,229 +109,196 @@ rmw_create_publisher(
     RMW_SET_ERROR_MSG("callbacks handle is null");
     return NULL;
   }
+
+  // TODO: TypeCode and susequent call to register external type have been removed
+  // May need to implement something similar after IDL type support is finalized
+
   std::string type_name = _create_type_name(callbacks, "msg");
-  // Past this point, a failure results in unrolling code in the goto fail block.
-  //DDS::TypeCode * type_code = nullptr;
-  DDS::DataWriterQos datawriter_qos;
-  DDS::PublisherQos publisher_qos;
-  DDS::ReturnCode_t status;
-  DDS::Publisher * dds_publisher = nullptr;
-  DDS::DataWriter * topic_writer = nullptr;
-  DDS::Topic * topic = nullptr;
-  DDS::TopicDescription * topic_description = nullptr;
+
   void * info_buf = nullptr;
   void * listener_buf = nullptr;
   OpenDDSPublisherListener * publisher_listener = nullptr;
   OpenDDSStaticPublisherInfo * publisher_info = nullptr;
   rmw_publisher_t * publisher = nullptr;
   std::string mangled_name = "";
+  OpenDDSStaticSerializedDataTypeSupport_var ts = new OpenDDSStaticSerializedDataTypeSupportImpl();
 
   char * topic_str = nullptr;
 
-  // Begin initializing elements
-  publisher = rmw_publisher_allocate();
-  if (!publisher) {
-    RMW_SET_ERROR_MSG("failed to allocate publisher");
-    goto fail;
-  }
-
-  //type_code = callbacks->get_type_code();
-  //if (!type_code) {
-  //  RMW_SET_ERROR_MSG("failed to fetch type code\n");
-  //  goto fail;
-  //}
-  // This is a non-standard RTI OpenDDS function
-  // It allows to register an external type to a static data writer
-  // In this case, we register the custom message type to a data writer,
-  // which only publishes DDS_Octets
-  // The purpose of this is to send only raw data DDS_Octets over the wire,
-  // advertise the topic however with a type of the message, e.g. std_msgs::msg::dds_::String
-  //status = OpenDDSStaticSerializedDataSupport_register_external_type(
-  //  participant, type_name.c_str(), type_code);
-  if (status != DDS::RETCODE_OK) {
-    RMW_SET_ERROR_MSG("failed to register external type");
-    goto fail;
-  }
-
-  status = participant->get_default_publisher_qos(publisher_qos);
-  if (status != DDS::RETCODE_OK) {
-    RMW_SET_ERROR_MSG("failed to get default publisher qos");
-    goto fail;
-  }
-
-  // allocating memory for topic_str
-  //if (!_process_topic_name(
-  //    topic_name,
-  //    qos_profile->avoid_ros_namespace_conventions,
-  //    &topic_str))
-  //{
-  //  goto fail;
-  //}
-
-  // Allocate memory for the PublisherListener object.
-  listener_buf = rmw_allocate(sizeof(OpenDDSPublisherListener));
-  if (!listener_buf) {
-    RMW_SET_ERROR_MSG("failed to allocate memory for publisher listener");
-    goto fail;
-  }
-  // Use a placement new to construct the PublisherListener in the preallocated buffer.
-  //RMW_TRY_PLACEMENT_NEW(publisher_listener, listener_buf, goto fail, OpenDDSPublisherListener, )
-  listener_buf = nullptr;  // Only free the buffer pointer.
-
-  dds_publisher = participant->create_publisher(
-    publisher_qos, publisher_listener, DDS::PUBLICATION_MATCHED_STATUS);
-  if (!dds_publisher) {
-    RMW_SET_ERROR_MSG("failed to create publisher");
-    goto fail;
-  }
-
-  topic_description = participant->lookup_topicdescription(topic_str);
-  if (!topic_description) {
-    DDS::TopicQos default_topic_qos;
-    status = participant->get_default_topic_qos(default_topic_qos);
-    if (status != DDS::RETCODE_OK) {
-      RMW_SET_ERROR_MSG("failed to get default topic qos");
-      goto fail;
-    }
-
-    //topic = participant->create_topic(
-    //  topic_str, type_name.c_str(),
-    //  default_topic_qos, NULL, DDS::STATUS_MASK_NONE);
-    //if (!topic) {
-    //  RMW_SET_ERROR_MSG("failed to create topic");
-    //  goto fail;
-    //}
-  } else {
-    //DDS::Duration_t timeout = DDS::Duration_t::from_seconds(0);
-    //topic = participant->find_topic(topic_str, timeout);
-    //if (!topic) {
-    //  RMW_SET_ERROR_MSG("failed to find topic");
-    //  goto fail;
-    //}
-  }
-  CORBA::string_free(topic_str);
-  topic_str = nullptr;
-
-  //if (!get_datawriter_qos(participant, *qos_profile, datawriter_qos)) {
-  //  // error string was set within the function
-  //  goto fail;
-  //}
-
-  //topic_writer = dds_publisher->create_datawriter(
-  //  topic, datawriter_qos, NULL, DDS::STATUS_MASK_NONE);
-  //if (!topic_writer) {
-  //  RMW_SET_ERROR_MSG("failed to create datawriter");
-  //  goto fail;
-  //}
-
-  // Allocate memory for the OpenDDSStaticPublisherInfo object.
-  info_buf = rmw_allocate(sizeof(OpenDDSStaticPublisherInfo));
-  if (!info_buf) {
-    RMW_SET_ERROR_MSG("failed to allocate memory for publisher info");
-    goto fail;
-  }
-  // Use a placement new to construct the OpenDDSStaticPublisherInfo in the preallocated buffer.
-  RMW_TRY_PLACEMENT_NEW(publisher_info, info_buf, goto fail, OpenDDSStaticPublisherInfo, )
-  info_buf = nullptr;  // Only free the publisher_info pointer; don't need the buf pointer anymore.
-  publisher_info->dds_publisher_ = dds_publisher;
-  publisher_info->topic_writer_ = topic_writer;
-  publisher_info->callbacks_ = callbacks;
-  publisher_info->publisher_gid.implementation_identifier = opendds_identifier;
-  publisher_info->listener_ = publisher_listener;
-  publisher_listener = nullptr;
-  static_assert(
-    sizeof(OpenDDSPublisherGID) <= RMW_GID_STORAGE_SIZE,
-    "RMW_GID_STORAGE_SIZE insufficient to store the rmw_opendds_cpp GID implemenation."
-  );
-  // Zero the data memory.
-  memset(publisher_info->publisher_gid.data, 0, RMW_GID_STORAGE_SIZE);
-  {
-    auto publisher_gid =
-      reinterpret_cast<OpenDDSPublisherGID *>(publisher_info->publisher_gid.data);
-    publisher_gid->publication_handle = topic_writer->get_instance_handle();
-  }
-  publisher_info->publisher_gid.implementation_identifier = opendds_identifier;
-
-  publisher->implementation_identifier = opendds_identifier;
-  publisher->data = publisher_info;
-  publisher->topic_name = reinterpret_cast<const char *>(rmw_allocate(strlen(topic_name) + 1));
-  if (!publisher->topic_name) {
-    RMW_SET_ERROR_MSG("failed to allocate memory for node name");
-    goto fail;
-  }
-  memcpy(const_cast<char *>(publisher->topic_name), topic_name, strlen(topic_name) + 1);
-
-  //if (!qos_profile->avoid_ros_namespace_conventions) {
-  //  mangled_name =
-  //    topic_writer->get_topic()->get_name();
-  //} else {
-  //  mangled_name = topic_name;
-  //}
-  node_info->publisher_listener->add_information(
-    node_info->participant->get_instance_handle(),
-    dds_publisher->get_instance_handle(),
-    mangled_name,
-    type_name,
-    EntityType::Publisher);
-  node_info->publisher_listener->trigger_graph_guard_condition();
-
-// TODO(karsten1987): replace this block with logging macros
-#ifdef DISCOVERY_DEBUG_LOGGING
-  fprintf(stderr, "******* Creating Publisher Details: ********\n");
-  fprintf(stderr, "Publisher topic %s\n", topic_writer->get_topic()->get_name());
-  fprintf(stderr, "Publisher address %p\n", static_cast<void *>(dds_publisher));
-  fprintf(stderr, "******\n");
-#endif
-
-  return publisher;
-fail:
-  if (topic_str) {
-    CORBA::string_free(topic_str);
-    topic_str = nullptr;
-  }
-  if (publisher) {
-    rmw_publisher_free(publisher);
-  }
-  // Assumption: participant is valid.
-  if (dds_publisher) {
-    if (topic_writer) {
-      if (dds_publisher->delete_datawriter(topic_writer) != DDS::RETCODE_OK) {
-        std::stringstream ss;
-        ss << "leaking datawriter while handling failure at " <<
-          __FILE__ << ":" << __LINE__ << '\n';
-        (std::cerr << ss.str()).flush();
+  try {
+    try {
+      // Begin initializing elements
+      publisher = rmw_publisher_allocate();
+      if (!publisher) {
+        throw std::string("failed to allocate publisher");
       }
-    }
-    if (participant->delete_publisher(dds_publisher) != DDS::RETCODE_OK) {
-      std::stringstream ss;
-      ss << "leaking publisher while handling failure at " <<
-        __FILE__ << ":" << __LINE__ << '\n';
-      (std::cerr << ss.str()).flush();
-    }
-  }
-  if (publisher_listener) {
-    RMW_TRY_DESTRUCTOR_FROM_WITHIN_FAILURE(
-      publisher_listener->~OpenDDSPublisherListener(), OpenDDSPublisherListener)
-    rmw_free(publisher_listener);
-  }
-  if (publisher_info) {
-    if (publisher_info->listener_) {
-      RMW_TRY_DESTRUCTOR_FROM_WITHIN_FAILURE(
-        publisher_info->listener_->~OpenDDSPublisherListener(), OpenDDSPublisherListener)
-      rmw_free(publisher_info->listener_);
-    }
-    RMW_TRY_DESTRUCTOR_FROM_WITHIN_FAILURE(
-      publisher_info->~OpenDDSStaticPublisherInfo(), OpenDDSStaticPublisherInfo)
-    rmw_free(publisher_info);
-  }
-  if (info_buf) {
-    rmw_free(info_buf);
-  }
-  if (listener_buf) {
-    rmw_free(listener_buf);
-  }
 
-  return NULL;
+      publisher->can_loan_messages = false;
+
+      // TODO: Register TypeSupport here ????????????????????????
+      if (ts->register_type(participant, "") != DDS::RETCODE_OK) {
+        throw std::string("failed to register OpenDDS type");
+      }
+
+      DDS::PublisherQos publisher_qos;
+      DDS::ReturnCode_t status = participant->get_default_publisher_qos(publisher_qos);
+      if (status != DDS::RETCODE_OK) {
+        throw std::string("failed to get default publisher qos");
+      }
+
+      // allocating memory for topic_str
+      if (!_process_topic_name(
+        topic_name,
+        qos_policies->avoid_ros_namespace_conventions,
+        &topic_str))
+      {
+        throw std::string("failed to allocate memory for topic_str");
+      }
+
+      // Allocate memory for the PublisherListener object.
+      listener_buf = rmw_allocate(sizeof(OpenDDSPublisherListener));
+      if (!listener_buf) {
+        throw std::string("failed to allocate memory for publisher listener");
+      }
+      // Use a placement new to construct the PublisherListener in the preallocated buffer.
+      RMW_TRY_PLACEMENT_NEW(publisher_listener, listener_buf, throw std::string("Constructing PublisherListener failed"), OpenDDSPublisherListener, )
+        listener_buf = nullptr;  // Only free the buffer pointer.
+
+      DDS::Publisher_var dds_publisher = participant->create_publisher(
+        publisher_qos, publisher_listener, DDS::PUBLICATION_MATCHED_STATUS);
+      if (!dds_publisher) {
+        throw std::string("failed to create publisher");
+      }
+
+      DDS::TopicDescription_var topic_description = participant->lookup_topicdescription(topic_str);
+      DDS::Topic_var topic;
+      if (!topic_description) {
+        DDS::TopicQos default_topic_qos;
+        status = participant->get_default_topic_qos(default_topic_qos);
+        if (status != DDS::RETCODE_OK) {
+          throw std::string("failed to get default topic qos");
+        }
+
+        topic = participant->create_topic(
+          topic_str, type_name.c_str(),
+          default_topic_qos, NULL, OpenDDS::DCPS::NO_STATUS_MASK);
+        if (!topic) {
+          throw std::string("failed to create topic");
+        }
+      }
+      else {
+        DDS::Duration_t timeout = { 0, 0 };
+        topic = participant->find_topic(topic_str, timeout);
+        if (!topic) {
+          throw std::string("failed to find topic");
+        }
+      }
+      CORBA::string_free(topic_str);
+      topic_str = nullptr;
+
+      DDS::DataWriterQos datawriter_qos;
+      if (!get_datawriter_qos(participant, *qos_policies, datawriter_qos)) {
+        // specific error was set within the function
+        throw std::string("get_datawriter_qos failed");
+      }
+
+      DDS::DataWriter_var topic_writer = dds_publisher->create_datawriter(
+        topic, datawriter_qos, NULL, OpenDDS::DCPS::NO_STATUS_MASK);
+      if (!topic_writer) {
+        throw std::string("failed to create datawriter");
+      }
+
+      // Allocate memory for the OpenDDSStaticPublisherInfo object.
+      info_buf = rmw_allocate(sizeof(OpenDDSStaticPublisherInfo));
+      if (!info_buf) {
+        throw std::string("failed to allocate memory for publisher info");
+      }
+      // Use a placement new to construct the OpenDDSStaticPublisherInfo in the preallocated buffer.
+      RMW_TRY_PLACEMENT_NEW(publisher_info, info_buf, throw std::string("Constructing OpenDDSStaticPublisherInfo failed"), OpenDDSStaticPublisherInfo, )
+        info_buf = nullptr;  // Only free the publisher_info pointer; don't need the buf pointer anymore.
+      publisher_info->dds_publisher_ = dds_publisher;
+      publisher_info->topic_writer_ = topic_writer;
+      publisher_info->callbacks_ = callbacks;
+      publisher_info->publisher_gid.implementation_identifier = opendds_identifier;
+      publisher_info->listener_ = publisher_listener;
+      publisher_listener = nullptr;
+      static_assert(
+        sizeof(OpenDDSPublisherGID) <= RMW_GID_STORAGE_SIZE,
+        "RMW_GID_STORAGE_SIZE insufficient to store the rmw_opendds_cpp GID implemenation."
+        );
+      // Zero the data memory.
+      memset(publisher_info->publisher_gid.data, 0, RMW_GID_STORAGE_SIZE);
+      {
+        auto publisher_gid =
+          reinterpret_cast<OpenDDSPublisherGID*>(publisher_info->publisher_gid.data);
+        publisher_gid->publication_handle = topic_writer->get_instance_handle();
+      }
+      publisher_info->publisher_gid.implementation_identifier = opendds_identifier;
+
+      publisher->implementation_identifier = opendds_identifier;
+      publisher->data = publisher_info;
+      publisher->topic_name = reinterpret_cast<const char*>(rmw_allocate(strlen(topic_name) + 1));
+      if (!publisher->topic_name) {
+        throw std::string("failed to allocate memory for node name");
+      }
+      memcpy(const_cast<char*>(publisher->topic_name), topic_name, strlen(topic_name) + 1);
+
+      if (!qos_policies->avoid_ros_namespace_conventions) {
+        mangled_name =
+          topic_writer->get_topic()->get_name();
+      }
+      else {
+        mangled_name = topic_name;
+      }
+      node_info->publisher_listener->add_information(
+        node_info->participant->get_instance_handle(),
+        dds_publisher->get_instance_handle(),
+        mangled_name,
+        type_name,
+        EntityType::Publisher);
+      node_info->publisher_listener->trigger_graph_guard_condition();
+
+      // TODO: Log created publisher details: topic and address (?)
+
+      return publisher;
+    }
+    catch (const std::string& sError) {
+      RMW_SET_ERROR_MSG("sError");
+      throw;
+    }
+  }
+  catch (...) {
+    if (topic_str) {
+      CORBA::string_free(topic_str);
+      topic_str = nullptr;
+    }
+    if (publisher) {
+      rmw_publisher_free(publisher);
+    }
+    if (publisher_listener) {
+      RMW_TRY_DESTRUCTOR_FROM_WITHIN_FAILURE(
+        publisher_listener->~OpenDDSPublisherListener(), OpenDDSPublisherListener)
+        rmw_free(publisher_listener);
+    }
+    if (publisher_info) {
+      if (publisher_info->listener_) {
+        RMW_TRY_DESTRUCTOR_FROM_WITHIN_FAILURE(
+          publisher_info->listener_->~OpenDDSPublisherListener(), OpenDDSPublisherListener)
+          rmw_free(publisher_info->listener_);
+      }
+      RMW_TRY_DESTRUCTOR_FROM_WITHIN_FAILURE(
+        publisher_info->~OpenDDSStaticPublisherInfo(), OpenDDSStaticPublisherInfo)
+        rmw_free(publisher_info);
+    }
+    if (info_buf) {
+      rmw_free(info_buf);
+    }
+    if (listener_buf) {
+      rmw_free(listener_buf);
+    }
+
+    return NULL;
+  }
 }
 
 rmw_ret_t
@@ -371,24 +339,24 @@ rmw_publisher_get_actual_qos(
   RMW_CHECK_ARGUMENT_FOR_NULL(publisher, RMW_RET_INVALID_ARGUMENT);
   RMW_CHECK_ARGUMENT_FOR_NULL(qos, RMW_RET_INVALID_ARGUMENT);
 
-  //auto info = static_cast<ConnextStaticPublisherInfo *>(publisher->data);
-  //if (!info) {
-  //  RMW_SET_ERROR_MSG("publisher internal data is invalid");
-  //  return RMW_RET_ERROR;
-  //}
-  //DDS::DataWriter * data_writer = info->topic_writer_;
-  //if (!data_writer) {
-  //  RMW_SET_ERROR_MSG("publisher internal data writer is invalid");
-  //  return RMW_RET_ERROR;
-  //}
-  //DDS::DataWriterQos dds_qos;
-  //DDS::ReturnCode_t status = data_writer->get_qos(dds_qos);
-  //if (DDS::RETCODE_OK != status) {
-  //  RMW_SET_ERROR_MSG("publisher can't get data writer qos policies");
-  //  return RMW_RET_ERROR;
-  //}
+  auto info = static_cast<OpenDDSStaticPublisherInfo*>(publisher->data);
+  if (!info) {
+    RMW_SET_ERROR_MSG("publisher internal data is invalid");
+    return RMW_RET_ERROR;
+  }
+  DDS::DataWriter_var data_writer = info->topic_writer_;
+  if (!data_writer) {
+    RMW_SET_ERROR_MSG("publisher internal data writer is invalid");
+    return RMW_RET_ERROR;
+  }
+  DDS::DataWriterQos dds_qos;
+  DDS::ReturnCode_t status = data_writer->get_qos(dds_qos);
+  if (DDS::RETCODE_OK != status) {
+    RMW_SET_ERROR_MSG("publisher can't get data writer qos policies");
+    return RMW_RET_ERROR;
+  }
 
-  //dds_qos_to_rmw_qos(dds_qos, qos);
+  dds_qos_to_rmw_qos(dds_qos, qos);
 
   return RMW_RET_OK;
 }
@@ -481,25 +449,25 @@ rmw_destroy_publisher(rmw_node_t * node, rmw_publisher_t * publisher)
     node_info->publisher_listener->remove_information(
       publisher_info->dds_publisher_->get_instance_handle(), EntityType::Publisher);
     node_info->publisher_listener->trigger_graph_guard_condition();
-    DDS::Publisher * dds_publisher = publisher_info->dds_publisher_;
+    //DDS::Publisher * dds_publisher = publisher_info->dds_publisher_;
 
-    if (dds_publisher) {
-      if (publisher_info->topic_writer_) {
-        if (dds_publisher->delete_datawriter(publisher_info->topic_writer_) != DDS::RETCODE_OK) {
-          RMW_SET_ERROR_MSG("failed to delete datawriter");
-          return RMW_RET_ERROR;
-        }
-        publisher_info->topic_writer_ = nullptr;
-      }
-      if (participant->delete_publisher(dds_publisher) != DDS::RETCODE_OK) {
-        RMW_SET_ERROR_MSG("failed to delete publisher");
-        return RMW_RET_ERROR;
-      }
-      publisher_info->dds_publisher_ = nullptr;
-    } else if (publisher_info->topic_writer_) {
-      RMW_SET_ERROR_MSG("cannot delete datawriter because the publisher is null");
-      return RMW_RET_ERROR;
-    }
+    //if (dds_publisher) {
+    //  if (publisher_info->topic_writer_) {
+    //    if (dds_publisher->delete_datawriter(publisher_info->topic_writer_) != DDS::RETCODE_OK) {
+    //      RMW_SET_ERROR_MSG("failed to delete datawriter");
+    //      return RMW_RET_ERROR;
+    //    }
+    //    publisher_info->topic_writer_ = nullptr;
+    //  }
+    //  if (participant->delete_publisher(dds_publisher) != DDS::RETCODE_OK) {
+    //    RMW_SET_ERROR_MSG("failed to delete publisher");
+    //    return RMW_RET_ERROR;
+    //  }
+    //  publisher_info->dds_publisher_ = nullptr;
+    //} else if (publisher_info->topic_writer_) {
+    //  RMW_SET_ERROR_MSG("cannot delete datawriter because the publisher is null");
+    //  return RMW_RET_ERROR;
+    //}
 
     OpenDDSPublisherListener * pub_listener = publisher_info->listener_;
     if (pub_listener) {

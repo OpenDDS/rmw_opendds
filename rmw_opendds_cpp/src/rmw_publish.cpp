@@ -21,8 +21,10 @@
 #include "rmw_opendds_cpp/opendds_static_publisher_info.hpp"
 #include "rmw_opendds_cpp/identifier.hpp"
 
-// include patched generated code from the build folder
+#include "dds/DCPS/DataWriterImpl.h"
 #include "opendds_static_serialized_dataTypeSupportC.h"
+
+#include <ace/Message_Block.h>
 
 bool
 publish(DDS::DataWriter * dds_data_writer, const rcutils_uint8_array_t * cdr_stream)
@@ -34,38 +36,32 @@ publish(DDS::DataWriter * dds_data_writer, const rcutils_uint8_array_t * cdr_str
     return false;
   }
 
-  //OpenDDSStaticSerializedData* instance = OpenDDSStaticSerializedDataTypeSupport::create_data();
-  //if (!instance) {
-  //  RMW_SET_ERROR_MSG("failed to create dds message instance");
-  //  return false;
-  //}
-
-  DDS::ReturnCode_t status = DDS::RETCODE_ERROR;
-
-  //instance->serialized_data.maximum(0);
   if (cdr_stream->buffer_length > (std::numeric_limits<CORBA::Long>::max)()) {
     RMW_SET_ERROR_MSG("cdr_stream->buffer_length unexpectedly larger than DDS_Long's max value");
     return false;
   }
-  //if (!instance->serialized_data.loan_contiguous(
-  //    reinterpret_cast<CORBA::Octet *>(cdr_stream->buffer),
-  //    static_cast<CORBA::Long>(cdr_stream->buffer_length),
-  //    static_cast<CORBA::Long>(cdr_stream->buffer_length)))
-  //{
-  //  RMW_SET_ERROR_MSG("failed to loan memory for message");
-  //  goto cleanup;
-  //}
 
-  //status = data_writer->write(*instance, DDS::HANDLE_NIL);
+  OpenDDSStaticSerializedData_var instance = new OpenDDSStaticSerializedData();
 
-cleanup:
-  //if (instance) {
-  //  if (!instance->serialized_data.unloan()) {
-  //    fprintf(stderr, "failed to return loaned memory\n");
-  //    status = DDS::RETCODE_ERROR;
-  //  }
-  //  OpenDDSStaticSerializedDataTypeSupport::delete_data(instance);
-  //}
+  // TODO: This implementation may be  temporary until typesupport is finalized
+
+  // Populate instance
+  instance->serialized_data.length(static_cast<CORBA::ULong>(cdr_stream->buffer_length));
+  std::memcpy(instance->serialized_data.get_buffer(), cdr_stream->buffer, cdr_stream->buffer_length);
+
+  OpenDDS::DCPS::DataWriterImpl* writer
+    = dynamic_cast<OpenDDS::DCPS::DataWriterImpl*>(dds_data_writer);
+
+  OpenDDS::DCPS::Message_Block_Ptr data(new ACE_Message_Block(KEY_HASH_LENGTH_16, ACE_Message_Block::MB_DATA, 0, 0, 0, 0));
+  OpenDDS::DCPS::Serializer ser(data.get());
+  ser << writer->get_publication_id();
+
+  instance->serialized_key.length(KEY_HASH_LENGTH_16);
+  std::memcpy(instance->serialized_key.get_buffer(), data.get(), KEY_HASH_LENGTH_16);
+
+  std::memcpy(instance->key_hash, data.get(), KEY_HASH_LENGTH_16);
+
+  DDS::ReturnCode_t status = data_writer->write(*instance, DDS::HANDLE_NIL);
 
   return status == DDS::RETCODE_OK;
 }
@@ -102,7 +98,7 @@ rmw_publish(
     RMW_SET_ERROR_MSG("callbacks handle is null");
     return RMW_RET_ERROR;
   }
-  DDS::DataWriter * topic_writer = publisher_info->topic_writer_;
+  DDS::DataWriter_var topic_writer = publisher_info->topic_writer_;
   if (!topic_writer) {
     RMW_SET_ERROR_MSG("topic writer handle is null");
     return RMW_RET_ERROR;
@@ -168,7 +164,7 @@ rmw_publish_serialized_message(
     RMW_SET_ERROR_MSG("callbacks handle is null");
     return RMW_RET_ERROR;
   }
-  DDS::DataWriter * topic_writer = publisher_info->topic_writer_;
+  DDS::DataWriter_var topic_writer = publisher_info->topic_writer_;
   if (!topic_writer) {
     RMW_SET_ERROR_MSG("topic writer handle is null");
     return RMW_RET_ERROR;
