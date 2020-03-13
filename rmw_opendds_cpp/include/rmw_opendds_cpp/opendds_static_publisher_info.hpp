@@ -27,9 +27,9 @@ extern "C"
 {
 struct OpenDDSStaticPublisherInfo
 {
-  DDS::Publisher * dds_publisher_;
+  DDS::Publisher_var dds_publisher_;
   OpenDDSPublisherListener * listener_;
-  DDS::DataWriter * topic_writer_;
+  DDS::DataWriter_var topic_writer_;
   const message_type_support_callbacks_t * callbacks_;
   rmw_gid_t publisher_gid;
 };
@@ -48,6 +48,36 @@ public:
   std::size_t current_count() const
   {
     return current_count_;
+  }
+
+  void on_offered_deadline_missed(
+    ::DDS::DataWriter_ptr writer,
+    const ::DDS::OfferedDeadlineMissedStatus& status
+  )
+  {
+    ACE_UNUSED_ARG(writer);
+    ACE_UNUSED_ARG(status);
+    // Add your implementation here
+  }
+
+  void on_offered_incompatible_qos(
+    ::DDS::DataWriter_ptr writer,
+    const ::DDS::OfferedIncompatibleQosStatus& status
+  )
+  {
+    ACE_UNUSED_ARG(writer);
+    ACE_UNUSED_ARG(status);
+    // Add your implementation here
+  }
+
+  void on_liveliness_lost(
+    ::DDS::DataWriter_ptr writer,
+    const ::DDS::LivelinessLostStatus& status
+  )
+  {
+    ACE_UNUSED_ARG(writer);
+    ACE_UNUSED_ARG(status);
+    // Add your implementation here
   }
 
 private:

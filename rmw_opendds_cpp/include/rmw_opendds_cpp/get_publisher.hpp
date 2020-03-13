@@ -30,7 +30,7 @@ namespace rmw_opendds_cpp
  * \return native OpenDDS data writer handle if successful, otherwise `NULL`
  */
 RMW_OPENDDS_CPP_PUBLIC
-DDS::DataWriter *
+DDS::DataWriter_var
 get_data_writer(rmw_publisher_t * publisher);
 
 }  // namespace rmw_opendds_cpp
