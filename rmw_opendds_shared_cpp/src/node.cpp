@@ -355,13 +355,14 @@ node_get_graph_guard_condition(const rmw_node_t * node)
 
 RMW_OPENDDS_SHARED_CPP_PUBLIC
 rmw_ret_t
-node_assert_liveliness(const char * implementation_identifier, const rmw_node_t * node)
+node_assert_liveliness(const rmw_node_t * node)
 {
   RMW_CHECK_ARGUMENT_FOR_NULL(node, RMW_RET_INVALID_ARGUMENT);
+  RMW_CHECK_ARGUMENT_FOR_NULL(node->implementation_identifier, RMW_RET_INVALID_ARGUMENT);
   RMW_CHECK_TYPE_IDENTIFIERS_MATCH(
     node handle,
     node->implementation_identifier,
-    implementation_identifier,
+    opendds_identifier,
     return RMW_RET_INCORRECT_RMW_IMPLEMENTATION)
 
   auto node_info = static_cast<OpenDDSNodeInfo *>(node->data);
