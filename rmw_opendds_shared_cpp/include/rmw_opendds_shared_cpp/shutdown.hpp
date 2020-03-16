@@ -12,18 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "rmw_opendds_shared_cpp/init.hpp"
-#include "rmw/error_handling.h"
-#include "dds/DCPS/Service_Participant.h"
+#ifndef RMW_OPENDDS_SHARED_CPP__SHUTDOWN_HPP_
+#define RMW_OPENDDS_SHARED_CPP__SHUTDOWN_HPP_
 
-rmw_ret_t
-init()
-{
-  DDS::DomainParticipantFactory * dpf_ = TheParticipantFactory;
-  if (!dpf_) {
-    RMW_SET_ERROR_MSG("failed to get participant factory");
-    return RMW_RET_ERROR;
-  }
-  TheServiceParticipant->set_default_discovery(OpenDDS::DCPS::Discovery::DEFAULT_RTPS);
-  return RMW_RET_OK;
-}
+#include "rmw/types.h"
+
+#include "rmw_opendds_shared_cpp/visibility_control.h"
+
+RMW_OPENDDS_SHARED_CPP_PUBLIC
+rmw_ret_t shutdown();
+
+#endif  // RMW_OPENDDS_SHARED_CPP__SHUTDOWN_HPP_
