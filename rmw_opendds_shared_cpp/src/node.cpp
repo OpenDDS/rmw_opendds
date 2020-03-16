@@ -357,14 +357,6 @@ RMW_OPENDDS_SHARED_CPP_PUBLIC
 rmw_ret_t
 node_assert_liveliness(const rmw_node_t * node)
 {
-  RMW_CHECK_ARGUMENT_FOR_NULL(node, RMW_RET_INVALID_ARGUMENT);
-  RMW_CHECK_ARGUMENT_FOR_NULL(node->implementation_identifier, RMW_RET_INVALID_ARGUMENT);
-  RMW_CHECK_TYPE_IDENTIFIERS_MATCH(
-    node handle,
-    node->implementation_identifier,
-    opendds_identifier,
-    return RMW_RET_INCORRECT_RMW_IMPLEMENTATION)
-
   auto node_info = static_cast<OpenDDSNodeInfo *>(node->data);
   if (nullptr == node_info) {
     RMW_SET_ERROR_MSG("node info is null");
