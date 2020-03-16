@@ -90,7 +90,7 @@ _create_type_name(
   const std::string & sep)
 {
   return
-    std::string(callbacks->package_name) +
+    std::string(callbacks->message_namespace) +
     "::" + sep + "::dds_::" + callbacks->message_name + "_";
 }
 
