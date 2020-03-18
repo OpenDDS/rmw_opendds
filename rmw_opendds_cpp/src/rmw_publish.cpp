@@ -21,20 +21,24 @@
 #include "rmw_opendds_cpp/opendds_static_publisher_info.hpp"
 #include "rmw_opendds_cpp/identifier.hpp"
 
-//#include "dds/DCPS/DataWriterImpl.h"
-#include <dds/DdsDcpsGuidC.h>
-#include <dds/DCPS/RepoIdBuilder.h>
+#include "dds/DCPS/DataWriterImpl.h"
 #include "opendds_static_serialized_dataTypeSupportC.h"
 
 #include <ace/Message_Block.h>
 
-OpenDDS::DCPS::RepoId createID(long participantId, long key, CORBA::Octet kind) {
-  OpenDDS::DCPS::RepoIdBuilder idBd;
-  idBd.federationId(0x12345678);     // guidPrefix1
-  idBd.participantId(participantId); // guidPrefix2
-  idBd.entityKey(key);
-  idBd.entityKind(kind);
-  return idBd;
+bool set_key(OpenDDSStaticSerializedData & instance, DDS::DataWriter * dds_data_writer) {
+  OpenDDS::DCPS::DataWriterImpl* dwImpl = dynamic_cast<OpenDDS::DCPS::DataWriterImpl*>(dds_data_writer);
+  if (!dwImpl) {
+    RMW_SET_ERROR_MSG("failed to cast dds_data_writer to DataWriterImpl");
+    return false;
+  }
+  OpenDDS::DCPS::Message_Block_Ptr key(new ACE_Message_Block(KEY_HASH_LENGTH_16, ACE_Message_Block::MB_DATA, 0, 0, 0, 0));
+  OpenDDS::DCPS::Serializer ser(key.get());
+  ser << dwImpl->get_publication_id();
+  instance.serialized_key.length(KEY_HASH_LENGTH_16);
+  std::memcpy(instance.key_hash, key.get(), KEY_HASH_LENGTH_16);
+  std::memcpy(instance.serialized_key.get_buffer(), key.get(), KEY_HASH_LENGTH_16);
+  return true;
 }
 
 bool
@@ -52,14 +56,10 @@ publish(DDS::DataWriter * dds_data_writer, const rcutils_uint8_array_t * cdr_str
   }
 
   OpenDDSStaticSerializedData instance;
-  // TODO: This implementation is temporary until typesupport is finalized.
-  // Populate instance
-  // Since OpenDDSStaticSerializedDataDataWriter is not a DataWriterImpl, a fake id is used here for testing.
-  OpenDDS::DCPS::RepoId id = createID(0x11111111, 0x123456, OpenDDS::DCPS::ENTITYKIND_USER_WRITER_WITH_KEY);
-  instance.serialized_key.length(KEY_HASH_LENGTH_16);
+  if (!set_key(instance, dds_data_writer)) {
+    return false;
+  }
   instance.serialized_data.length(static_cast<CORBA::ULong>(cdr_stream->buffer_length));
-  std::memcpy(instance.key_hash, &id, KEY_HASH_LENGTH_16);
-  std::memcpy(instance.serialized_key.get_buffer(), &id, KEY_HASH_LENGTH_16);
   std::memcpy(instance.serialized_data.get_buffer(), cdr_stream->buffer, cdr_stream->buffer_length);
 
   DDS::ReturnCode_t status = writer->write(instance, DDS::HANDLE_NIL);
