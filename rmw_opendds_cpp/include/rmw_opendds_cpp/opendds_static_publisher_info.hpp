@@ -32,6 +32,12 @@ struct OpenDDSStaticPublisherInfo
   DDS::DataWriter_var topic_writer_;
   const message_type_support_callbacks_t * callbacks_;
   rmw_gid_t publisher_gid;
+  OpenDDSStaticPublisherInfo() :
+    dds_publisher_(),
+    listener_(nullptr),
+    topic_writer_(),
+    callbacks_(nullptr),
+    publisher_gid() {}
 };
 }  // extern "C"
 
