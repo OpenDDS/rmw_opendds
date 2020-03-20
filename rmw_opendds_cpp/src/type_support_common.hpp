@@ -55,6 +55,23 @@
     } \
   }
 
+inline const rosidl_message_type_support_t *
+rmw_get_message_type_support(const rosidl_message_type_support_t * type_support)
+{
+  if (!type_support) {
+    RMW_SET_ERROR_MSG("type support is null");
+    return nullptr;
+  }
+  const rosidl_message_type_support_t * ts =
+    //get_message_typesupport_handle(type_support, rosidl_typesupport_opendds_cpp::typesupport_identifier);
+    get_message_typesupport_handle(type_support, "rosidl_typesupport_c"); //for temporary testing
+  if (!ts) {
+    RMW_SET_ERROR_MSG_WITH_FORMAT_STRING("type support implementation '%s' does not match '%s'",
+      type_support->typesupport_identifier, rosidl_typesupport_opendds_cpp::typesupport_identifier);
+  }
+  return ts;
+}
+
 #define RMW_OPENDDS_EXTRACT_SERVICE_TYPESUPPORT(TYPE_SUPPORTS, TYPE_SUPPORT, RET_VAL) \
   if (!TYPE_SUPPORTS) { \
     RMW_SET_ERROR_MSG("type supports handle is null"); \
