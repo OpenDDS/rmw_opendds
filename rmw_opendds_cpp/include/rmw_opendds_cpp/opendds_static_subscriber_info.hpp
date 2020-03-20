@@ -27,10 +27,10 @@ extern "C"
 {
 struct OpenDDSStaticSubscriberInfo
 {
-  DDS::Subscriber * dds_subscriber_;
+  DDS::Subscriber_var dds_subscriber_;
   OpenDDSSubscriberListener * listener_;
-  DDS::DataReader * topic_reader_;
-  DDS::ReadCondition * read_condition_;
+  DDS::DataReader_var topic_reader_;
+  DDS::ReadCondition_var read_condition_;
   bool ignore_local_publications;
   const message_type_support_callbacks_t * callbacks_;
 };
@@ -49,6 +49,53 @@ public:
   std::size_t current_count() const
   {
     return current_count_;
+  }
+
+  void on_data_available(DDS::DataReader_ptr /*reader*/)
+  {
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: on_data_available()\n")));
+  }
+
+  void on_requested_deadline_missed(
+    DDS::DataReader_ptr,
+    const DDS::RequestedDeadlineMissedStatus&)
+  {
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: on_requested_deadline_missed()\n")));
+  }
+
+  void on_requested_incompatible_qos(
+    DDS::DataReader_ptr,
+    const DDS::RequestedIncompatibleQosStatus&)
+  {
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: on_requested_incompatible_qos()\n")));
+  }
+
+  void on_liveliness_changed(
+    DDS::DataReader_ptr,
+    const DDS::LivelinessChangedStatus&)
+  {
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: on_liveliness_changed()\n")));
+  }
+
+  void on_sample_rejected(
+    DDS::DataReader_ptr,
+    const DDS::SampleRejectedStatus&)
+  {
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: on_sample_rejected()\n")));
+  }
+
+  void on_sample_lost(
+    DDS::DataReader_ptr,
+    const DDS::SampleLostStatus&)
+  {
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: on_sample_lost()\n")));
+  }
+
+  void on_data_on_readers(
+    DDS::Subscriber_ptr
+  )
+  {
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: on_data_on_readers()\n")));
   }
 
 private:
