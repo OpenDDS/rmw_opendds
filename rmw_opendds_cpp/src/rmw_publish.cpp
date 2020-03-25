@@ -32,19 +32,17 @@ bool set_key(OpenDDSStaticSerializedData & instance, DDS::DataWriter * dds_data_
     RMW_SET_ERROR_MSG("failed to cast dds_data_writer to DataWriterImpl");
     return false;
   }
-  OpenDDS::DCPS::Message_Block_Ptr key(new ACE_Message_Block(KEY_HASH_LENGTH_16, ACE_Message_Block::MB_DATA, 0, 0, 0, 0));
-  OpenDDS::DCPS::Serializer ser(key.get());
-  ser << dwImpl->get_publication_id();
+  OpenDDS::DCPS::RepoId id = dwImpl->get_publication_id();
+  std::memcpy(instance.key_hash, &id, KEY_HASH_LENGTH_16);
   instance.serialized_key.length(KEY_HASH_LENGTH_16);
-  std::memcpy(instance.key_hash, key.get(), KEY_HASH_LENGTH_16);
-  std::memcpy(instance.serialized_key.get_buffer(), key.get(), KEY_HASH_LENGTH_16);
+  std::memcpy(instance.serialized_key.get_buffer(), &id, KEY_HASH_LENGTH_16);
   return true;
 }
 
 bool
 publish(DDS::DataWriter * dds_data_writer, const rcutils_uint8_array_t * cdr_stream)
 {
-  OpenDDSStaticSerializedDataDataWriter * writer = OpenDDSStaticSerializedDataDataWriter::_narrow(dds_data_writer);
+  OpenDDSStaticSerializedDataDataWriter_var writer = OpenDDSStaticSerializedDataDataWriter::_narrow(dds_data_writer);
   if (!writer) {
     RMW_SET_ERROR_MSG("failed to narrow data writer");
     return false;

@@ -336,7 +336,7 @@ rmw_take_loaned_message(
   (void) taken;
   (void) allocation;
 
-  RMW_SET_ERROR_MSG("rmw_take_loaned_message not implemented for rmw_connext_cpp");
+  RMW_SET_ERROR_MSG("rmw_take_loaned_message not implemented for rmw_opendds_cpp");
   return RMW_RET_UNSUPPORTED;
 }
 
@@ -354,7 +354,7 @@ rmw_take_loaned_message_with_info(
   (void) message_info;
   (void) allocation;
 
-  RMW_SET_ERROR_MSG("rmw_take_loaned_message_with_info not implemented for rmw_connext_cpp");
+  RMW_SET_ERROR_MSG("rmw_take_loaned_message_with_info not implemented for rmw_opendds_cpp");
   return RMW_RET_UNSUPPORTED;
 }
 
@@ -367,7 +367,7 @@ rmw_return_loaned_message_from_subscription(
   (void) loaned_message;
 
   RMW_SET_ERROR_MSG(
-    "rmw_release_loaned_message not implemented for rmw_connext_cpp");
+    "rmw_return_loaned_message_from_subscription not implemented for rmw_opendds_cpp");
   return RMW_RET_UNSUPPORTED;
 }
 }  // extern "C"

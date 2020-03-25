@@ -38,6 +38,8 @@
 //   rmw_opendds_shared_cpp/shared_functions.cpp
 // #define DISCOVERY_DEBUG_LOGGING 1
 
+#include <dds/DCPS/Marked_Default_Qos.h>
+
 extern "C"
 {
 rmw_ret_t
@@ -117,7 +119,6 @@ rmw_create_publisher(
     return NULL;
   }
 
-//RMW_OPENDDS_EXTRACT_MESSAGE_TYPESUPPORT(type_supports, type_support, NULL)
   auto type_support = rmw_get_message_type_support(type_supports);
   if (!type_support) {
     return NULL;
@@ -149,7 +150,6 @@ rmw_create_publisher(
 
   rmw_publisher_t * publisher = nullptr;
   void * buf = nullptr;
-  char * topic_str = nullptr;
   try {
     // create rmw_publisher_t
     publisher = rmw_publisher_allocate();
@@ -178,12 +178,6 @@ rmw_create_publisher(
     publisher->data = publisher_info;
     buf = nullptr;
 
-    DDS::PublisherQos publisher_qos;
-    DDS::ReturnCode_t status = participant->get_default_publisher_qos(publisher_qos);
-    if (status != DDS::RETCODE_OK) {
-      throw std::string("failed to get default publisher qos");
-    }
-
     // create OpenDDSPublisherListener
     buf = rmw_allocate(sizeof(OpenDDSPublisherListener));
     if (!buf) {
@@ -194,38 +188,31 @@ rmw_create_publisher(
 
     // create DDS::Publisher
     publisher_info->dds_publisher_ = participant->create_publisher(
-      publisher_qos, publisher_info->listener_, DDS::PUBLICATION_MATCHED_STATUS);
+      PUBLISHER_QOS_DEFAULT, publisher_info->listener_, DDS::PUBLICATION_MATCHED_STATUS);
     if (!publisher_info->dds_publisher_) {
       throw std::string("failed to create publisher");
     }
 
-    // create or find DDS::Topic
+    // find or create DDS::Topic
     DDS::Topic_var topic;
-    if (!_process_topic_name(topic_name, qos_policies->avoid_ros_namespace_conventions, &topic_str)) {
+    CORBA::String_var topic_str;
+    if (!_process_topic_name(topic_name, qos_policies->avoid_ros_namespace_conventions, &topic_str.out())) {
       throw std::string("failed to allocate memory for topic_str");
     }
-    DDS::TopicDescription_var topic_description = participant->lookup_topicdescription(topic_str);
     std::string type_name = _create_type_name(callbacks, "msg");
-    if (!topic_description) {
-      DDS::TopicQos qos;
-      status = participant->get_default_topic_qos(qos);
-      if (status != DDS::RETCODE_OK) {
-        throw std::string("failed to get default topic qos");
+    DDS::TopicDescription_var topic_description = participant->lookup_topicdescription(topic_str.in());
+    if (topic_description) {
+      DDS::Duration_t timeout = { 0, 0 };
+      topic = participant->find_topic(topic_str.in(), timeout);
+      if (!topic) {
+        throw std::string("failed to find topic");
       }
-      topic = participant->create_topic(topic_str, type_name.c_str(), qos, NULL, OpenDDS::DCPS::NO_STATUS_MASK);
+    } else {
+      topic = participant->create_topic(topic_str.in(), type_name.c_str(), TOPIC_QOS_DEFAULT, NULL, OpenDDS::DCPS::NO_STATUS_MASK);
       if (!topic) {
         throw std::string("failed to create topic");
       }
     }
-    else {
-      DDS::Duration_t timeout = { 0, 0 };
-      topic = participant->find_topic(topic_str, timeout);
-      if (!topic) {
-        throw std::string("failed to find topic");
-      }
-    }
-    CORBA::string_free(topic_str);
-    topic_str = nullptr;
 
     // create DDS::DataWriter
     DDS::DataWriterQos datawriter_qos;
@@ -250,8 +237,19 @@ rmw_create_publisher(
     }
 
     // update node_info
-    std::string mangled_name = qos_policies->avoid_ros_namespace_conventions ?
-      topic_name : publisher_info->topic_writer_->get_topic()->get_name();
+    std::string mangled_name;
+    if (qos_policies->avoid_ros_namespace_conventions) {
+      mangled_name = topic_name;
+    } else {
+      DDS::Topic_var topic = publisher_info->topic_writer_->get_topic();
+      if (topic) {
+        CORBA::String_var name = topic->get_name();
+        if (name) { mangled_name = *name; }
+      }
+      if (mangled_name.empty()) {
+        throw std::string("failed to get topic name");
+      }
+    }
     node_info->publisher_listener->add_information(participant->get_instance_handle(),
       publisher_info->dds_publisher_->get_instance_handle(), mangled_name, type_name, EntityType::Publisher);
     node_info->publisher_listener->trigger_graph_guard_condition();
@@ -269,10 +267,6 @@ rmw_create_publisher(
   clean_publisher(publisher);
   if (buf) {
     rmw_free(buf);
-  }
-  if (topic_str) {
-    CORBA::string_free(topic_str);
-    topic_str = nullptr;
   }
   return nullptr;
 }
@@ -370,7 +364,7 @@ rmw_borrow_loaned_message(
   (void) type_support;
   (void) ros_message;
 
-  RMW_SET_ERROR_MSG("rmw_borrow_loaned_message not implemented for rmw_connext_cpp");
+  RMW_SET_ERROR_MSG("rmw_borrow_loaned_message not implemented for rmw_opendds_cpp");
   return RMW_RET_UNSUPPORTED;
 }
 
@@ -383,7 +377,7 @@ rmw_return_loaned_message_from_publisher(
   (void) loaned_message;
 
   RMW_SET_ERROR_MSG(
-    "rmw_return_loaned_message_from_publisher not implemented for rmw_connext_cpp");
+    "rmw_return_loaned_message_from_publisher not implemented for rmw_opendds_cpp");
   return RMW_RET_UNSUPPORTED;
 }
 
