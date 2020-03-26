@@ -35,7 +35,7 @@ get_datareader_qos(
 RMW_OPENDDS_SHARED_CPP_PUBLIC
 bool
 get_datawriter_qos(
-  DDS::DomainParticipant * participant,
+  DDS::Publisher * publisher,
   const rmw_qos_profile_t & qos_profile,
   DDS::DataWriterQos & datawriter_qos);
 

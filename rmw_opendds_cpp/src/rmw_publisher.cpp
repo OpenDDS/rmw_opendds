@@ -119,34 +119,37 @@ rmw_create_publisher(
     return NULL;
   }
 
+  // message type support
   auto type_support = rmw_get_message_type_support(type_supports);
   if (!type_support) {
     return NULL;
   }
-
-  const message_type_support_callbacks_t * callbacks =
-    static_cast<const message_type_support_callbacks_t *>(type_support->data);
+  auto callbacks = static_cast<const message_type_support_callbacks_t*>(type_support->data);
   if (!callbacks) {
     RMW_SET_ERROR_MSG("callbacks handle is null");
     return NULL;
   }
-
-  // TODO: Register TypeSupport here ????????????????????????
   OpenDDSStaticSerializedDataTypeSupport_var ts = new OpenDDSStaticSerializedDataTypeSupportImpl();
   if (ts->register_type(participant, "") != DDS::RETCODE_OK) {
     RMW_SET_ERROR_MSG("failed to register OpenDDS type");
     return NULL;
   }
+  //std::string type_name = _create_type_name(callbacks, "msg"); //?? revisit
+  CORBA::String_var type_name = ts->get_type_name();
 
   if (!topic_name || strlen(topic_name) == 0) {
     RMW_SET_ERROR_MSG("publisher topic_name is null or empty");
     return NULL;
   }
-
   if (!qos_policies) {
     RMW_SET_ERROR_MSG("qos_policies is null");
     return NULL;
   }
+  CORBA::String_var topic_str;
+  if (!_process_topic_name(topic_name, qos_policies->avoid_ros_namespace_conventions, &topic_str.out())) {
+    throw std::string("failed to allocate memory for topic_str");
+  }
+  std::cout << "type_name[" << type_name << "], topic_name[" << topic_name << "], topic_str[" << topic_str << "]\n"; //??
 
   rmw_publisher_t * publisher = nullptr;
   void * buf = nullptr;
@@ -195,11 +198,6 @@ rmw_create_publisher(
 
     // find or create DDS::Topic
     DDS::Topic_var topic;
-    CORBA::String_var topic_str;
-    if (!_process_topic_name(topic_name, qos_policies->avoid_ros_namespace_conventions, &topic_str.out())) {
-      throw std::string("failed to allocate memory for topic_str");
-    }
-    std::string type_name = _create_type_name(callbacks, "msg");
     DDS::TopicDescription_var topic_description = participant->lookup_topicdescription(topic_str.in());
     if (topic_description) {
       DDS::Duration_t timeout = { 0, 0 };
@@ -208,7 +206,7 @@ rmw_create_publisher(
         throw std::string("failed to find topic");
       }
     } else {
-      topic = participant->create_topic(topic_str.in(), type_name.c_str(), TOPIC_QOS_DEFAULT, NULL, OpenDDS::DCPS::NO_STATUS_MASK);
+      topic = participant->create_topic(topic_str.in(), type_name, TOPIC_QOS_DEFAULT, NULL, OpenDDS::DCPS::NO_STATUS_MASK);
       if (!topic) {
         throw std::string("failed to create topic");
       }
@@ -216,8 +214,7 @@ rmw_create_publisher(
 
     // create DDS::DataWriter
     DDS::DataWriterQos datawriter_qos;
-    if (!get_datawriter_qos(participant, *qos_policies, datawriter_qos)) {
-      // specific error was set within the function
+    if (!get_datawriter_qos(publisher_info->dds_publisher_.in(), *qos_policies, datawriter_qos)) {
       throw std::string("get_datawriter_qos failed");
     }
     publisher_info->topic_writer_ = publisher_info->dds_publisher_->create_datawriter(
@@ -251,10 +248,8 @@ rmw_create_publisher(
       }
     }
     node_info->publisher_listener->add_information(participant->get_instance_handle(),
-      publisher_info->dds_publisher_->get_instance_handle(), mangled_name, type_name, EntityType::Publisher);
+      publisher_info->dds_publisher_->get_instance_handle(), mangled_name, std::string(type_name), EntityType::Publisher);
     node_info->publisher_listener->trigger_graph_guard_condition();
-
-    // TODO: Log created publisher details: topic and address (?)
 
     return publisher;
 

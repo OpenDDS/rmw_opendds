@@ -31,25 +31,14 @@ _process_topic_name(
 {
   bool success = true;
   rcutils_allocator_t allocator = rcutils_get_default_allocator();
-
-  const char * topic_prefix = "";
-  char * concat_str = nullptr;
-
-  if (!avoid_ros_namespace_conventions) {
-    topic_prefix = ros_topic_prefix;
-  }
-
-  concat_str = rcutils_format_string(allocator, "%s%s", topic_prefix, topic_name);
-  if (!concat_str) {
+  const char * topic_prefix = avoid_ros_namespace_conventions ? "" : ros_topic_prefix;
+  char * concat_str = rcutils_format_string(allocator, "%s%s", topic_prefix, topic_name);
+  if (concat_str) {
+    *topic_str = CORBA::string_dup(concat_str);
+    allocator.deallocate(concat_str, allocator.state);
+  } else {
     RMW_SET_ERROR_MSG("could not allocate memory for topic string");
     success = false;
-    goto end;
-  }
-  *topic_str = CORBA::string_dup(concat_str);
-
-end:
-  if (concat_str) {
-    allocator.deallocate(concat_str, allocator.state);
   }
   return success;
 }

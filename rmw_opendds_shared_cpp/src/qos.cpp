@@ -35,21 +35,15 @@ get_datareader_qos(
 
 bool
 get_datawriter_qos(
-  DDS::DomainParticipant * participant,
+  DDS::Publisher * publisher,
   const rmw_qos_profile_t & qos_profile,
   DDS::DataWriterQos & datawriter_qos)
 {
-  DDS::ReturnCode_t status; // @todo jwi = participant->get_default_datawriter_qos(datawriter_qos);
-  if (status != DDS::RETCODE_OK) {
+  if (publisher->get_default_datawriter_qos(datawriter_qos) != DDS::RETCODE_OK) {
     RMW_SET_ERROR_MSG("failed to get default datawriter qos");
     return false;
   }
-
-  if (!set_entity_qos_from_profile(qos_profile, datawriter_qos)) {
-    return false;
-  }
-
-  return true;
+  return set_entity_qos_from_profile(qos_profile, datawriter_qos);
 }
 
 template<typename AttributeT>

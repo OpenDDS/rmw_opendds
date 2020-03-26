@@ -106,12 +106,13 @@ rmw_create_service(
     // error string was set within the function
     goto fail;
   }
-
+/*
+  //?? get_default_publisher_qos or pass DDS::Publisher* to get_datawriter_qos
   if (!get_datawriter_qos(participant, *qos_profile, datawriter_qos)) {
     // error string was set within the function
     goto fail;
   }
-
+*/
   // allocating memory for request topic and response topic strings
   if (!_process_service_name(
       service_name,

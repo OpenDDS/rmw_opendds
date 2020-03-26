@@ -106,9 +106,8 @@ _create_type_name(
   const message_type_support_callbacks_t * callbacks,
   const std::string & sep)
 {
-  return
-    std::string(callbacks->message_namespace) +
-    "::" + sep + "::dds_::" + callbacks->message_name + "_";
+  //return std::string(callbacks->message_namespace) + "::" + sep + "::dds_::" + callbacks->message_name + "_";
+  return std::string("callbacks->message_namespace::" + sep + "::dds_::callbacks->message_name_"); //?? temp
 }
 
 #endif  // TYPE_SUPPORT_COMMON_HPP_
