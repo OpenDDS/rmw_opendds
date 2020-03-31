@@ -30,6 +30,7 @@
 // This affects code in this file, but there is a similar variable in:
 //   rmw_opendds_shared_cpp/shared_functions.cpp
 // #define DISCOVERY_DEBUG_LOGGING 1
+#include <dds/DCPS/Marked_Default_Qos.h> //?? temp
 
 extern "C"
 {
@@ -49,7 +50,10 @@ rmw_create_service(
     node->implementation_identifier, opendds_identifier,
     return NULL)
 
-  RMW_OPENDDS_EXTRACT_SERVICE_TYPESUPPORT(type_supports, type_support, NULL)
+  const rosidl_service_type_support_t * type_support = rmw_get_service_type_support(type_supports);
+  if (!type_support) {
+    return NULL;
+  }
 
   if (!qos_profile) {
     RMW_SET_ERROR_MSG("qos_profile is null");
@@ -101,18 +105,18 @@ rmw_create_service(
     RMW_SET_ERROR_MSG("service handle is null");
     goto fail;
   }
-
+/*
   if (!get_datareader_qos(participant, *qos_profile, datareader_qos)) {
     // error string was set within the function
     goto fail;
   }
-/*
-  //?? get_default_publisher_qos or pass DDS::Publisher* to get_datawriter_qos
+
   if (!get_datawriter_qos(participant, *qos_profile, datawriter_qos)) {
     // error string was set within the function
     goto fail;
   }
 */
+
   // allocating memory for request topic and response topic strings
   if (!_process_service_name(
       service_name,
@@ -122,7 +126,7 @@ rmw_create_service(
   {
     goto fail;
   }
-
+/*
   replier = callbacks->create_replier(
     participant, request_topic_str, response_topic_str,
     &datareader_qos, &datawriter_qos,
@@ -226,7 +230,7 @@ rmw_create_service(
   fprintf(stderr, "Publisher address %p\n", static_cast<void *>(dds_publisher));
   fprintf(stderr, "******\n");
 #endif
-
+*/
   return service;
 fail:
   if (request_topic_str) {

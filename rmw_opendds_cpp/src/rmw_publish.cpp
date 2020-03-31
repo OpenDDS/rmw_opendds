@@ -60,6 +60,7 @@ publish(DDS::DataWriter * dds_data_writer, const rcutils_uint8_array_t * cdr_str
   instance.serialized_data.length(static_cast<CORBA::ULong>(cdr_stream->buffer_length));
   std::memcpy(instance.serialized_data.get_buffer(), cdr_stream->buffer, cdr_stream->buffer_length);
 
+  std::cout << "publish writer->write\n";
   DDS::ReturnCode_t status = writer->write(instance, DDS::HANDLE_NIL);
   return status == DDS::RETCODE_OK;
 }
@@ -72,6 +73,7 @@ rmw_publish(
   const void * ros_message,
   rmw_publisher_allocation_t * allocation)
 {
+  std::cout << "rmw_publish----->\n";
   if (!publisher) {
     RMW_SET_ERROR_MSG("publisher is null");
     return RMW_RET_ERROR;
@@ -102,8 +104,9 @@ rmw_publish(
 
   auto ret = RMW_RET_ERROR;
   rcutils_uint8_array_t cdr_stream = rcutils_get_zero_initialized_uint8_array();
-  cdr_stream.allocator = rcutils_get_default_allocator(); //?? not using the given allocation
+  cdr_stream.allocator = rcutils_get_default_allocator();
   try {
+/*
     if (!callbacks->to_cdr_stream(ros_message, &cdr_stream)) {
       throw std::string("failed to convert ros_message to cdr stream");
     }
@@ -113,6 +116,7 @@ rmw_publish(
     if (!cdr_stream.buffer) {
       throw std::string("no serialized message attached");
     }
+*/
     if (!publish(writer, &cdr_stream)) {
       throw std::string("failed to publish message");
     }
@@ -123,6 +127,7 @@ rmw_publish(
     RMW_SET_ERROR_MSG("rmw_publish failed");
   }
   cdr_stream.allocator.deallocate(cdr_stream.buffer, cdr_stream.allocator.state);
+  std::cout << "rmw_publish return " << ret << '\n'; //??
   return ret;
 }
 

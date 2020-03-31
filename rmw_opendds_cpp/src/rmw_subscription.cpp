@@ -78,7 +78,10 @@ rmw_create_subscription(
     node->implementation_identifier, opendds_identifier,
     return NULL)
 
-  RMW_OPENDDS_EXTRACT_MESSAGE_TYPESUPPORT(type_supports, type_support, NULL)
+  const rosidl_message_type_support_t * type_support = rmw_get_message_type_support(type_supports);
+  if (!type_support) {
+    return NULL;
+  }
 
   if (!qos_profile) {
     RMW_SET_ERROR_MSG("qos_profile is null");
@@ -205,12 +208,12 @@ rmw_create_subscription(
   }
   CORBA::string_free(topic_str);
   topic_str = nullptr;
-
+/*
   if (!get_datareader_qos(participant, *qos_profile, datareader_qos)) {
     // error string was set within the function
     goto fail;
   }
-
+*/
   //topic_reader = dds_subscriber->create_datareader(
   //  topic, datareader_qos,
   //  NULL, DDS::STATUS_MASK_NONE);
@@ -218,14 +221,14 @@ rmw_create_subscription(
   //  RMW_SET_ERROR_MSG("failed to create datareader");
   //  goto fail;
   //}
-
+/*
   read_condition = topic_reader->create_readcondition(
     DDS::ANY_SAMPLE_STATE, DDS::ANY_VIEW_STATE, DDS::ANY_INSTANCE_STATE);
   if (!read_condition) {
     RMW_SET_ERROR_MSG("failed to create read condition");
     goto fail;
   }
-
+*/
   // Allocate memory for the OpenDDSStaticSubscriberInfo object.
   info_buf = rmw_allocate(sizeof(OpenDDSStaticSubscriberInfo));
   if (!info_buf) {
@@ -253,7 +256,7 @@ rmw_create_subscription(
     goto fail;
   }
   memcpy(const_cast<char *>(subscription->topic_name), topic_name, strlen(topic_name) + 1);
-
+/*
   if (!qos_profile->avoid_ros_namespace_conventions) {
     mangled_name =
       topic_reader->get_topicdescription()->get_name();
@@ -275,7 +278,7 @@ rmw_create_subscription(
   fprintf(stderr, "Subscriber address %p\n", static_cast<void *>(dds_subscriber));
   fprintf(stderr, "******\n");
 #endif
-
+*/
   return subscription;
 fail:
   if (topic_str) {

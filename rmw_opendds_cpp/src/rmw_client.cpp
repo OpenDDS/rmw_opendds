@@ -50,7 +50,10 @@ rmw_create_client(
     node->implementation_identifier, opendds_identifier,
     return NULL)
 
-  RMW_OPENDDS_EXTRACT_SERVICE_TYPESUPPORT(type_supports, type_support, NULL)
+  const rosidl_service_type_support_t * type_support = rmw_get_service_type_support(type_supports);
+  if (!type_support) {
+    return NULL;
+  }
 
   if (!qos_profile) {
     RMW_SET_ERROR_MSG("qos_profile is null");
@@ -101,12 +104,12 @@ rmw_create_client(
     RMW_SET_ERROR_MSG("failed to allocate client");
     goto fail;
   }
-
+/*
   if (!get_datareader_qos(participant, *qos_profile, datareader_qos)) {
     // error string was set within the function
     goto fail;
   }
-/*
+
   //?? get_default_publisher_qos or pass DDS::Publisher* to get_datawriter_qos
   if (!get_datawriter_qos(participant, *qos_profile, datawriter_qos)) {
     // error string was set within the function

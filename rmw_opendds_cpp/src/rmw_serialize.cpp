@@ -28,7 +28,10 @@ rmw_serialize(
   const rosidl_message_type_support_t * type_support,
   rmw_serialized_message_t * serialized_message)
 {
-  RMW_OPENDDS_EXTRACT_MESSAGE_TYPESUPPORT(type_support, ts, RMW_RET_ERROR)
+  const rosidl_message_type_support_t * ts = rmw_get_message_type_support(type_support);
+  if (!ts) {
+    return NULL;
+  }
 
   const message_type_support_callbacks_t * callbacks =
     static_cast<const message_type_support_callbacks_t *>(ts->data);
@@ -51,7 +54,10 @@ rmw_deserialize(
   const rosidl_message_type_support_t * type_support,
   void * ros_message)
 {
-  RMW_OPENDDS_EXTRACT_MESSAGE_TYPESUPPORT(type_support, ts, RMW_RET_ERROR)
+  const rosidl_message_type_support_t * ts = rmw_get_message_type_support(type_support);
+  if (!ts) {
+    return NULL;
+  }
 
   const message_type_support_callbacks_t * callbacks =
     static_cast<const message_type_support_callbacks_t *>(ts->data);
