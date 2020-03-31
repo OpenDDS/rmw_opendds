@@ -100,54 +100,55 @@ rmw_create_publisher(
 {
   if (!node) {
     RMW_SET_ERROR_MSG("node is null");
-    return NULL;
+    return nullptr;
   }
   RMW_CHECK_TYPE_IDENTIFIERS_MATCH(
     node handle,
     node->implementation_identifier, opendds_identifier,
-    return NULL)
+    return nullptr)
 
   auto node_info = static_cast<OpenDDSNodeInfo *>(node->data);
   if (!node_info) {
     RMW_SET_ERROR_MSG("node info is null");
-    return NULL;
+    return nullptr;
   }
 
   auto participant = static_cast<DDS::DomainParticipant *>(node_info->participant);
   if (!participant) {
     RMW_SET_ERROR_MSG("participant is null");
-    return NULL;
+    return nullptr;
   }
 
   // message type support
   const rosidl_message_type_support_t * type_support = rmw_get_message_type_support(type_supports);
   if (!type_support) {
-    return NULL;
+    return nullptr;
   }
   std::cout << "type_support(" << type_support->typesupport_identifier << ", " << type_support->data << ", " << type_support->func << ")\n"; //??
   auto callbacks = static_cast<const message_type_support_callbacks_t*>(type_support->data);
   if (!callbacks) {
     RMW_SET_ERROR_MSG("callbacks handle is null");
-    return NULL;
+    return nullptr;
   }
   std::string type_name = _create_type_name(callbacks, "msg");
   OpenDDSStaticSerializedDataTypeSupport_var ts = new OpenDDSStaticSerializedDataTypeSupportImpl();
   if (ts->register_type(participant, type_name.c_str()) != DDS::RETCODE_OK) {
     RMW_SET_ERROR_MSG("failed to register OpenDDS type");
-    return NULL;
+    return nullptr;
   }
 
   if (!topic_name || strlen(topic_name) == 0) {
     RMW_SET_ERROR_MSG("publisher topic_name is null or empty");
-    return NULL;
+    return nullptr;
   }
   if (!qos_policies) {
     RMW_SET_ERROR_MSG("qos_policies is null");
-    return NULL;
+    return nullptr;
   }
   CORBA::String_var topic_str;
   if (!_process_topic_name(topic_name, qos_policies->avoid_ros_namespace_conventions, &topic_str.out())) {
-    throw std::string("failed to allocate memory for topic_str");
+    RMW_SET_ERROR_MSG("failed to allocate memory for topic_str");
+    return nullptr;
   }
   std::cout << "type_name[" << type_name << "], topic_name[" << topic_name << "], topic_str[" << topic_str << "]\n"; //??
 
