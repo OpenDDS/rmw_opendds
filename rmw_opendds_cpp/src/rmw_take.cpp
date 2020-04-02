@@ -47,7 +47,7 @@ take(
     return false;
   }
 
-  OpenDDSStaticSerializedDataDataReader * data_reader =
+  OpenDDSStaticSerializedDataDataReader_var data_reader =
     OpenDDSStaticSerializedDataDataReader::_narrow(dds_data_reader);
   if (!data_reader) {
     RMW_SET_ERROR_MSG("failed to narrow data reader");
