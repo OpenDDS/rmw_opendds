@@ -103,8 +103,7 @@ rmw_create_publisher(
     return nullptr;
   }
   RMW_CHECK_TYPE_IDENTIFIERS_MATCH(
-    node handle,
-    node->implementation_identifier, opendds_identifier,
+    node handle, node->implementation_identifier, opendds_identifier,
     return nullptr)
 
   auto node_info = static_cast<OpenDDSNodeInfo *>(node->data);
@@ -152,6 +151,16 @@ rmw_create_publisher(
   }
   std::cout << "type_name[" << type_name << "], topic_name[" << topic_name << "], topic_str[" << topic_str << "]\n"; //??
 
+  // find or create DDS::Topic
+  DDS::TopicDescription_var topic_description = participant->lookup_topicdescription(topic_str.in());
+  DDS::Topic_var topic = topic_description ?
+    participant->find_topic(topic_str.in(), DDS::Duration_t{0, 0}) :
+    participant->create_topic(topic_str.in(), type_name.c_str(), TOPIC_QOS_DEFAULT, NULL, OpenDDS::DCPS::NO_STATUS_MASK);
+  if (!topic) {
+    RMW_SET_ERROR_MSG_WITH_FORMAT_STRING("failed to %s topic", (topic_description ? "find" : "create"));
+    return nullptr;
+  }
+
   rmw_publisher_t * publisher = nullptr;
   void * buf = nullptr;
   try {
@@ -197,29 +206,13 @@ rmw_create_publisher(
       throw std::string("failed to create publisher");
     }
 
-    // find or create DDS::Topic
-    DDS::Topic_var topic;
-    DDS::TopicDescription_var topic_description = participant->lookup_topicdescription(topic_str.in());
-    if (topic_description) {
-      DDS::Duration_t timeout = { 0, 0 };
-      topic = participant->find_topic(topic_str.in(), timeout);
-      if (!topic) {
-        throw std::string("failed to find topic");
-      }
-    } else {
-      topic = participant->create_topic(topic_str.in(), type_name.c_str(), TOPIC_QOS_DEFAULT, NULL, OpenDDS::DCPS::NO_STATUS_MASK);
-      if (!topic) {
-        throw std::string("failed to create topic");
-      }
-    }
-
     // create DDS::DataWriter
-    DDS::DataWriterQos datawriter_qos;
-    if (!get_datawriter_qos(publisher_info->dds_publisher_.in(), *qos_policies, datawriter_qos)) {
+    DDS::DataWriterQos dw_qos;
+    if (!get_datawriter_qos(publisher_info->dds_publisher_.in(), *qos_policies, dw_qos)) {
       throw std::string("get_datawriter_qos failed");
     }
     publisher_info->topic_writer_ = publisher_info->dds_publisher_->create_datawriter(
-      topic, datawriter_qos, NULL, OpenDDS::DCPS::NO_STATUS_MASK);
+      topic, dw_qos, NULL, OpenDDS::DCPS::NO_STATUS_MASK);
     if (!publisher_info->topic_writer_) {
       throw std::string("failed to create datawriter");
     }
@@ -252,7 +245,6 @@ rmw_create_publisher(
       publisher_info->dds_publisher_->get_instance_handle(), mangled_name, type_name, EntityType::Publisher);
     node_info->publisher_listener->trigger_graph_guard_condition();
 
-    std::cout << "return publisher <-------\n"; //??
     return publisher;
 
   } catch (const std::string& e) {

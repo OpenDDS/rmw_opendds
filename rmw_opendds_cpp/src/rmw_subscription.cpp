@@ -29,12 +29,13 @@
 #include "rmw_opendds_cpp/opendds_static_subscriber_info.hpp"
 
 // include patched generated code from the build folder
-#include "opendds_static_serialized_dataTypeSupportC.h"
+#include "opendds_static_serialized_dataTypeSupportImpl.h"
 
 // Uncomment this to get extra console output about discovery.
 // This affects code in this file, but there is a similar variable in:
 //   rmw_opendds_shared_cpp/shared_functions.cpp
 // #define DISCOVERY_DEBUG_LOGGING 1
+#include <dds/DCPS/Marked_Default_Qos.h>
 
 extern "C"
 {
@@ -61,6 +62,47 @@ rmw_fini_subscription_allocation(rmw_subscription_allocation_t * allocation)
   return RMW_RET_ERROR;
 }
 
+void clean_subscription(rmw_subscription_t * subscription, DDS::DomainParticipant& participant){
+  if (!subscription) {
+    return;
+  }
+  auto info = static_cast<OpenDDSStaticSubscriberInfo*>(subscription->data);
+  if (info) {
+    if (info->dds_subscriber_) {
+      if (info->topic_reader_) {
+        if (info->read_condition_) {
+          if (info->topic_reader_->delete_readcondition(info->read_condition_) != DDS::RETCODE_OK) {
+            std::cerr << "delete_readcondition failed " << __FILE__ << ":" << __LINE__ << std::endl;
+          }
+          info->read_condition_ = nullptr;
+        }
+        if (info->dds_subscriber_->delete_datareader(info->topic_reader_) != DDS::RETCODE_OK) {
+          std::cerr << "delete_datareader failed " << __FILE__ << ":" << __LINE__ << std::endl;
+        }
+        info->topic_reader_ = nullptr;
+      }
+      if (participant.delete_subscriber(info->dds_subscriber_) != DDS::RETCODE_OK) {
+        std::cerr << "delete_subscriber failed " << __FILE__ << ":" << __LINE__ << std::endl;
+      }
+      info->dds_subscriber_ = nullptr;
+    }
+    if (info->listener_) {
+      RMW_TRY_DESTRUCTOR_FROM_WITHIN_FAILURE(
+        info->listener_->~OpenDDSSubscriberListener(), OpenDDSSubscriberListener)
+      rmw_free(info->listener_);
+      info->listener_ = nullptr;
+    }
+    RMW_TRY_DESTRUCTOR_FROM_WITHIN_FAILURE(
+      info->~OpenDDSStaticSubscriberInfo(), OpenDDSStaticSubscriberInfo)
+    rmw_free(info);
+    subscription->data = nullptr;
+  }
+  if (subscription->topic_name) {
+    rmw_free(const_cast<char *>(subscription->topic_name));
+  }
+  rmw_subscription_free(subscription);
+}
+
 rmw_subscription_t *
 rmw_create_subscription(
   const rmw_node_t * node,
@@ -70,66 +112,40 @@ rmw_create_subscription(
   const rmw_subscription_options_t* subscription_options)
 {
   if (!node) {
-    RMW_SET_ERROR_MSG("node handle is null");
-    return NULL;
-  }
-  RMW_CHECK_TYPE_IDENTIFIERS_MATCH(
-    node handle,
-    node->implementation_identifier, opendds_identifier,
-    return NULL)
-
-  const rosidl_message_type_support_t * type_support = rmw_get_message_type_support(type_supports);
-  if (!type_support) {
-    return NULL;
-  }
-
-  if (!qos_profile) {
-    RMW_SET_ERROR_MSG("qos_profile is null");
+    RMW_SET_ERROR_MSG("node is null");
     return nullptr;
   }
+  RMW_CHECK_TYPE_IDENTIFIERS_MATCH(
+    node handle, node->implementation_identifier, opendds_identifier,
+    return nullptr)
 
   auto node_info = static_cast<OpenDDSNodeInfo *>(node->data);
   if (!node_info) {
-    RMW_SET_ERROR_MSG("node info handle is null");
-    return NULL;
-  }
-  auto participant = static_cast<DDS::DomainParticipant *>(node_info->participant);
-  if (!participant) {
-    RMW_SET_ERROR_MSG("participant handle is null");
-    return NULL;
+    RMW_SET_ERROR_MSG("node info is null");
+    return nullptr;
   }
 
+  auto participant = static_cast<DDS::DomainParticipant *>(node_info->participant);
+  if (!participant) {
+    RMW_SET_ERROR_MSG("participant is null");
+    return nullptr;
+  }
+
+  // message type support
+  const rosidl_message_type_support_t * type_support = rmw_get_message_type_support(type_supports);
+  if (!type_support) {
+    return nullptr;
+  }
   const message_type_support_callbacks_t * callbacks =
     static_cast<const message_type_support_callbacks_t *>(type_support->data);
   if (!callbacks) {
     RMW_SET_ERROR_MSG("callbacks handle is null");
-    return NULL;
+    return nullptr;
   }
   std::string type_name = _create_type_name(callbacks, "msg");
-  // Past this point, a failure results in unrolling code in the goto fail block.
-  //DDS::TypeCode * type_code = nullptr;
-  DDS::DataReaderQos datareader_qos;
-  DDS::SubscriberQos subscriber_qos;
-  DDS::ReturnCode_t status;
-  DDS::Subscriber * dds_subscriber = nullptr;
-  DDS::Topic * topic = nullptr;
-  DDS::TopicDescription * topic_description = nullptr;
-  DDS::DataReader * topic_reader = nullptr;
-  DDS::ReadCondition * read_condition = nullptr;
-  void * info_buf = nullptr;
-  void * listener_buf = nullptr;
-  OpenDDSSubscriberListener * subscriber_listener = nullptr;
-  OpenDDSStaticSubscriberInfo * subscriber_info = nullptr;
-  rmw_subscription_t * subscription = nullptr;
-  std::string mangled_name;
-
-  char * topic_str = nullptr;
-
-  // Begin initializing elements.
-  subscription = rmw_subscription_allocate();
-  if (!subscription) {
-    RMW_SET_ERROR_MSG("failed to allocate subscription");
-    goto fail;
+  OpenDDSStaticSerializedDataTypeSupport_var ts = new OpenDDSStaticSerializedDataTypeSupportImpl();
+  if (ts->register_type(participant, type_name.c_str()) != DDS::RETCODE_OK) {
+    throw std::string("failed to register OpenDDS type");
   }
 
   //type_code = callbacks->get_type_code();
@@ -150,192 +166,128 @@ rmw_create_subscription(
   //  goto fail;
   //}
 
-  status = participant->get_default_subscriber_qos(subscriber_qos);
-  if (status != DDS::RETCODE_OK) {
-    RMW_SET_ERROR_MSG("failed to get default subscriber qos");
-    goto fail;
+  if (!topic_name || strlen(topic_name) == 0) {
+    RMW_SET_ERROR_MSG("subscription topic_name is null or empty");
+    return nullptr;
+  }
+  if (!qos_profile) {
+    RMW_SET_ERROR_MSG("qos_profile is null");
+    return nullptr;
+  }
+  CORBA::String_var topic_str;
+  if (!_process_topic_name(topic_name, qos_profile->avoid_ros_namespace_conventions, &topic_str.out())) {
+    RMW_SET_ERROR_MSG("failed to allocate memory for topic_str");
+    return nullptr;
   }
 
-  // allocating memory for topic_str
-  if (!_process_topic_name(
-      topic_name,
-      qos_profile->avoid_ros_namespace_conventions,
-      &topic_str))
-  {
-    goto fail;
+  // find or create DDS::Topic
+  DDS::TopicDescription_var topic_description = participant->lookup_topicdescription(topic_str.in());
+  DDS::Topic_var topic = topic_description ?
+    participant->find_topic(topic_str.in(), DDS::Duration_t{0, 0}) :
+    participant->create_topic(topic_str.in(), type_name.c_str(), TOPIC_QOS_DEFAULT, NULL, OpenDDS::DCPS::NO_STATUS_MASK);
+  if (!topic) {
+    RMW_SET_ERROR_MSG_WITH_FORMAT_STRING("failed to %s topic", (topic_description ? "find" : "create"));
+    return nullptr;
   }
 
-  // Allocate memory for the SubscriberListener object.
-  listener_buf = rmw_allocate(sizeof(OpenDDSSubscriberListener));
-  if (!listener_buf) {
-    RMW_SET_ERROR_MSG("failed to allocate memory for subscriber listener");
-    goto fail;
-  }
-  // Use a placement new to construct the OpenDDSSubscriberListener in the preallocated buffer.
-  //RMW_TRY_PLACEMENT_NEW(subscriber_listener, listener_buf, goto fail, OpenDDSSubscriberListener, )
-  listener_buf = nullptr;  // Only free the buffer pointer.
+  rmw_subscription_t * subscription = nullptr;
+  void * buf = nullptr;
+  try {
+    // create rmw_subscription_t
+    subscription = rmw_subscription_allocate();
+    if (!subscription) {
+      throw std::string("failed to allocate subscription");
+    }
+    subscription->implementation_identifier = opendds_identifier;
+    subscription->data = nullptr;
+    subscription->topic_name = reinterpret_cast<const char*>(rmw_allocate(strlen(topic_name) + 1));
+    if (!subscription->topic_name) {
+      throw std::string("failed to allocate memory for node name");
+    }
+    memcpy(const_cast<char*>(subscription->topic_name), topic_name, strlen(topic_name) + 1);
+    if (subscription_options) {
+      subscription->options = *subscription_options;
+    }
+    subscription->can_loan_messages = false;
 
-  dds_subscriber = participant->create_subscriber(
-    subscriber_qos, subscriber_listener, DDS::SUBSCRIPTION_MATCHED_STATUS);
-  if (!dds_subscriber) {
-    RMW_SET_ERROR_MSG("failed to create subscriber");
-    goto fail;
-  }
+    // create OpenDDSStaticSubscriberInfo
+    buf = rmw_allocate(sizeof(OpenDDSStaticSubscriberInfo));
+    if (!buf) {
+      throw std::string("failed to allocate memory for subscriber info");
+    }
+    OpenDDSStaticSubscriberInfo * subscriber_info = nullptr;
+    RMW_TRY_PLACEMENT_NEW(subscriber_info, buf, throw 1, OpenDDSStaticSubscriberInfo,)
+    subscription->data = subscriber_info;
+    buf = nullptr;
 
-  topic_description = participant->lookup_topicdescription(topic_str);
-  if (!topic_description) {
-    DDS::TopicQos default_topic_qos;
-    status = participant->get_default_topic_qos(default_topic_qos);
-    if (status != DDS::RETCODE_OK) {
-      RMW_SET_ERROR_MSG("failed to get default topic qos");
-      goto fail;
+    // create OpenDDSSubscriberListener
+    buf = rmw_allocate(sizeof(OpenDDSSubscriberListener));
+    if (!buf) {
+      throw std::string("failed to allocate memory for subscriber listener");
+    }
+    RMW_TRY_PLACEMENT_NEW(subscriber_info->listener_, buf, throw 1, OpenDDSSubscriberListener,)
+    buf = nullptr;
+
+    // create DDS::Subscriber
+    subscriber_info->dds_subscriber_ = participant->create_subscriber(
+      SUBSCRIBER_QOS_DEFAULT, subscriber_info->listener_, DDS::SUBSCRIPTION_MATCHED_STATUS);
+    if (!subscriber_info->dds_subscriber_) {
+      throw std::string("failed to create subscriber");
     }
 
-    //topic = participant->create_topic(
-    //  topic_str, type_name.c_str(),
-    //  default_topic_qos, NULL, DDS::STATUS_MASK_NONE);
-    //if (!topic) {
-    //  RMW_SET_ERROR_MSG("failed to create topic");
-    //  goto fail;
-    //}
-  } else {
-    //DDS::Duration_t timeout = DDS::Duration_t::from_seconds(0);
-    //topic = participant->find_topic(topic_str, timeout);
-    //if (!topic) {
-    //  RMW_SET_ERROR_MSG("failed to find topic");
-    //  goto fail;
-    //}
-  }
-  CORBA::string_free(topic_str);
-  topic_str = nullptr;
-/*
-  if (!get_datareader_qos(participant, *qos_profile, datareader_qos)) {
-    // error string was set within the function
-    goto fail;
-  }
-*/
-  //topic_reader = dds_subscriber->create_datareader(
-  //  topic, datareader_qos,
-  //  NULL, DDS::STATUS_MASK_NONE);
-  //if (!topic_reader) {
-  //  RMW_SET_ERROR_MSG("failed to create datareader");
-  //  goto fail;
-  //}
-/*
-  read_condition = topic_reader->create_readcondition(
-    DDS::ANY_SAMPLE_STATE, DDS::ANY_VIEW_STATE, DDS::ANY_INSTANCE_STATE);
-  if (!read_condition) {
-    RMW_SET_ERROR_MSG("failed to create read condition");
-    goto fail;
-  }
-*/
-  // Allocate memory for the OpenDDSStaticSubscriberInfo object.
-  info_buf = rmw_allocate(sizeof(OpenDDSStaticSubscriberInfo));
-  if (!info_buf) {
-    RMW_SET_ERROR_MSG("failed to allocate memory");
-    goto fail;
-  }
-  // Use a placement new to construct the OpenDDSStaticSubscriberInfo in the preallocated buffer.
-  RMW_TRY_PLACEMENT_NEW(subscriber_info, info_buf, goto fail, OpenDDSStaticSubscriberInfo, )
-  info_buf = nullptr;  // Only free the subscriber_info pointer; don't need the buf pointer anymore.
-  subscriber_info->dds_subscriber_ = dds_subscriber;
-  subscriber_info->topic_reader_ = topic_reader;
-  subscriber_info->read_condition_ = read_condition;
-  subscriber_info->callbacks_ = callbacks;
-  //subscriber_info->ignore_local_publications = ignore_local_publications;
-  subscriber_info->listener_ = subscriber_listener;
-  subscriber_listener = nullptr;
+    // create DDS::DataReader
+    DDS::DataReaderQos dr_qos;
+    if (!get_datareader_qos(subscriber_info->dds_subscriber_.in(), *qos_profile, dr_qos)) {
+      throw std::string("get_datareader_qos failed");
+    }
+    subscriber_info->topic_reader_ = subscriber_info->dds_subscriber_->create_datareader(
+      topic, dr_qos, NULL, OpenDDS::DCPS::NO_STATUS_MASK);
+    if (!subscriber_info->topic_reader_) {
+      throw std::string("failed to create datareader");
+    }
 
-  subscription->implementation_identifier = opendds_identifier;
-  subscription->data = subscriber_info;
+    // create read_condition
+    subscriber_info->read_condition_ = subscriber_info->topic_reader_->create_readcondition(
+      DDS::ANY_SAMPLE_STATE, DDS::ANY_VIEW_STATE, DDS::ANY_INSTANCE_STATE);
+    if (!subscriber_info->read_condition_) {
+      throw std::string("failed to create read condition");
+    }
 
-  subscription->topic_name = reinterpret_cast<const char *>(
-    rmw_allocate(strlen(topic_name) + 1));
-  if (!subscription->topic_name) {
-    RMW_SET_ERROR_MSG("failed to allocate memory for node name");
-    goto fail;
-  }
-  memcpy(const_cast<char *>(subscription->topic_name), topic_name, strlen(topic_name) + 1);
-/*
-  if (!qos_profile->avoid_ros_namespace_conventions) {
-    mangled_name =
-      topic_reader->get_topicdescription()->get_name();
-  } else {
-    mangled_name = topic_name;
-  }
-  node_info->subscriber_listener->add_information(
-    node_info->participant->get_instance_handle(),
-    dds_subscriber->get_instance_handle(),
-    mangled_name,
-    type_name,
-    EntityType::Subscriber);
-  node_info->subscriber_listener->trigger_graph_guard_condition();
+    subscriber_info->callbacks_ = callbacks;
 
-// TODO(karsten1987): replace this block with logging macros
-#ifdef DISCOVERY_DEBUG_LOGGING
-  fprintf(stderr, "******* Creating Subscriber Details: ********\n");
-  fprintf(stderr, "Subscriber topic %s\n", topic_reader->get_topicdescription()->get_name());
-  fprintf(stderr, "Subscriber address %p\n", static_cast<void *>(dds_subscriber));
-  fprintf(stderr, "******\n");
-#endif
-*/
-  return subscription;
-fail:
-  if (topic_str) {
-    CORBA::string_free(topic_str);
-    topic_str = nullptr;
-  }
-  if (subscription) {
-    rmw_subscription_free(subscription);
-  }
-  // Assumption: participant is valid.
-  if (dds_subscriber) {
-    if (topic_reader) {
-      if (read_condition) {
-        if (topic_reader->delete_readcondition(read_condition) != DDS::RETCODE_OK) {
-          std::stringstream ss;
-          ss << "leaking readcondition while handling failure at " <<
-            __FILE__ << ":" << __LINE__ << '\n';
-          (std::cerr << ss.str()).flush();
-        }
+    // update node_info
+    std::string mangled_name;
+    if (qos_profile->avoid_ros_namespace_conventions) {
+      mangled_name = topic_name;
+    } else {
+      DDS::TopicDescription_var topic_des = subscriber_info->topic_reader_->get_topicdescription();
+      if (topic_des) {
+        CORBA::String_var name = topic_des->get_name();
+        if (name) { mangled_name = *name; }
       }
-      if (dds_subscriber->delete_datareader(topic_reader) != DDS::RETCODE_OK) {
-        std::stringstream ss;
-        ss << "leaking datareader while handling failure at " <<
-          __FILE__ << ":" << __LINE__ << '\n';
-        (std::cerr << ss.str()).flush();
+      if (mangled_name.empty()) {
+        throw std::string("failed to get topic name");
       }
     }
-    if (participant->delete_subscriber(dds_subscriber) != DDS::RETCODE_OK) {
-      std::stringstream ss;
-      std::cerr << "leaking subscriber while handling failure at " <<
-        __FILE__ << ":" << __LINE__ << '\n';
-      (std::cerr << ss.str()).flush();
-    }
-  }
-  if (subscriber_listener) {
-    RMW_TRY_DESTRUCTOR_FROM_WITHIN_FAILURE(
-      subscriber_listener->~OpenDDSSubscriberListener(), OpenDDSSubscriberListener)
-    rmw_free(subscriber_listener);
-  }
-  if (subscriber_info) {
-    if (subscriber_info->listener_) {
-      RMW_TRY_DESTRUCTOR_FROM_WITHIN_FAILURE(
-        subscriber_info->listener_->~OpenDDSSubscriberListener(), OpenDDSSubscriberListener)
-      rmw_free(subscriber_info->listener_);
-    }
-    RMW_TRY_DESTRUCTOR_FROM_WITHIN_FAILURE(
-      subscriber_info->~OpenDDSStaticSubscriberInfo(), OpenDDSStaticSubscriberInfo)
-    rmw_free(subscriber_info);
-  }
-  if (info_buf) {
-    rmw_free(info_buf);
-  }
-  if (listener_buf) {
-    rmw_free(listener_buf);
+    node_info->subscriber_listener->add_information(
+      participant->get_instance_handle(),
+      subscriber_info->dds_subscriber_->get_instance_handle(),
+      mangled_name, type_name, EntityType::Subscriber);
+    node_info->subscriber_listener->trigger_graph_guard_condition();
+
+    return subscription;
+
+  } catch (const std::string& e) {
+    RMW_SET_ERROR_MSG(e.c_str());
+  } catch (...) {
+    RMW_SET_ERROR_MSG("rmw_create_subscription failed");
   }
 
-  return NULL;
+  clean_subscription(subscription, *participant);
+  if (buf) {
+    rmw_free(buf);
+  }
+  return nullptr;
 }
 
 rmw_ret_t
