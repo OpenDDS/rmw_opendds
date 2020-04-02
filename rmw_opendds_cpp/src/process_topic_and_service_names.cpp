@@ -22,7 +22,6 @@
 
 #include "rmw_opendds_shared_cpp/namespace_prefix.hpp"
 #include "rmw_opendds_shared_cpp/opendds_include.hpp"
-#include <iostream> //?? temp
 
 bool
 _process_topic_name(
@@ -30,7 +29,6 @@ _process_topic_name(
   bool avoid_ros_namespace_conventions,
   char ** topic_str)
 {
-  std::cout << "topic_name[" << topic_name << "], avoid_ros_namespace_conventions:" << avoid_ros_namespace_conventions << '\n'; //??
   bool success = true;
   rcutils_allocator_t allocator = rcutils_get_default_allocator();
   const char * topic_prefix = avoid_ros_namespace_conventions ? "" : ros_topic_prefix;
@@ -42,7 +40,6 @@ _process_topic_name(
     RMW_SET_ERROR_MSG("could not allocate memory for topic string");
     success = false;
   }
-  std::cout << "topic_prefix[" << topic_prefix << "], topic_str[" << *topic_str << "]\n"; //??
   return success;
 }
 
@@ -54,7 +51,6 @@ _process_service_name(
   char ** response_topic_str)
 {
   bool success = true;
-  std::cout << "service_name[" << service_name << "], avoid_ros_namespace_conventions:" << avoid_ros_namespace_conventions << '\n'; //??
   rcutils_allocator_t allocator = rcutils_get_default_allocator();
   const char * rq_pfx = avoid_ros_namespace_conventions ? "" : ros_service_requester_prefix;
   const char * rp_pfx = avoid_ros_namespace_conventions ? "" : ros_service_response_prefix;
