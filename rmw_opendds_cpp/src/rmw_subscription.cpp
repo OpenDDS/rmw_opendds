@@ -253,6 +253,7 @@ rmw_create_subscription(
       throw std::string("failed to create read condition");
     }
 
+    subscriber_info->ignore_local_publications = false;
     subscriber_info->callbacks_ = callbacks;
 
     // update node_info

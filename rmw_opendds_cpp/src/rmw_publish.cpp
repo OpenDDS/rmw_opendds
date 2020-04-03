@@ -60,7 +60,6 @@ publish(DDS::DataWriter * dds_data_writer, const rcutils_uint8_array_t * cdr_str
   instance.serialized_data.length(static_cast<CORBA::ULong>(cdr_stream->buffer_length));
   std::memcpy(instance.serialized_data.get_buffer(), cdr_stream->buffer, cdr_stream->buffer_length);
 
-  std::cout << "publish writer->write\n";
   DDS::ReturnCode_t status = writer->write(instance, DDS::HANDLE_NIL);
   return status == DDS::RETCODE_OK;
 }
@@ -73,7 +72,6 @@ rmw_publish(
   const void * ros_message,
   rmw_publisher_allocation_t * allocation)
 {
-  std::cout << "rmw_publish----->\n";
   if (!publisher) {
     RMW_SET_ERROR_MSG("publisher is null");
     return RMW_RET_ERROR;
@@ -127,7 +125,6 @@ rmw_publish(
     RMW_SET_ERROR_MSG("rmw_publish failed");
   }
   cdr_stream.allocator.deallocate(cdr_stream.buffer, cdr_stream.allocator.state);
-  std::cout << "rmw_publish return " << ret << '\n'; //??
   return ret;
 }
 

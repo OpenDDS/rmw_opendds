@@ -123,7 +123,6 @@ rmw_create_publisher(
   if (!type_support) {
     return nullptr;
   }
-  std::cout << "type_support(" << type_support->typesupport_identifier << ", " << type_support->data << ", " << type_support->func << ")\n"; //??
   auto callbacks = static_cast<const message_type_support_callbacks_t*>(type_support->data);
   if (!callbacks) {
     RMW_SET_ERROR_MSG("callbacks handle is null");
@@ -149,7 +148,6 @@ rmw_create_publisher(
     RMW_SET_ERROR_MSG("failed to allocate memory for topic_str");
     return nullptr;
   }
-  std::cout << "type_name[" << type_name << "], topic_name[" << topic_name << "], topic_str[" << topic_str << "]\n"; //??
 
   // find or create DDS::Topic
   DDS::TopicDescription_var topic_description = participant->lookup_topicdescription(topic_str.in());

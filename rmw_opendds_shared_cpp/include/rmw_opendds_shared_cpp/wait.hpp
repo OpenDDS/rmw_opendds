@@ -158,7 +158,7 @@ wait(
       }
     }
   }
-
+/*
   // add a condition for each service
   if (services) {
     for (size_t i = 0; i < services->service_count; ++i) {
@@ -182,7 +182,7 @@ wait(
       }
     }
   }
-
+*/
   // add a condition for each client
   if (clients) {
     for (size_t i = 0; i < clients->client_count; ++i) {
@@ -299,7 +299,7 @@ wait(
       }
     }
   }
-
+/*
   // set service handles to zero for all not triggered conditions
   if (services) {
     for (size_t i = 0; i < services->service_count; ++i) {
@@ -334,7 +334,7 @@ wait(
       }
     }
   }
-
+*/
   // set client handles to zero for all not triggered conditions
   if (clients) {
     for (size_t i = 0; i < clients->client_count; ++i) {

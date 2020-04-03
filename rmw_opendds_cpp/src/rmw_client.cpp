@@ -42,12 +42,11 @@ rmw_create_client(
   const rmw_qos_profile_t * qos_profile)
 {
   if (!node) {
-    RMW_SET_ERROR_MSG("node handle is null");
+    RMW_SET_ERROR_MSG("node is null");
     return NULL;
   }
   RMW_CHECK_TYPE_IDENTIFIERS_MATCH(
-    node handle,
-    node->implementation_identifier, opendds_identifier,
+    node handle, node->implementation_identifier, opendds_identifier,
     return NULL)
 
   const rosidl_service_type_support_t * type_support = rmw_get_service_type_support(type_supports);
@@ -62,12 +61,12 @@ rmw_create_client(
 
   auto node_info = static_cast<OpenDDSNodeInfo *>(node->data);
   if (!node_info) {
-    RMW_SET_ERROR_MSG("node info handle is null");
+    RMW_SET_ERROR_MSG("node info is null");
     return NULL;
   }
   auto participant = static_cast<DDS::DomainParticipant *>(node_info->participant);
   if (!participant) {
-    RMW_SET_ERROR_MSG("participant handle is null");
+    RMW_SET_ERROR_MSG("participant is null");
     return NULL;
   }
 
@@ -110,7 +109,6 @@ rmw_create_client(
     goto fail;
   }
 
-  //?? get_default_publisher_qos or pass DDS::Publisher* to get_datawriter_qos
   if (!get_datawriter_qos(participant, *qos_profile, datawriter_qos)) {
     // error string was set within the function
     goto fail;
@@ -125,7 +123,7 @@ rmw_create_client(
   {
     goto fail;
   }
-
+/*
   requester = callbacks->create_requester(
     participant, request_topic_str, response_topic_str,
     &datareader_qos, &datawriter_qos,
@@ -176,7 +174,7 @@ rmw_create_client(
     RMW_SET_ERROR_MSG("failed to create read condition");
     goto fail;
   }
-
+*/
   buf = rmw_allocate(sizeof(OpenDDSStaticClientInfo));
   if (!buf) {
     RMW_SET_ERROR_MSG("failed to allocate memory");
@@ -185,10 +183,10 @@ rmw_create_client(
   // Use a placement new to construct the OpenDDSStaticClientInfo in the preallocated buffer.
   RMW_TRY_PLACEMENT_NEW(client_info, buf, goto fail, OpenDDSStaticClientInfo, )
   buf = nullptr;  // Only free the client_info pointer; don't need the buf pointer anymore.
-  client_info->requester_ = requester;
-  client_info->callbacks_ = callbacks;
-  client_info->response_datareader_ = response_datareader;
-  client_info->read_condition_ = read_condition;
+  client_info->requester_ = NULL; //requester;
+  client_info->callbacks_ = NULL; //callbacks;
+  client_info->response_datareader_ = NULL; //response_datareader;
+  client_info->read_condition_ = NULL; //read_condition;
 
   client->implementation_identifier = opendds_identifier;
   client->data = client_info;
@@ -198,7 +196,7 @@ rmw_create_client(
     goto fail;
   }
   memcpy(const_cast<char *>(client->service_name), service_name, strlen(service_name) + 1);
-
+/*
   mangled_name =
     response_datareader->get_topicdescription()->get_name();
   node_info->subscriber_listener->add_information(
@@ -228,7 +226,7 @@ rmw_create_client(
   fprintf(stderr, "Publisher address %p\n", static_cast<void *>(dds_publisher));
   fprintf(stderr, "******\n");
 #endif
-
+*/
   return client;
 fail:
   if (request_topic_str) {

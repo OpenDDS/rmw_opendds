@@ -99,6 +99,7 @@ rmw_take_request(
   }
 
   void * replier = service_info->replier_;
+/*
   if (!replier) {
     RMW_SET_ERROR_MSG("replier handle is null");
     return RMW_RET_ERROR;
@@ -111,7 +112,8 @@ rmw_take_request(
   }
 
   *taken = callbacks->take_request(replier, request_header, ros_request);
-
+*/
+  *taken = true; //?? temp
   return RMW_RET_OK;
 }
 }  // extern "C"
