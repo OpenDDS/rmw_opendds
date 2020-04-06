@@ -113,7 +113,7 @@ rmw_take_request(
 
   *taken = callbacks->take_request(replier, request_header, ros_request);
 */
-  *taken = true; //?? temp
+  *taken = true; //TODO: replaced this line with the above when service is implemented
   return RMW_RET_OK;
 }
 }  // extern "C"

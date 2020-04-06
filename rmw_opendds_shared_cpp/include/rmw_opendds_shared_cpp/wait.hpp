@@ -158,7 +158,7 @@ wait(
       }
     }
   }
-/*
+/*  TODO: uncommnet this block when type support is ready and service is properly implemented.
   // add a condition for each service
   if (services) {
     for (size_t i = 0; i < services->service_count; ++i) {
@@ -299,7 +299,7 @@ wait(
       }
     }
   }
-/*
+/*  TODO: uncommnet this block when type support is ready and service is properly implemented.
   // set service handles to zero for all not triggered conditions
   if (services) {
     for (size_t i = 0; i < services->service_count; ++i) {

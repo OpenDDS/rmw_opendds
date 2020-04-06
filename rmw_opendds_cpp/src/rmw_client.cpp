@@ -103,7 +103,8 @@ rmw_create_client(
     RMW_SET_ERROR_MSG("failed to allocate client");
     goto fail;
   }
-/*
+/* //commented out for clearing crashes before type support is ready.
+   //TODO: implement client properly.
   if (!get_datareader_qos(participant, *qos_profile, datareader_qos)) {
     // error string was set within the function
     goto fail;
@@ -123,7 +124,8 @@ rmw_create_client(
   {
     goto fail;
   }
-/*
+/* //commented out for clearing crashes before type support is ready.
+   //TODO: implement client properly.
   requester = callbacks->create_requester(
     participant, request_topic_str, response_topic_str,
     &datareader_qos, &datawriter_qos,
@@ -183,10 +185,10 @@ rmw_create_client(
   // Use a placement new to construct the OpenDDSStaticClientInfo in the preallocated buffer.
   RMW_TRY_PLACEMENT_NEW(client_info, buf, goto fail, OpenDDSStaticClientInfo, )
   buf = nullptr;  // Only free the client_info pointer; don't need the buf pointer anymore.
-  client_info->requester_ = NULL; //requester;
-  client_info->callbacks_ = NULL; //callbacks;
-  client_info->response_datareader_ = NULL; //response_datareader;
-  client_info->read_condition_ = NULL; //read_condition;
+  client_info->requester_ = nullptr; //requester;
+  client_info->callbacks_ = nullptr; //callbacks;
+  client_info->response_datareader_ = nullptr; //response_datareader;
+  client_info->read_condition_ = nullptr; //read_condition;
 
   client->implementation_identifier = opendds_identifier;
   client->data = client_info;
@@ -196,7 +198,8 @@ rmw_create_client(
     goto fail;
   }
   memcpy(const_cast<char *>(client->service_name), service_name, strlen(service_name) + 1);
-/*
+/* //commented out for clearing crashes before type support is ready.
+   //TODO: implement client properly.
   mangled_name =
     response_datareader->get_topicdescription()->get_name();
   node_info->subscriber_listener->add_information(

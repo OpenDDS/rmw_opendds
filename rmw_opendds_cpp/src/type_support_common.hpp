@@ -38,12 +38,14 @@ rmw_get_message_type_support(const rosidl_message_type_support_t * type_support)
   /*
     type_support, rosidl_typesupport_opendds_c__identifier);
   */
-    type_support, "rosidl_typesupport_c"); //?? to be replaced by the above
+    //TODO: replace the following line with the above when type support is ready.
+    type_support, "rosidl_typesupport_c");
   if (!ts) {
   /*
     ts = get_message_typesupport_handle(type_support, rosidl_typesupport_opendds_cpp::typesupport_identifier);
   */
-    ts = get_message_typesupport_handle(type_support, "rosidl_typesupport_cpp"); //?? to be replaced by the above
+    //TODO: replace the following line with the above when type support is ready.
+    ts = get_message_typesupport_handle(type_support, "rosidl_typesupport_cpp");
     if (!ts) {
       RMW_SET_ERROR_MSG_WITH_FORMAT_STRING("type support implementation '%s' does not match '%s'",
         type_support->typesupport_identifier, rosidl_typesupport_opendds_cpp::typesupport_identifier);
@@ -63,7 +65,8 @@ rmw_get_service_type_support(const rosidl_service_type_support_t * type_support)
   /*
     type_support, rosidl_typesupport_opendds_c__identifier);
   */
-    type_support, "rosidl_typesupport_cpp"); //?? to be replaced by the above
+    //TODO: replace the following line with the above when type support is ready.
+    type_support, "rosidl_typesupport_cpp");
   if (!ts) {
     ts = get_service_typesupport_handle(type_support, rosidl_typesupport_opendds_cpp::typesupport_identifier);
     if (!ts) {
@@ -82,7 +85,8 @@ _create_type_name(
 /*
   return std::string(callbacks->message_namespace) + "::" + sep + "::dds_::" + callbacks->message_name + "_";
 */
-  return std::string("callbacks->message_namespace::" + sep + "::dds_::callbacks->message_name_"); //?? to be replaced by the above
+  //TODO: replace the following line with the above when type support is ready.
+  return std::string("callbacks->message_namespace::" + sep + "::dds_::callbacks->message_name_");
 }
 
 #endif  // TYPE_SUPPORT_COMMON_HPP_

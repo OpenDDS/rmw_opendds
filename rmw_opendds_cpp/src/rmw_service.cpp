@@ -103,7 +103,8 @@ rmw_create_service(
     RMW_SET_ERROR_MSG("failed to allocate service");
     goto fail;
   }
-/*
+/* //commented out for clearing crashes before type support is ready.
+   //TODO: implement service properly.
   if (!get_datareader_qos(participant, *qos_profile, datareader_qos)) {
     // error string was set within the function
     goto fail;
@@ -123,7 +124,8 @@ rmw_create_service(
   {
     goto fail;
   }
-/*
+/* //commented out for clearing crashes before type support is ready.
+   //TODO: implement service properly.
   replier = callbacks->create_replier(
     participant, request_topic_str, response_topic_str,
     &datareader_qos, &datawriter_qos,
@@ -184,10 +186,10 @@ rmw_create_service(
   // Use a placement new to construct the OpenDDSStaticServiceInfo in the preallocated buffer.
   RMW_TRY_PLACEMENT_NEW(service_info, buf, goto fail, OpenDDSStaticServiceInfo, )
   buf = nullptr;  // Only free the service_info pointer; don't need the buf pointer anymore.
-  service_info->replier_ = NULL; //replier;
+  service_info->replier_ = nullptr; //replier;
   service_info->callbacks_ = callbacks;
-  service_info->request_datareader_ = NULL; //request_datareader;
-  service_info->read_condition_ = NULL; //read_condition;
+  service_info->request_datareader_ = nullptr; //request_datareader;
+  service_info->read_condition_ = nullptr; //read_condition;
 
   service->implementation_identifier = opendds_identifier;
   service->data = service_info;
@@ -197,7 +199,8 @@ rmw_create_service(
     goto fail;
   }
   memcpy(const_cast<char *>(service->service_name), service_name, strlen(service_name) + 1);
-/*
+/* //commented out for clearing crashes before type support is ready.
+   //TODO: implement service properly.
   mangled_name =
     request_datareader->get_topicdescription()->get_name();
   node_info->subscriber_listener->add_information(
