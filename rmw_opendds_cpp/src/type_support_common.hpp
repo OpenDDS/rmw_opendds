@@ -35,11 +35,15 @@ rmw_get_message_type_support(const rosidl_message_type_support_t * type_support)
     return nullptr;
   }
   const rosidl_message_type_support_t * ts = get_message_typesupport_handle(
-  //type_support, rosidl_typesupport_opendds_c__identifier);
-    type_support, "rosidl_typesupport_c"); //?? temp
+  /*
+    type_support, rosidl_typesupport_opendds_c__identifier);
+  */
+    type_support, "rosidl_typesupport_c"); //?? to be replaced by the above
   if (!ts) {
-//  ts = get_message_typesupport_handle(type_support, rosidl_typesupport_opendds_cpp::typesupport_identifier);
-    ts = get_message_typesupport_handle(type_support, "rosidl_typesupport_cpp"); //?? temp
+  /*
+    ts = get_message_typesupport_handle(type_support, rosidl_typesupport_opendds_cpp::typesupport_identifier);
+  */
+    ts = get_message_typesupport_handle(type_support, "rosidl_typesupport_cpp"); //?? to be replaced by the above
     if (!ts) {
       RMW_SET_ERROR_MSG_WITH_FORMAT_STRING("type support implementation '%s' does not match '%s'",
         type_support->typesupport_identifier, rosidl_typesupport_opendds_cpp::typesupport_identifier);
@@ -56,8 +60,10 @@ rmw_get_service_type_support(const rosidl_service_type_support_t * type_support)
     return nullptr;
   }
   const rosidl_service_type_support_t * ts = get_service_typesupport_handle(
-//  type_support, rosidl_typesupport_opendds_c__identifier);
-    type_support, "rosidl_typesupport_cpp"); //?? temp
+  /*
+    type_support, rosidl_typesupport_opendds_c__identifier);
+  */
+    type_support, "rosidl_typesupport_cpp"); //?? to be replaced by the above
   if (!ts) {
     ts = get_service_typesupport_handle(type_support, rosidl_typesupport_opendds_cpp::typesupport_identifier);
     if (!ts) {
@@ -76,7 +82,7 @@ _create_type_name(
 /*
   return std::string(callbacks->message_namespace) + "::" + sep + "::dds_::" + callbacks->message_name + "_";
 */
-  return std::string("callbacks->message_namespace::" + sep + "::dds_::callbacks->message_name_"); //?? temp
+  return std::string("callbacks->message_namespace::" + sep + "::dds_::callbacks->message_name_"); //?? to be replaced by the above
 }
 
 #endif  // TYPE_SUPPORT_COMMON_HPP_
