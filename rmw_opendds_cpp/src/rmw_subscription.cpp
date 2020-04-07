@@ -72,17 +72,17 @@ void clean_subscription(rmw_subscription_t * subscription, DDS::DomainParticipan
       if (info->topic_reader_) {
         if (info->read_condition_) {
           if (info->topic_reader_->delete_readcondition(info->read_condition_) != DDS::RETCODE_OK) {
-            std::cerr << "delete_readcondition failed " << __FILE__ << ":" << __LINE__ << std::endl;
+            RMW_SET_ERROR_MSG("delete_readcondition failed");
           }
           info->read_condition_ = nullptr;
         }
         if (info->dds_subscriber_->delete_datareader(info->topic_reader_) != DDS::RETCODE_OK) {
-          std::cerr << "delete_datareader failed " << __FILE__ << ":" << __LINE__ << std::endl;
+          RMW_SET_ERROR_MSG("delete_datareader failed");
         }
         info->topic_reader_ = nullptr;
       }
       if (participant.delete_subscriber(info->dds_subscriber_) != DDS::RETCODE_OK) {
-        std::cerr << "delete_subscriber failed " << __FILE__ << ":" << __LINE__ << std::endl;
+        RMW_SET_ERROR_MSG("delete_subscriber failed");
       }
       info->dds_subscriber_ = nullptr;
     }
