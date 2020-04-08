@@ -145,7 +145,8 @@ rmw_create_subscription(
   std::string type_name = _create_type_name(callbacks, "msg");
   OpenDDSStaticSerializedDataTypeSupport_var ts = new OpenDDSStaticSerializedDataTypeSupportImpl();
   if (ts->register_type(participant, type_name.c_str()) != DDS::RETCODE_OK) {
-    throw std::string("failed to register OpenDDS type");
+    RMW_SET_ERROR_MSG("failed to register OpenDDS type");
+    return nullptr;
   }
 
   //type_code = callbacks->get_type_code();
