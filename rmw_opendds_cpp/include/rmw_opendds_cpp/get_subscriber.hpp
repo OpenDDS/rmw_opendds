@@ -30,7 +30,7 @@ namespace rmw_opendds_cpp
  * \return native OpenDDS data reader handle if successful, otherwise `NULL`
  */
 RMW_OPENDDS_CPP_PUBLIC
-DDS::DataReader *
+DDS::DataReader_var
 get_data_reader(rmw_subscription_t * subscription);
 
 }  // namespace rmw_opendds_cpp

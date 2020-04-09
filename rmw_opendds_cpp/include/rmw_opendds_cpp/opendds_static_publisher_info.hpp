@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef RMW_OPENDDS_CPP__CONNEXT_STATIC_PUBLISHER_INFO_HPP_
-#define RMW_OPENDDS_CPP__CONNEXT_STATIC_PUBLISHER_INFO_HPP_
+#ifndef RMW_OPENDDS_CPP__OPENDDS_STATIC_PUBLISHER_INFO_HPP_
+#define RMW_OPENDDS_CPP__OPENDDS_STATIC_PUBLISHER_INFO_HPP_
 
 #include <atomic>
 
@@ -32,6 +32,12 @@ struct OpenDDSStaticPublisherInfo
   DDS::DataWriter_var topic_writer_;
   const message_type_support_callbacks_t * callbacks_;
   rmw_gid_t publisher_gid;
+  OpenDDSStaticPublisherInfo() :
+    dds_publisher_(),
+    listener_(nullptr),
+    topic_writer_(),
+    callbacks_(nullptr),
+    publisher_gid() {}
 };
 }  // extern "C"
 
@@ -84,4 +90,4 @@ private:
   std::atomic<std::size_t> current_count_;
 };
 
-#endif  // RMW_OPENDDS_CPP__CONNEXT_STATIC_PUBLISHER_INFO_HPP_
+#endif  // RMW_OPENDDS_CPP__OPENDDS_STATIC_PUBLISHER_INFO_HPP_

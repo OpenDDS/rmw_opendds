@@ -41,15 +41,17 @@ rmw_create_service(
   const rmw_qos_profile_t * qos_profile)
 {
   if (!node) {
-    RMW_SET_ERROR_MSG("node handle is null");
+    RMW_SET_ERROR_MSG("node is null");
     return NULL;
   }
   RMW_CHECK_TYPE_IDENTIFIERS_MATCH(
-    node handle,
-    node->implementation_identifier, opendds_identifier,
+    node handle, node->implementation_identifier, opendds_identifier,
     return NULL)
 
-  RMW_OPENDDS_EXTRACT_SERVICE_TYPESUPPORT(type_supports, type_support, NULL)
+  const rosidl_service_type_support_t * type_support = rmw_get_service_type_support(type_supports);
+  if (!type_support) {
+    return NULL;
+  }
 
   if (!qos_profile) {
     RMW_SET_ERROR_MSG("qos_profile is null");
@@ -58,12 +60,12 @@ rmw_create_service(
 
   auto node_info = static_cast<OpenDDSNodeInfo *>(node->data);
   if (!node_info) {
-    RMW_SET_ERROR_MSG("node info handle is null");
+    RMW_SET_ERROR_MSG("node info is null");
     return NULL;
   }
   auto participant = static_cast<DDS::DomainParticipant *>(node_info->participant);
   if (!participant) {
-    RMW_SET_ERROR_MSG("participant handle is null");
+    RMW_SET_ERROR_MSG("participant is null");
     return NULL;
   }
 
@@ -98,10 +100,11 @@ rmw_create_service(
   // Begin initializing elements.
   service = rmw_service_allocate();
   if (!service) {
-    RMW_SET_ERROR_MSG("service handle is null");
+    RMW_SET_ERROR_MSG("failed to allocate service");
     goto fail;
   }
-
+/* //commented out for clearing crashes before type support is ready.
+   //TODO: implement service properly.
   if (!get_datareader_qos(participant, *qos_profile, datareader_qos)) {
     // error string was set within the function
     goto fail;
@@ -111,7 +114,7 @@ rmw_create_service(
     // error string was set within the function
     goto fail;
   }
-
+*/
   // allocating memory for request topic and response topic strings
   if (!_process_service_name(
       service_name,
@@ -121,7 +124,8 @@ rmw_create_service(
   {
     goto fail;
   }
-
+/* //commented out for clearing crashes before type support is ready.
+   //TODO: implement service properly.
   replier = callbacks->create_replier(
     participant, request_topic_str, response_topic_str,
     &datareader_qos, &datawriter_qos,
@@ -173,7 +177,7 @@ rmw_create_service(
 
   // update attached publisher
   dds_publisher->set_qos(publisher_qos);
-
+*/
   buf = rmw_allocate(sizeof(OpenDDSStaticServiceInfo));
   if (!buf) {
     RMW_SET_ERROR_MSG("failed to allocate memory");
@@ -182,10 +186,10 @@ rmw_create_service(
   // Use a placement new to construct the OpenDDSStaticServiceInfo in the preallocated buffer.
   RMW_TRY_PLACEMENT_NEW(service_info, buf, goto fail, OpenDDSStaticServiceInfo, )
   buf = nullptr;  // Only free the service_info pointer; don't need the buf pointer anymore.
-  service_info->replier_ = replier;
+  service_info->replier_ = nullptr; //replier;
   service_info->callbacks_ = callbacks;
-  service_info->request_datareader_ = request_datareader;
-  service_info->read_condition_ = read_condition;
+  service_info->request_datareader_ = nullptr; //request_datareader;
+  service_info->read_condition_ = nullptr; //read_condition;
 
   service->implementation_identifier = opendds_identifier;
   service->data = service_info;
@@ -195,7 +199,8 @@ rmw_create_service(
     goto fail;
   }
   memcpy(const_cast<char *>(service->service_name), service_name, strlen(service_name) + 1);
-
+/* //commented out for clearing crashes before type support is ready.
+   //TODO: implement service properly.
   mangled_name =
     request_datareader->get_topicdescription()->get_name();
   node_info->subscriber_listener->add_information(
@@ -225,7 +230,7 @@ rmw_create_service(
   fprintf(stderr, "Publisher address %p\n", static_cast<void *>(dds_publisher));
   fprintf(stderr, "******\n");
 #endif
-
+*/
   return service;
 fail:
   if (request_topic_str) {

@@ -26,12 +26,24 @@
 
 #include <ace/Message_Block.h>
 
+bool set_key(OpenDDSStaticSerializedData & instance, DDS::DataWriter * dds_data_writer) {
+  OpenDDS::DCPS::DataWriterImpl* dwImpl = dynamic_cast<OpenDDS::DCPS::DataWriterImpl*>(dds_data_writer);
+  if (!dwImpl) {
+    RMW_SET_ERROR_MSG("failed to cast dds_data_writer to DataWriterImpl");
+    return false;
+  }
+  OpenDDS::DCPS::RepoId id = dwImpl->get_publication_id();
+  std::memcpy(instance.key_hash, &id, KEY_HASH_LENGTH_16);
+  instance.serialized_key.length(KEY_HASH_LENGTH_16);
+  std::memcpy(instance.serialized_key.get_buffer(), &id, KEY_HASH_LENGTH_16);
+  return true;
+}
+
 bool
 publish(DDS::DataWriter * dds_data_writer, const rcutils_uint8_array_t * cdr_stream)
 {
-  OpenDDSStaticSerializedDataDataWriter * data_writer =
-    OpenDDSStaticSerializedDataDataWriter::_narrow(dds_data_writer);
-  if (!data_writer) {
+  OpenDDSStaticSerializedDataDataWriter_var writer = OpenDDSStaticSerializedDataDataWriter::_narrow(dds_data_writer);
+  if (!writer) {
     RMW_SET_ERROR_MSG("failed to narrow data writer");
     return false;
   }
@@ -41,28 +53,14 @@ publish(DDS::DataWriter * dds_data_writer, const rcutils_uint8_array_t * cdr_str
     return false;
   }
 
-  OpenDDSStaticSerializedData_var instance = new OpenDDSStaticSerializedData();
+  OpenDDSStaticSerializedData instance;
+  if (!set_key(instance, dds_data_writer)) {
+    return false;
+  }
+  instance.serialized_data.length(static_cast<CORBA::ULong>(cdr_stream->buffer_length));
+  std::memcpy(instance.serialized_data.get_buffer(), cdr_stream->buffer, cdr_stream->buffer_length);
 
-  // TODO: This implementation may be  temporary until typesupport is finalized
-
-  // Populate instance
-  instance->serialized_data.length(static_cast<CORBA::ULong>(cdr_stream->buffer_length));
-  std::memcpy(instance->serialized_data.get_buffer(), cdr_stream->buffer, cdr_stream->buffer_length);
-
-  OpenDDS::DCPS::DataWriterImpl* writer
-    = dynamic_cast<OpenDDS::DCPS::DataWriterImpl*>(dds_data_writer);
-
-  OpenDDS::DCPS::Message_Block_Ptr data(new ACE_Message_Block(KEY_HASH_LENGTH_16, ACE_Message_Block::MB_DATA, 0, 0, 0, 0));
-  OpenDDS::DCPS::Serializer ser(data.get());
-  ser << writer->get_publication_id();
-
-  instance->serialized_key.length(KEY_HASH_LENGTH_16);
-  std::memcpy(instance->serialized_key.get_buffer(), data.get(), KEY_HASH_LENGTH_16);
-
-  std::memcpy(instance->key_hash, data.get(), KEY_HASH_LENGTH_16);
-
-  DDS::ReturnCode_t status = data_writer->write(*instance, DDS::HANDLE_NIL);
-
+  DDS::ReturnCode_t status = writer->write(instance, DDS::HANDLE_NIL);
   return status == DDS::RETCODE_OK;
 }
 
@@ -75,61 +73,57 @@ rmw_publish(
   rmw_publisher_allocation_t * allocation)
 {
   if (!publisher) {
-    RMW_SET_ERROR_MSG("publisher handle is null");
+    RMW_SET_ERROR_MSG("publisher is null");
     return RMW_RET_ERROR;
   }
   if (publisher->implementation_identifier != opendds_identifier) {
-    RMW_SET_ERROR_MSG("publisher handle is not from this rmw implementation");
+    RMW_SET_ERROR_MSG("publisher is not from this rmw implementation");
     return RMW_RET_ERROR;
   }
   if (!ros_message) {
-    RMW_SET_ERROR_MSG("ros message handle is null");
+    RMW_SET_ERROR_MSG("ros message is null");
     return RMW_RET_ERROR;
   }
-
-  OpenDDSStaticPublisherInfo * publisher_info =
-    static_cast<OpenDDSStaticPublisherInfo *>(publisher->data);
-  if (!publisher_info) {
-    RMW_SET_ERROR_MSG("publisher info handle is null");
+  OpenDDSStaticPublisherInfo * info = static_cast<OpenDDSStaticPublisherInfo *>(publisher->data);
+  if (!info) {
+    RMW_SET_ERROR_MSG("publisher info is null");
     return RMW_RET_ERROR;
   }
-  const message_type_support_callbacks_t * callbacks = publisher_info->callbacks_;
+  const message_type_support_callbacks_t * callbacks = info->callbacks_;
   if (!callbacks) {
-    RMW_SET_ERROR_MSG("callbacks handle is null");
+    RMW_SET_ERROR_MSG("publisher info callbacks is null");
     return RMW_RET_ERROR;
   }
-  DDS::DataWriter_var topic_writer = publisher_info->topic_writer_;
-  if (!topic_writer) {
-    RMW_SET_ERROR_MSG("topic writer handle is null");
+  DDS::DataWriter_var writer = info->topic_writer_;
+  if (!writer) {
+    RMW_SET_ERROR_MSG("topic writer is null");
     return RMW_RET_ERROR;
   }
 
-  auto ret = RMW_RET_OK;
+  auto ret = RMW_RET_ERROR;
   rcutils_uint8_array_t cdr_stream = rcutils_get_zero_initialized_uint8_array();
   cdr_stream.allocator = rcutils_get_default_allocator();
-
-  if (!callbacks->to_cdr_stream(ros_message, &cdr_stream)) {
-    RMW_SET_ERROR_MSG("failed to convert ros_message to cdr stream");
-    ret = RMW_RET_ERROR;
-    goto fail;
+  try {
+/*  TODO: uncommnet this block when type support is ready.
+    if (!callbacks->to_cdr_stream(ros_message, &cdr_stream)) {
+      throw std::string("failed to convert ros_message to cdr stream");
+    }
+    if (cdr_stream.buffer_length == 0) {
+      throw std::string("no message length set");
+    }
+    if (!cdr_stream.buffer) {
+      throw std::string("no serialized message attached");
+    }
+*/
+    if (!publish(writer, &cdr_stream)) {
+      throw std::string("failed to publish message");
+    }
+    ret = RMW_RET_OK;
+  } catch (const std::string& e) {
+    RMW_SET_ERROR_MSG(e.c_str());
+  } catch (...) {
+    RMW_SET_ERROR_MSG("rmw_publish failed");
   }
-  if (cdr_stream.buffer_length == 0) {
-    RMW_SET_ERROR_MSG("no message length set");
-    ret = RMW_RET_ERROR;
-    goto fail;
-  }
-  if (!cdr_stream.buffer) {
-    RMW_SET_ERROR_MSG("no serialized message attached");
-    ret = RMW_RET_ERROR;
-    goto fail;
-  }
-  if (!publish(topic_writer, &cdr_stream)) {
-    RMW_SET_ERROR_MSG("failed to publish message");
-    ret = RMW_RET_ERROR;
-    goto fail;
-  }
-
-fail:
   cdr_stream.allocator.deallocate(cdr_stream.buffer, cdr_stream.allocator.state);
   return ret;
 }
@@ -141,37 +135,35 @@ rmw_publish_serialized_message(
   rmw_publisher_allocation_t * allocation)
 {
   if (!publisher) {
-    RMW_SET_ERROR_MSG("publisher handle is null");
+    RMW_SET_ERROR_MSG("publisher is null");
     return RMW_RET_ERROR;
   }
   if (publisher->implementation_identifier != opendds_identifier) {
-    RMW_SET_ERROR_MSG("publisher handle is not from this rmw implementation");
+    RMW_SET_ERROR_MSG("publisher is not from this rmw implementation");
     return RMW_RET_ERROR;
   }
   if (!serialized_message) {
-    RMW_SET_ERROR_MSG("serialized message handle is null");
+    RMW_SET_ERROR_MSG("serialized message is null");
     return RMW_RET_ERROR;
   }
 
-  OpenDDSStaticPublisherInfo * publisher_info =
-    static_cast<OpenDDSStaticPublisherInfo *>(publisher->data);
-  if (!publisher_info) {
-    RMW_SET_ERROR_MSG("publisher info handle is null");
+  OpenDDSStaticPublisherInfo * info = static_cast<OpenDDSStaticPublisherInfo *>(publisher->data);
+  if (!info) {
+    RMW_SET_ERROR_MSG("publisher info is null");
     return RMW_RET_ERROR;
   }
-  const message_type_support_callbacks_t * callbacks = publisher_info->callbacks_;
+  const message_type_support_callbacks_t * callbacks = info->callbacks_;
   if (!callbacks) {
-    RMW_SET_ERROR_MSG("callbacks handle is null");
+    RMW_SET_ERROR_MSG("publisher info callbacks is null");
     return RMW_RET_ERROR;
   }
-  DDS::DataWriter_var topic_writer = publisher_info->topic_writer_;
-  if (!topic_writer) {
-    RMW_SET_ERROR_MSG("topic writer handle is null");
+  DDS::DataWriter_var writer = info->topic_writer_;
+  if (!writer) {
+    RMW_SET_ERROR_MSG("topic writer is null");
     return RMW_RET_ERROR;
   }
 
-  bool published = publish(topic_writer, serialized_message);
-  if (!published) {
+  if (!publish(writer, serialized_message)) {
     RMW_SET_ERROR_MSG("failed to publish message");
     return RMW_RET_ERROR;
   }

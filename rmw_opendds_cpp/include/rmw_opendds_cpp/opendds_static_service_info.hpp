@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef RMW_OPENDDS_CPP__CONNEXT_STATIC_SERVICE_INFO_HPP_
-#define RMW_OPENDDS_CPP__CONNEXT_STATIC_SERVICE_INFO_HPP_
+#ifndef RMW_OPENDDS_CPP__OPENDDS_STATIC_SERVICE_INFO_HPP_
+#define RMW_OPENDDS_CPP__OPENDDS_STATIC_SERVICE_INFO_HPP_
 
 #include "rmw_opendds_shared_cpp/opendds_include.hpp"
 
@@ -24,10 +24,10 @@ extern "C"
 struct OpenDDSStaticServiceInfo
 {
   void * replier_;
-  DDS::DataReader * request_datareader_;
-  DDS::ReadCondition * read_condition_;
+  DDS::DataReader_var request_datareader_;
+  DDS::ReadCondition_var read_condition_;
   const service_type_support_callbacks_t * callbacks_;
 };
 }  // extern "C"
 
-#endif  // RMW_OPENDDS_CPP__CONNEXT_STATIC_SERVICE_INFO_HPP_
+#endif  // RMW_OPENDDS_CPP__OPENDDS_STATIC_SERVICE_INFO_HPP_

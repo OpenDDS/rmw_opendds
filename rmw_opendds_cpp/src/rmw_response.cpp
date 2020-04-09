@@ -105,7 +105,7 @@ rmw_send_response(
     RMW_SET_ERROR_MSG("service info handle is null");
     return RMW_RET_ERROR;
   }
-
+/*  TODO: uncommnet this block when type support is ready and service is properly implemented.
   void * replier = service_info->replier_;
   if (!replier) {
     RMW_SET_ERROR_MSG("replier handle is null");
@@ -119,7 +119,7 @@ rmw_send_response(
   }
 
   callbacks->send_response(replier, request_header, ros_response);
-
+*/
   return RMW_RET_OK;
 }
 }  // extern "C"
