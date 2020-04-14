@@ -54,11 +54,7 @@ rmw_get_service_type_support(const rosidl_service_type_support_t * type_support)
     return nullptr;
   }
   const rosidl_service_type_support_t * ts = get_service_typesupport_handle(
-  /*
     type_support, rosidl_typesupport_opendds_c__identifier);
-  */
-    //TODO: replace the following line with the above when type support is ready.
-    type_support, "rosidl_typesupport_cpp");
   if (!ts) {
     ts = get_service_typesupport_handle(type_support, rosidl_typesupport_opendds_cpp::typesupport_identifier);
     if (!ts) {
@@ -74,11 +70,7 @@ _create_type_name(
   const message_type_support_callbacks_t * callbacks,
   const std::string & sep)
 {
-/*
   return std::string(callbacks->message_namespace) + "::" + sep + "::dds_::" + callbacks->message_name + "_";
-*/
-  //TODO: replace the following line with the above when type support is ready.
-  return std::string("callbacks->message_namespace::" + sep + "::dds_::callbacks->message_name_");
 }
 
 #endif  // TYPE_SUPPORT_COMMON_HPP_
