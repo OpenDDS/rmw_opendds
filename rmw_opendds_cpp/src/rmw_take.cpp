@@ -178,12 +178,12 @@ _take(
     return RMW_RET_ERROR;
   }
   // convert the cdr stream to the message
-/*
+
   if (*taken && !callbacks->to_message(&cdr_stream, ros_message)) {
     RMW_SET_ERROR_MSG("can't convert cdr stream to ros message");
     return RMW_RET_ERROR;
   }
-*/
+
   // the call to take allocates memory for the serialized message
   // we have to free this here again
   free(cdr_stream.buffer);
