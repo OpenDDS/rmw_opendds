@@ -104,7 +104,6 @@ rmw_publish(
   rcutils_uint8_array_t cdr_stream = rcutils_get_zero_initialized_uint8_array();
   cdr_stream.allocator = rcutils_get_default_allocator();
   try {
-/*  TODO: uncommnet this block when type support is ready.
     if (!callbacks->to_cdr_stream(ros_message, &cdr_stream)) {
       throw std::string("failed to convert ros_message to cdr stream");
     }
@@ -114,7 +113,6 @@ rmw_publish(
     if (!cdr_stream.buffer) {
       throw std::string("no serialized message attached");
     }
-*/
     if (!publish(writer, &cdr_stream)) {
       throw std::string("failed to publish message");
     }
