@@ -70,9 +70,9 @@ take(
         *taken = true;
 
         if (message_info) {
-          message_info->publisher_gid->implementation_identifier = opendds_identifier;
-          memset(message_info->publisher_gid->data, 0, RMW_GID_STORAGE_SIZE);
-          auto detail = reinterpret_cast<OpenDDSPublisherGID *>(message_info->publisher_gid->data);
+          message_info->publisher_gid.implementation_identifier = opendds_identifier;
+          memset(message_info->publisher_gid.data, 0, RMW_GID_STORAGE_SIZE);
+          auto detail = reinterpret_cast<OpenDDSPublisherGID *>(message_info->publisher_gid.data);
           detail->publication_handle = info.publication_handle;
         }
       } else {
