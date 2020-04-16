@@ -113,17 +113,6 @@ take(
   return ret;
 }
 
-rmw_ret_t
-take_serialized_message(
-  rmw_serialized_message_t * serialized_msg,
-  const rmw_subscription_t * subscription,
-  bool * taken,
-  rmw_message_info_t * message_info)
-{
-  RMW_CHECK_FOR_NULL_WITH_MSG(serialized_msg, "serialized_msg is null", return RMW_RET_ERROR);
-  return take(subscription, serialized_msg, taken, message_info);
-}
-
 extern "C"
 {
 rmw_ret_t
@@ -155,7 +144,7 @@ rmw_take_serialized_message(
   bool * taken,
   rmw_subscription_allocation_t * allocation)
 {
-  return take_serialized_message(serialized_msg, subscription, taken, nullptr);
+  return take(subscription, serialized_msg, taken, nullptr);
 }
 
 rmw_ret_t
@@ -167,7 +156,7 @@ rmw_take_serialized_message_with_info(
   rmw_subscription_allocation_t * allocation)
 {
   RMW_CHECK_FOR_NULL_WITH_MSG(message_info, "message info is null", return RMW_RET_ERROR);
-  return take_serialized_message(serialized_msg, subscription, taken, message_info);
+  return take(subscription, serialized_msg, taken, message_info);
 }
 
 rmw_ret_t
