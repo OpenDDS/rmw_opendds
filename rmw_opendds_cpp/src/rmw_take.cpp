@@ -101,12 +101,10 @@ take(
     if (*taken) {
       auto info = static_cast<OpenDDSStaticSubscriberInfo *>(subscription->data);
       // convert the cdr stream to the message
-/*  TODO: uncommnet this block when type support is ready.
       if (!info->callbacks_->to_message(&cdr_stream, ros_message)) {
         RMW_SET_ERROR_MSG("can't convert cdr stream to ros message");
         ret = RMW_RET_ERROR;
       }
-*/
       free(cdr_stream.buffer);
     }
   }
