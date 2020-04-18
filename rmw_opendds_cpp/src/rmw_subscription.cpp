@@ -328,28 +328,21 @@ rmw_subscription_get_actual_qos(
   rmw_qos_profile_t * qos)
 {
   RMW_CHECK_ARGUMENT_FOR_NULL(subscription, RMW_RET_INVALID_ARGUMENT);
+  RMW_CHECK_TYPE_IDENTIFIERS_MATCH(subscription handle,
+    subscription->implementation_identifier, opendds_identifier, return RMW_RET_ERROR)
   RMW_CHECK_ARGUMENT_FOR_NULL(qos, RMW_RET_INVALID_ARGUMENT);
 
-  //auto info = static_cast<ConnextStaticSubscriberInfo *>(subscription->data);
-  //if (!info) {
-  //  RMW_SET_ERROR_MSG("subscription internal data is invalid");
-  //  return RMW_RET_ERROR;
-  //}
-  //DDS::DataReader * data_reader = info->topic_reader_;
-  //if (!data_reader) {
-  //  RMW_SET_ERROR_MSG("subscription internal data reader is invalid");
-  //  return RMW_RET_ERROR;
-  //}
-  //DDS::DataReaderQos dds_qos;
-  //DDS::ReturnCode_t status = data_reader->get_qos(dds_qos);
-  //if (DDS::RETCODE_OK != status) {
-  //  RMW_SET_ERROR_MSG("subscription can't get data reader qos policies");
-  //  return RMW_RET_ERROR;
-  //}
-
-  //dds_qos_to_rmw_qos(dds_qos, qos);
-
-  return RMW_RET_OK;
+  auto info = static_cast<OpenDDSStaticSubscriberInfo *>(subscription->data);
+  RMW_CHECK_FOR_NULL_WITH_MSG(info, "subscriber info is null", return RMW_RET_ERROR);
+  RMW_CHECK_FOR_NULL_WITH_MSG(info->topic_reader_, "topic_reader_ is null", return RMW_RET_ERROR);
+  DDS::DataReaderQos dds_qos;
+  if (info->topic_reader_->get_qos(dds_qos) == DDS::RETCODE_OK) {
+    dds_qos_to_rmw_qos(dds_qos, qos);
+    return RMW_RET_OK;
+  } else {
+    RMW_SET_ERROR_MSG("subscription can't get data reader qos policies");
+  }
+  return RMW_RET_ERROR;
 }
 
 rmw_ret_t
