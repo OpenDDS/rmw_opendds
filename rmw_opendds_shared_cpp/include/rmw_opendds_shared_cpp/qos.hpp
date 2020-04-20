@@ -94,18 +94,33 @@ set_entity_qos_from_profile(
 
   // ensure the history depth is at least the requested queue size
   assert(entity_qos.history.depth >= 0);
-  if (
-    entity_qos.history.kind == DDS::KEEP_LAST_HISTORY_QOS &&
+  if (entity_qos.history.kind == DDS::KEEP_LAST_HISTORY_QOS &&
     static_cast<size_t>(entity_qos.history.depth) < qos_profile.depth)
   {
     if (qos_profile.depth > (std::numeric_limits<CORBA::ULong>::max)()) {
-      RMW_SET_ERROR_MSG(
-        "failed to set history depth since the requested queue size exceeds the DDS type");
+      RMW_SET_ERROR_MSG("failed to set history depth since the requested queue size exceeds the DDS type");
       return false;
     }
     entity_qos.history.depth = static_cast<CORBA::ULong>(qos_profile.depth);
   }
   return true;
+}
+
+inline void
+dds_qos_lifespan_to_rmw_qos_lifespan(
+  const DDS::DataWriterQos & dds_qos,
+  rmw_qos_profile_t * qos)
+{
+  qos->lifespan.sec = dds_qos.lifespan.duration.sec;
+  qos->lifespan.nsec = dds_qos.lifespan.duration.nanosec;
+}
+
+inline void
+dds_qos_lifespan_to_rmw_qos_lifespan(
+  const DDS::DataReaderQos &,
+  rmw_qos_profile_t *)
+{
+  // no-op since no lifespan in DataReader
 }
 
 template<typename AttributeT>
@@ -154,7 +169,7 @@ dds_qos_to_rmw_qos(
   qos->deadline.sec = dds_qos.deadline.period.sec;
   qos->deadline.nsec = dds_qos.deadline.period.nanosec;
 
-  //dds_qos_lifespan_to_rmw_qos_lifespan(dds_qos, qos); //?? temp
+  dds_qos_lifespan_to_rmw_qos_lifespan(dds_qos, qos);
 
   switch (dds_qos.liveliness.kind) {
   case DDS::AUTOMATIC_LIVELINESS_QOS:
