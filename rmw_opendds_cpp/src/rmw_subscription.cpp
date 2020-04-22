@@ -337,7 +337,7 @@ rmw_subscription_get_actual_qos(
   RMW_CHECK_FOR_NULL_WITH_MSG(info->topic_reader_, "topic_reader_ is null", return RMW_RET_ERROR);
   DDS::DataReaderQos dds_qos;
   if (info->topic_reader_->get_qos(dds_qos) == DDS::RETCODE_OK) {
-    dds_qos_to_rmw_qos(dds_qos, qos);
+    dds_qos_to_rmw_qos(dds_qos, *qos);
     return RMW_RET_OK;
   } else {
     RMW_SET_ERROR_MSG("subscription can't get data reader qos policies");
