@@ -59,7 +59,6 @@ time_to_rmw(rmw_time_t & rmw, const DDS::Duration_t & dds) {
 inline void
 qos_lifespan_to_rmw(rmw_qos_profile_t & rmw_qos, const DDS::DataWriterQos & dds_qos) {
   time_to_rmw(rmw_qos.lifespan, dds_qos.lifespan.duration);
-  std::cerr << "\nlifespan(" << rmw_qos.lifespan.sec << ',' << rmw_qos.lifespan.nsec << ")";
 }
 
 inline void
