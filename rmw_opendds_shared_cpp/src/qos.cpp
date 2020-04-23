@@ -24,7 +24,7 @@ get_datareader_qos(
     RMW_SET_ERROR_MSG("failed to get default datareader qos");
     return false;
   }
-  return set_entity_qos_from_profile(qos_profile, datareader_qos);
+  return rmw_qos_to_dds_qos(qos_profile, datareader_qos);
 }
 
 bool
@@ -37,5 +37,5 @@ get_datawriter_qos(
     RMW_SET_ERROR_MSG("failed to get default datawriter qos");
     return false;
   }
-  return set_entity_qos_from_profile(qos_profile, datawriter_qos);
+  return rmw_qos_to_dds_qos(qos_profile, datawriter_qos);
 }

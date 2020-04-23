@@ -312,7 +312,7 @@ rmw_publisher_get_actual_qos(
     RMW_SET_ERROR_MSG("publisher writer get_qos failed");
     return RMW_RET_ERROR;
   }
-  dds_qos_to_rmw_qos(dds_qos, qos);
+  dds_qos_to_rmw_qos(dds_qos, *qos);
 
   return RMW_RET_OK;
 }
