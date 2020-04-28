@@ -35,5 +35,8 @@ jobs:
         source /opt/ros/eloquent/setup.bash
         printenv|grep DDS
         printenv|grep ROS
-        colcon build --symlink-install
-    displayName:  environment setup and build
+        colcon build --symlink-install --packages-up-to rmw_opendds_cpp
+        echo "done"
+        ls
+        ls ..
+    displayName: build rmw
