@@ -29,21 +29,25 @@ jobs:
       echo $(Agent.BuildDirectory)
     displayName: filesystem check
   - script: |
-      mkdir src
-      cd src
+      cd $(Agent.BuildDirectory)/s
       git clone https://github.com/oci-labs/rosidl_typesupport_opendds.git
     displayName: clone rosidl_typesupport_opendds
+  - script: |
+        cd $(Agent.BuildDirectory)
+        git clone https://github.com/adamsj-oci/rmw_build
+        vcs import s < rmw_build/ros2.repos
+        echo "ls"
+        ls
+        echo "ls s"
+        ls s/
+    displayName:  rmw build repo and dependencies
   - script: |
         source /opt/OpenDDS/setenv.sh
         source /opt/ros/eloquent/setup.bash
         printenv|grep DDS
         printenv|grep ROS
         colcon build --symlink-install --packages-up-to rmw_opendds_cpp
-    displayName:  rmw build
-  - script: |
-        curl https://raw.githubusercontent.com/adamsj-oci/rmw_build/master/ros2.repos --output ros2.repos
-        vcs import . < ros2.repos
-    displayName:  add supporting code for tests
+    displayName:  build up to rmw_opendds_cpp
   - script: |
         source /opt/OpenDDS/setenv.sh
         source /opt/ros/eloquent/setup.bash
