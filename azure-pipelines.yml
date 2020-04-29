@@ -68,8 +68,9 @@ jobs:
         export RMW_IMPLEMENTATION=rmw_opendds_cpp
         env|grep RMW
         ros2 run examples_rclcpp_minimal_subscriber subscriber_member_function_twenty 1> sub.out& 
+        process_id=$!
         ros2 run examples_rclcpp_minimal_publisher publisher_member_function_twenty
-        sleep 20
+        wait $process_id
         cat sub.out
         grep "I heard" sub.out
     displayName:  run simple tests
