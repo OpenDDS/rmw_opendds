@@ -23,17 +23,54 @@ jobs:
   steps:
   - script: |
       printenv
-      echo hello
       pwd
       ls
+      echo "agend build directory"
+      echo $(Agent.BuildDirectory)
     displayName: filesystem check
   - script: |
+      cd $(Agent.BuildDirectory)/s
       git clone https://github.com/oci-labs/rosidl_typesupport_opendds.git
     displayName: clone rosidl_typesupport_opendds
   - script: |
+        cd $(Agent.BuildDirectory)
+        git clone https://github.com/adamsj-oci/rmw_build
+        vcs import s < rmw_build/ros2.repos
+        echo "ls"
+        ls
+        echo "ls s"
+        ls s/
+    displayName:  rmw build repo and dependencies
+  - script: |
+        cd $(Agent.BuildDirectory)
         source /opt/OpenDDS/setenv.sh
         source /opt/ros/eloquent/setup.bash
         printenv|grep DDS
         printenv|grep ROS
-        colcon build --symlink-install
-    displayName:  environment setup and build
+        colcon build --symlink-install --packages-up-to rmw_opendds_cpp
+    displayName:  build up to rmw_opendds_cpp
+  - script: |
+        cd $(Agent.BuildDirectory)
+        source /opt/OpenDDS/setenv.sh
+        source /opt/ros/eloquent/setup.bash
+        source install/local_setup.bash
+        printenv|grep DDS
+        printenv|grep ROS
+        colcon build --symlink-install --packages-up-to rcl_interfaces examples_rclcpp_minimal_publisher examples_rclcpp_minimal_subscriber
+    displayName:  build simple tests
+  - script: |
+        cd $(Agent.BuildDirectory)
+        source /opt/OpenDDS/setenv.sh
+        source /opt/ros/eloquent/setup.bash
+        source install/local_setup.bash
+        printenv|grep DDS
+        printenv|grep ROS
+        export RMW_IMPLEMENTATION=rmw_opendds_cpp
+        env|grep RMW
+        ros2 run examples_rclcpp_minimal_subscriber subscriber_member_function_twenty 1> sub.out& 
+        process_id=$!
+        ros2 run examples_rclcpp_minimal_publisher publisher_member_function_twenty
+        wait $process_id
+        cat sub.out
+        grep "I heard" sub.out
+    displayName:  run simple tests
