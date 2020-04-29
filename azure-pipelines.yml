@@ -70,3 +70,4 @@ jobs:
         ros2 run examples_rclcpp_minimal_subscriber subscriber_member_function_twenty& 
         ros2 run examples_rclcpp_minimal_publisher publisher_member_function_twenty
     displayName:  run simple tests
+    
