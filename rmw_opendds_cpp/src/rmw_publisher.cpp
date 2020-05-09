@@ -143,17 +143,15 @@ rmw_create_publisher(
     RMW_SET_ERROR_MSG("qos_policies is null");
     return nullptr;
   }
-  CORBA::String_var topic_str;
-  if (!_process_topic_name(topic_name, qos_policies->avoid_ros_namespace_conventions, &topic_str.out())) {
-    RMW_SET_ERROR_MSG("failed to allocate memory for topic_str");
-    return nullptr;
-  }
+
+  std::string topic_str;
+  get_topic_name(topic_name, qos_policies->avoid_ros_namespace_conventions, topic_str);
 
   // find or create DDS::Topic
-  DDS::TopicDescription_var topic_description = participant->lookup_topicdescription(topic_str.in());
+  DDS::TopicDescription_var topic_description = participant->lookup_topicdescription(topic_str.c_str());
   DDS::Topic_var topic = topic_description ?
-    participant->find_topic(topic_str.in(), DDS::Duration_t{0, 0}) :
-    participant->create_topic(topic_str.in(), type_name.c_str(), TOPIC_QOS_DEFAULT, NULL, OpenDDS::DCPS::NO_STATUS_MASK);
+    participant->find_topic(topic_str.c_str(), DDS::Duration_t{0, 0}) :
+    participant->create_topic(topic_str.c_str(), type_name.c_str(), TOPIC_QOS_DEFAULT, NULL, OpenDDS::DCPS::NO_STATUS_MASK);
   if (!topic) {
     RMW_SET_ERROR_MSG_WITH_FORMAT_STRING("failed to %s topic", (topic_description ? "find" : "create"));
     return nullptr;

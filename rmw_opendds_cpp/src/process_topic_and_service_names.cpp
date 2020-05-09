@@ -23,54 +23,22 @@
 #include "rmw_opendds_shared_cpp/namespace_prefix.hpp"
 #include "rmw_opendds_shared_cpp/opendds_include.hpp"
 
-bool
-_process_topic_name(
-  const char * topic_name,
+void
+get_topic_name(
+  const std::string topic_name,
   bool avoid_ros_namespace_conventions,
-  char ** topic_str)
+  std::string& topic_str)
 {
-  bool success = true;
-  rcutils_allocator_t allocator = rcutils_get_default_allocator();
-  const char * topic_prefix = avoid_ros_namespace_conventions ? "" : ros_topic_prefix;
-  char * concat_str = rcutils_format_string(allocator, "%s%s", topic_prefix, topic_name);
-  if (concat_str) {
-    *topic_str = CORBA::string_dup(concat_str);
-    allocator.deallocate(concat_str, allocator.state);
-  } else {
-    RMW_SET_ERROR_MSG("could not allocate memory for topic string");
-    success = false;
-  }
-  return success;
+  topic_str = (avoid_ros_namespace_conventions ? "" : ros_topic_prefix) + topic_name;
 }
 
-bool
-_process_service_name(
-  const char * service_name,
+void
+get_service_topic_names(
+  const std::string service_name,
   bool avoid_ros_namespace_conventions,
-  char ** request_topic_str,
-  char ** response_topic_str)
+  std::string& request_topic,
+  std::string& response_topic)
 {
-  bool success = true;
-  rcutils_allocator_t allocator = rcutils_get_default_allocator();
-  const char * rq_pfx = avoid_ros_namespace_conventions ? "" : ros_service_requester_prefix;
-  const char * rp_pfx = avoid_ros_namespace_conventions ? "" : ros_service_response_prefix;
-
-  // concat the ros_service_*_prefix and Request/Reply suffixes with the service_name
-  char * rq_str = rcutils_format_string(allocator, "%s%s%s", rq_pfx, service_name, "Request");
-  if (rq_str) {
-    *request_topic_str = CORBA::string_dup(rq_str);
-    allocator.deallocate(rq_str, allocator.state);
-  } else {
-    RMW_SET_ERROR_MSG("could not allocate memory for request topic string");
-    success = false;
-  }
-  char * rp_str = rcutils_format_string(allocator, "%s%s%s", rp_pfx, service_name, "Reply");
-  if (rp_str) {
-    *response_topic_str = CORBA::string_dup(rp_str);
-    allocator.deallocate(rp_str, allocator.state);
-  } else {
-    RMW_SET_ERROR_MSG("could not allocate memory for response topic string");
-    success = false;
-  }
-  return success;
+  request_topic = (avoid_ros_namespace_conventions ? "" : ros_service_requester_prefix) + service_name + "Request";
+  response_topic = (avoid_ros_namespace_conventions ? "" : ros_service_response_prefix) + service_name + "Reply";
 }

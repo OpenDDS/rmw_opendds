@@ -115,6 +115,8 @@ rmw_create_client(
     goto fail;
   }
 */
+
+/*
   // allocating memory for request topic and response topic strings
   if (!_process_service_name(
       service_name,
@@ -124,6 +126,8 @@ rmw_create_client(
   {
     goto fail;
   }
+*/
+
 /* //commented out for clearing crashes before type support is ready.
    //TODO: implement client properly.
   requester = callbacks->create_requester(

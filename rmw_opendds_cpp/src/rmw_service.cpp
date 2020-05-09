@@ -107,12 +107,9 @@ rmw_create_service(
   }
 
   RMW_CHECK_FOR_NULL_WITH_MSG(service_name, "service_name is null", return nullptr);
-  CORBA::String_var request_topic;
-  CORBA::String_var response_topic;
-  if (!_process_service_name(service_name, qos_profile->avoid_ros_namespace_conventions,
-      &request_topic.out(), &response_topic.out())) {
-    return nullptr;
-  }
+  std::string request_topic;
+  std::string response_topic;
+  get_service_topic_names(service_name, qos_profile->avoid_ros_namespace_conventions, request_topic, response_topic);
 
   RMW_CHECK_FOR_NULL_WITH_MSG(qos_profile, "qos_profile is null", return nullptr);
 
@@ -150,7 +147,6 @@ rmw_create_service(
     return nullptr;
   }
 
-  // create service
   rmw_service_t * service = rmw_service_allocate();
   if (!service) {
     RMW_SET_ERROR_MSG("failed to allocate service");
@@ -164,9 +160,8 @@ rmw_create_service(
     if (!service->service_name) {
       throw std::string("failed to allocate memory for service name");
     }
-    memcpy(const_cast<char*>(service->service_name), service_name, strlen(service_name) + 1);
+    std::strcpy(const_cast<char*>(service->service_name), service_name);
 
-    // create OpenDDSStaticServiceInfo
     buf = rmw_allocate(sizeof(OpenDDSStaticServiceInfo));
     if (!buf) {
       throw std::string("failed to allocate memory for service info");
@@ -183,7 +178,7 @@ rmw_create_service(
     // create replier
 /* TODO: open this block when service typesupport is ready.
     info->replier_ = info->callbacks_->create_replier(node_info->participant,
-      request_topic.in(), response_topic.in(), publisher, subscriber, &rmw_allocate);
+      request_topic.c_str(), response_topic.c_str(), publisher, subscriber, &rmw_allocate);
     if (!info->replier_) {
       throw std::string("failed to create_replier");
     }

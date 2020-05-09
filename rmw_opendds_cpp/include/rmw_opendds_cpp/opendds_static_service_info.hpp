@@ -27,7 +27,7 @@ struct OpenDDSStaticServiceInfo
   void * replier_;
   DDS::DataReader_var request_reader_;
   DDS::ReadCondition_var read_condition_;
-  OpenDDSStaticServiceInfo(const service_type_support_callbacks_t * callbacks)
+  explicit OpenDDSStaticServiceInfo(const service_type_support_callbacks_t * callbacks)
   : callbacks_(callbacks), replier_(nullptr) {}
 };
 }  // extern "C"
