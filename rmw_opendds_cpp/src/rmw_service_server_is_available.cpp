@@ -182,7 +182,7 @@ rmw_service_server_is_available(
 
   size_t number_of_response_publishers = 0;
   ret = _subscription_count_matched_publishers(
-    client_info->response_datareader_, &number_of_response_publishers);
+    client_info->response_reader_, &number_of_response_publishers);
   if (ret != RMW_RET_OK) {
     // error string already set
     return ret;

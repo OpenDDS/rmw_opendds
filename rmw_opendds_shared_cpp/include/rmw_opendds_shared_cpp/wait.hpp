@@ -193,7 +193,7 @@ wait(
         return RMW_RET_ERROR;
       }
 
-      DDS::DataReader * response_datareader = client_info->response_datareader_;
+      DDS::DataReader * response_datareader = client_info->response_reader_;
       if (!response_datareader) {
         RMW_SET_ERROR_MSG("response datareader handle is null");
         return RMW_RET_ERROR;

@@ -27,6 +27,8 @@
 #include "process_topic_and_service_names.hpp"
 #include "type_support_common.hpp"
 
+#include <dds/DCPS/Marked_Default_Qos.h>
+
 // Uncomment this to get extra console output about discovery.
 // This affects code in this file, but there is a similar variable in:
 //   rmw_opendds_shared_cpp/shared_functions.cpp
@@ -34,6 +36,56 @@
 
 extern "C"
 {
+rmw_ret_t clean_client(OpenDDSNodeInfo & node_info, rmw_client_t * client)
+{
+  auto ret = RMW_RET_OK;
+  if (!client) {
+    return ret;
+  }
+  auto info = static_cast<OpenDDSStaticClientInfo*>(client->data);
+  if (info) {
+    if (info->response_reader_) {
+      node_info.subscriber_listener->remove_information(
+        info->response_reader_->get_instance_handle(), EntityType::Subscriber);
+      node_info.subscriber_listener->trigger_graph_guard_condition();
+      if (info->read_condition_) {
+        if (info->response_reader_->delete_readcondition(info->read_condition_) != DDS::RETCODE_OK) {
+          RMW_SET_ERROR_MSG("failed to delete_readcondition");
+          ret = RMW_RET_ERROR;
+        }
+        info->read_condition_ = nullptr;
+      }
+      info->response_reader_ = nullptr;
+    } else if (info->read_condition_) {
+      RMW_SET_ERROR_MSG("cannot delete readcondition because the datareader is null");
+      ret = RMW_RET_ERROR;
+    }
+
+    if (info->callbacks_ && info->requester_) {
+      DDS::DataWriter_var writer = static_cast<DDS::DataWriter *>(
+        info->callbacks_->get_request_datawriter(info->requester_));
+      if (writer) {
+        node_info.publisher_listener->remove_information(
+          writer->get_instance_handle(), EntityType::Publisher);
+        node_info.publisher_listener->trigger_graph_guard_condition();
+      }
+      info->callbacks_->destroy_requester(info->requester_, &rmw_free);
+      info->requester_ = nullptr;
+    }
+
+    RMW_TRY_DESTRUCTOR(info->~OpenDDSStaticClientInfo(), OpenDDSStaticClientInfo, ret = RMW_RET_ERROR)
+    rmw_free(info);
+    client->data = nullptr;
+  }
+
+  if (client->service_name) {
+    rmw_free(const_cast<char *>(client->service_name));
+    client->service_name = nullptr;
+  }
+  rmw_client_free(client);
+  return ret;
+}
+
 rmw_client_t *
 rmw_create_client(
   const rmw_node_t * node,
@@ -41,299 +93,167 @@ rmw_create_client(
   const char * service_name,
   const rmw_qos_profile_t * qos_profile)
 {
-  if (!node) {
-    RMW_SET_ERROR_MSG("node is null");
-    return NULL;
-  }
-  RMW_CHECK_TYPE_IDENTIFIERS_MATCH(
-    node handle, node->implementation_identifier, opendds_identifier,
-    return NULL)
+  RMW_CHECK_FOR_NULL_WITH_MSG(node, "node is null", return nullptr);
+  RMW_CHECK_TYPE_IDENTIFIERS_MATCH(node, node->implementation_identifier, opendds_identifier, return nullptr)
+
+  auto node_info = static_cast<OpenDDSNodeInfo *>(node->data);
+  RMW_CHECK_FOR_NULL_WITH_MSG(node_info, "node_info is null", return nullptr);
+  RMW_CHECK_FOR_NULL_WITH_MSG(node_info->participant.in(), "participant is null", return nullptr);
+  RMW_CHECK_FOR_NULL_WITH_MSG(node_info->publisher_listener, "publisher_listener is null", return nullptr);
+  RMW_CHECK_FOR_NULL_WITH_MSG(node_info->subscriber_listener, "subscriber_listener is null", return nullptr);
 
   const rosidl_service_type_support_t * type_support = rmw_get_service_type_support(type_supports);
   if (!type_support) {
-    return NULL;
-  }
-
-  if (!qos_profile) {
-    RMW_SET_ERROR_MSG("qos_profile is null");
     return nullptr;
   }
 
-  auto node_info = static_cast<OpenDDSNodeInfo *>(node->data);
-  if (!node_info) {
-    RMW_SET_ERROR_MSG("node info is null");
-    return NULL;
+  RMW_CHECK_FOR_NULL_WITH_MSG(service_name, "service_name is null", return nullptr);
+  std::string request_topic;
+  std::string response_topic;
+  get_service_topic_names(service_name, qos_profile->avoid_ros_namespace_conventions, request_topic, response_topic);
+
+  RMW_CHECK_FOR_NULL_WITH_MSG(qos_profile, "qos_profile is null", return nullptr);
+
+  // create publisher
+  DDS::Publisher_var publisher = node_info->participant->create_publisher(
+    PUBLISHER_QOS_DEFAULT, NULL, OpenDDS::DCPS::NO_STATUS_MASK);
+  if (!publisher) {
+    RMW_SET_ERROR_MSG("failed to create_publisher");
+    return nullptr;
   }
-  auto participant = static_cast<DDS::DomainParticipant *>(node_info->participant);
-  if (!participant) {
-    RMW_SET_ERROR_MSG("participant is null");
-    return NULL;
+  DDS::DataWriterQos writer_qos;
+  if (!get_datawriter_qos(publisher, *qos_profile, writer_qos)) {
+    RMW_SET_ERROR_MSG("failed to get_datawriter_qos");
+    return nullptr;
+  }
+  if (publisher->set_default_datawriter_qos(writer_qos) != DDS::RETCODE_OK) {
+    RMW_SET_ERROR_MSG("failed to set_default_datawriter_qos");
+    return nullptr;
   }
 
-  const service_type_support_callbacks_t * callbacks =
-    static_cast<const service_type_support_callbacks_t *>(type_support->data);
-  if (!callbacks) {
-    RMW_SET_ERROR_MSG("callbacks handle is null");
-    return NULL;
+  // create subscriber
+  DDS::Subscriber_var subscriber = node_info->participant->create_subscriber(
+    SUBSCRIBER_QOS_DEFAULT, NULL, OpenDDS::DCPS::NO_STATUS_MASK);
+  if (!subscriber) {
+    RMW_SET_ERROR_MSG("failed to create_subscriber");
+    return nullptr;
   }
-  // Past this point, a failure results in unrolling code in the goto fail block.
-  DDS::SubscriberQos subscriber_qos;
-  DDS::ReturnCode_t status;
-  DDS::PublisherQos publisher_qos;
-  DDS::DataReaderQos datareader_qos;
-  DDS::DataWriterQos datawriter_qos;
-  DDS::Publisher * dds_publisher = nullptr;
-  DDS::Subscriber * dds_subscriber = nullptr;
-  DDS::DataReader * response_datareader = nullptr;
-  DDS::DataWriter * request_datawriter = nullptr;
-  DDS::ReadCondition * read_condition = nullptr;
-  void * requester = nullptr;
-  void * buf = nullptr;
-  OpenDDSStaticClientInfo * client_info = nullptr;
-  rmw_client_t * client = nullptr;
-  std::string mangled_name = "";
+  DDS::DataReaderQos reader_qos;
+  if (!get_datareader_qos(subscriber, *qos_profile, reader_qos)) {
+    RMW_SET_ERROR_MSG("failed to get_datareader_qos");
+    return nullptr;
+  }
+  if (subscriber->set_default_datareader_qos(reader_qos) != DDS::RETCODE_OK) {
+    RMW_SET_ERROR_MSG("failed to set_default_datareader_qos");
+    return nullptr;
+  }
 
-  // memory allocations for namespacing
-  char * request_topic_str = nullptr;
-  char * response_topic_str = nullptr;
-
-  // Begin inializing elements.
-  client = rmw_client_allocate();
+  rmw_client_t * client = rmw_client_allocate();
   if (!client) {
     RMW_SET_ERROR_MSG("failed to allocate client");
-    goto fail;
+    return nullptr;
   }
-/* //commented out for clearing crashes before type support is ready.
-   //TODO: implement client properly.
-  if (!get_datareader_qos(participant, *qos_profile, datareader_qos)) {
-    // error string was set within the function
-    goto fail;
-  }
-
-  if (!get_datawriter_qos(participant, *qos_profile, datawriter_qos)) {
-    // error string was set within the function
-    goto fail;
-  }
-*/
-
-/*
-  // allocating memory for request topic and response topic strings
-  if (!_process_service_name(
-      service_name,
-      qos_profile->avoid_ros_namespace_conventions,
-      &request_topic_str,
-      &response_topic_str))
-  {
-    goto fail;
-  }
-*/
-
-/* //commented out for clearing crashes before type support is ready.
-   //TODO: implement client properly.
-  requester = callbacks->create_requester(
-    participant, request_topic_str, response_topic_str,
-    &datareader_qos, &datawriter_qos,
-    reinterpret_cast<void **>(&response_datareader),
-    reinterpret_cast<void **>(&request_datawriter),
-    &rmw_allocate);
-  CORBA::string_free(request_topic_str);
-  request_topic_str = nullptr;
-  CORBA::string_free(response_topic_str);
-  response_topic_str = nullptr;
-
-  if (!requester) {
-    RMW_SET_ERROR_MSG("failed to create requester");
-    goto fail;
-  }
-  if (!response_datareader) {
-    RMW_SET_ERROR_MSG("data reader handle is null");
-    goto fail;
-  }
-  if (!request_datawriter) {
-    RMW_SET_ERROR_MSG("data request handle is null");
-    goto fail;
-  }
-
-  dds_subscriber = response_datareader->get_subscriber();
-  status = participant->get_default_subscriber_qos(subscriber_qos);
-  if (status != DDS::RETCODE_OK) {
-    RMW_SET_ERROR_MSG("failed to get default subscriber qos");
-    goto fail;
-  }
-
-  dds_publisher = request_datawriter->get_publisher();
-  status = participant->get_default_publisher_qos(publisher_qos);
-  if (status != DDS::RETCODE_OK) {
-    RMW_SET_ERROR_MSG("failed to get default subscriber qos");
-    goto fail;
-  }
-
-  // update attached subscriber
-  dds_subscriber->set_qos(subscriber_qos);
-
-  // update attached publisher
-  dds_publisher->set_qos(publisher_qos);
-
-  read_condition = response_datareader->create_readcondition(
-    DDS::ANY_SAMPLE_STATE, DDS::ANY_VIEW_STATE, DDS::ANY_INSTANCE_STATE);
-  if (!read_condition) {
-    RMW_SET_ERROR_MSG("failed to create read condition");
-    goto fail;
-  }
-*/
-  buf = rmw_allocate(sizeof(OpenDDSStaticClientInfo));
-  if (!buf) {
-    RMW_SET_ERROR_MSG("failed to allocate memory");
-    goto fail;
-  }
-  // Use a placement new to construct the OpenDDSStaticClientInfo in the preallocated buffer.
-  RMW_TRY_PLACEMENT_NEW(client_info, buf, goto fail, OpenDDSStaticClientInfo, )
-  buf = nullptr;  // Only free the client_info pointer; don't need the buf pointer anymore.
-  client_info->requester_ = nullptr; //requester;
-  client_info->callbacks_ = nullptr; //callbacks;
-  client_info->response_datareader_ = nullptr; //response_datareader;
-  client_info->read_condition_ = nullptr; //read_condition;
-
-  client->implementation_identifier = opendds_identifier;
-  client->data = client_info;
-  client->service_name = reinterpret_cast<const char *>(rmw_allocate(strlen(service_name) + 1));
-  if (!client->service_name) {
-    RMW_SET_ERROR_MSG("failed to allocate memory for service name");
-    goto fail;
-  }
-  memcpy(const_cast<char *>(client->service_name), service_name, strlen(service_name) + 1);
-/* //commented out for clearing crashes before type support is ready.
-   //TODO: implement client properly.
-  mangled_name =
-    response_datareader->get_topicdescription()->get_name();
-  node_info->subscriber_listener->add_information(
-    node_info->participant->get_instance_handle(),
-    response_datareader->get_instance_handle(),
-    mangled_name,
-    response_datareader->get_topicdescription()->get_type_name(),
-    EntityType::Subscriber);
-  node_info->subscriber_listener->trigger_graph_guard_condition();
-
-  mangled_name =
-    request_datawriter->get_topic()->get_name();
-  node_info->publisher_listener->add_information(
-    node_info->participant->get_instance_handle(),
-    request_datawriter->get_instance_handle(),
-    mangled_name,
-    request_datawriter->get_topic()->get_type_name(),
-    EntityType::Publisher);
-  node_info->publisher_listener->trigger_graph_guard_condition();
-
-// TODO(karsten1987): replace this block with logging macros
-#ifdef DISCOVERY_DEBUG_LOGGING
-  fprintf(stderr, "****** Creating Client Details: *********\n");
-  fprintf(stderr, "Subscriber topic %s\n", response_datareader->get_topicdescription()->get_name());
-  fprintf(stderr, "Subscriber address %p\n", static_cast<void *>(dds_subscriber));
-  fprintf(stderr, "Publisher topic %s\n", request_datawriter->get_topic()->get_name());
-  fprintf(stderr, "Publisher address %p\n", static_cast<void *>(dds_publisher));
-  fprintf(stderr, "******\n");
-#endif
-*/
-  return client;
-fail:
-  if (request_topic_str) {
-    CORBA::string_free(request_topic_str);
-    request_topic_str = nullptr;
-  }
-  if (response_topic_str) {
-    CORBA::string_free(response_topic_str);
-    response_topic_str = nullptr;
-  }
-  if (client) {
-    rmw_client_free(client);
-  }
-  if (response_datareader) {
-    if (dds_subscriber->delete_datareader(response_datareader) != DDS::RETCODE_OK) {
-      std::stringstream ss;
-      ss << "leaking datareader while handling failure at " <<
-        __FILE__ << ":" << __LINE__ << '\n';
-      (std::cerr << ss.str()).flush();
+  void * buf = nullptr;
+  try {
+    client->implementation_identifier = opendds_identifier;
+    client->data = nullptr;
+    client->service_name = reinterpret_cast<const char *>(rmw_allocate(strlen(service_name) + 1));
+    if (!client->service_name) {
+      throw std::string("failed to allocate memory for service name");
     }
+    std::strcpy(const_cast<char*>(client->service_name), service_name);
+
+    buf = rmw_allocate(sizeof(OpenDDSStaticClientInfo));
+    if (!buf) {
+      throw std::string("failed to allocate memory for client info");
+    }
+    OpenDDSStaticClientInfo * info = nullptr;
+    RMW_TRY_PLACEMENT_NEW(info, buf, throw 1, OpenDDSStaticClientInfo,
+      static_cast<const service_type_support_callbacks_t*>(type_support->data))
+    client->data = info;
+    buf = nullptr;
+    if (!info->callbacks_) {
+      throw std::string("callbacks handle is null");
+    }
+
+    info->requester_ = info->callbacks_->create_requester(node_info->participant,
+      request_topic.c_str(), response_topic.c_str(), publisher, subscriber, &rmw_allocate);
+    if (!info->requester_) {
+      throw std::string("failed to create_requester");
+    }
+
+    info->response_reader_ = static_cast<DDS::DataReader*>(
+      info->callbacks_->get_reply_datareader(info->requester_));
+    if (!info->response_reader_) {
+      throw std::string("response_reader_ is null");
+    }
+
+    info->read_condition_ = info->response_reader_->create_readcondition(
+      DDS::ANY_SAMPLE_STATE, DDS::ANY_VIEW_STATE, DDS::ANY_INSTANCE_STATE);
+    if (!info->read_condition_) {
+      throw std::string("failed to create_readcondition");
+    }
+
+    // update node_info subscriber_listener
+    DDS::TopicDescription_ptr rtopic_des = info->response_reader_->get_topicdescription();
+    if (!rtopic_des) {
+      throw std::string("failed to get_topicdescription");
+    }
+    CORBA::String_var name = rtopic_des->get_name();
+    CORBA::String_var type_name = rtopic_des->get_type_name();
+    if (!name || !type_name) {
+      throw std::string("topicdescription name or type_name is null");
+    }
+    node_info->subscriber_listener->add_information(node_info->participant->get_instance_handle(),
+      info->response_reader_->get_instance_handle(), name.in(), type_name.in(), EntityType::Subscriber);
+    node_info->subscriber_listener->trigger_graph_guard_condition();
+
+    // update node_info publisher_listener
+    DDS::DataWriter_var writer = static_cast<DDS::DataWriter*>(
+      info->callbacks_->get_request_datawriter(info->requester_));
+    if (!writer) {
+      throw std::string("reply writer is null");
+    }
+    DDS::Topic_ptr wtopic = writer->get_topic();
+    if (!wtopic) {
+      throw std::string("writer->get_topic failed");
+    }
+    name = wtopic->get_name();
+    type_name = wtopic->get_type_name();
+    if (!name || !type_name) {
+      throw std::string("writer topic name or type_name is null");
+    }
+    node_info->publisher_listener->add_information(node_info->participant->get_instance_handle(),
+      writer->get_instance_handle(), name.in(), type_name.in(), EntityType::Publisher);
+    node_info->publisher_listener->trigger_graph_guard_condition();
+
+    return client;
+
+  } catch (const std::string& e) {
+    RMW_SET_ERROR_MSG(e.c_str());
+  } catch (...) {
+    RMW_SET_ERROR_MSG("rmw_create_client failed");
   }
-  // TODO(wjwwood): deallocate requester (currently allocated with new elsewhere)
-  if (client_info) {
-    RMW_TRY_DESTRUCTOR_FROM_WITHIN_FAILURE(
-      client_info->~OpenDDSStaticClientInfo(), OpenDDSStaticClientInfo)
-    rmw_free(client_info);
-  }
+  clean_client(*node_info, client);
   if (buf) {
     rmw_free(buf);
   }
-
-  return NULL;
+  return nullptr;
 }
 
 rmw_ret_t
 rmw_destroy_client(rmw_node_t * node, rmw_client_t * client)
 {
-  if (!node) {
-    RMW_SET_ERROR_MSG("node handle is null");
-    return RMW_RET_ERROR;
-  }
-  if (!client) {
-    RMW_SET_ERROR_MSG("client handle is null");
-    return RMW_RET_ERROR;
-  }
-  RMW_CHECK_TYPE_IDENTIFIERS_MATCH(
-    client handle,
-    client->implementation_identifier, opendds_identifier,
-    return RMW_RET_ERROR)
-
-  auto result = RMW_RET_OK;
-  OpenDDSStaticClientInfo * client_info = static_cast<OpenDDSStaticClientInfo *>(client->data);
-
+  RMW_CHECK_FOR_NULL_WITH_MSG(node, "node is null", return RMW_RET_ERROR);
+  RMW_CHECK_TYPE_IDENTIFIERS_MATCH(node, node->implementation_identifier,
+    opendds_identifier, return RMW_RET_ERROR)
   auto node_info = static_cast<OpenDDSNodeInfo *>(node->data);
+  RMW_CHECK_FOR_NULL_WITH_MSG(node_info, "node_info is null", return RMW_RET_ERROR);
 
-  if (client_info) {
-    auto response_datareader = client_info->response_datareader_;
+  RMW_CHECK_FOR_NULL_WITH_MSG(client, "client is null", return RMW_RET_ERROR);
+  RMW_CHECK_TYPE_IDENTIFIERS_MATCH(client, client->implementation_identifier,
+    opendds_identifier, return RMW_RET_ERROR)
 
-    node_info->subscriber_listener->remove_information(
-      client_info->response_datareader_->get_instance_handle(), EntityType::Subscriber);
-    DDS::DataWriter * request_datawriter = static_cast<DDS::DataWriter *>(
-      client_info->callbacks_->get_request_datawriter(client_info->requester_));
-    node_info->subscriber_listener->trigger_graph_guard_condition();
-
-    node_info->publisher_listener->remove_information(
-      request_datawriter->get_instance_handle(),
-      EntityType::Publisher);
-    node_info->publisher_listener->trigger_graph_guard_condition();
-
-    if (response_datareader) {
-      auto read_condition = client_info->read_condition_;
-      if (read_condition) {
-        if (response_datareader->delete_readcondition(read_condition) != DDS::RETCODE_OK) {
-          RMW_SET_ERROR_MSG("failed to delete readcondition");
-          result = RMW_RET_ERROR;
-        }
-        client_info->read_condition_ = nullptr;
-      }
-    } else if (client_info->read_condition_) {
-      RMW_SET_ERROR_MSG("cannot delete readcondition because the datareader is null");
-      result = RMW_RET_ERROR;
-    }
-    const service_type_support_callbacks_t * callbacks = client_info->callbacks_;
-    if (callbacks) {
-      if (client_info->requester_) {
-        callbacks->destroy_requester(client_info->requester_, &rmw_free);
-      }
-    }
-
-    RMW_TRY_DESTRUCTOR(
-      client_info->~OpenDDSStaticClientInfo(),
-      OpenDDSStaticClientInfo, result = RMW_RET_ERROR)
-    rmw_free(client_info);
-    client->data = nullptr;
-    if (client->service_name) {
-      rmw_free(const_cast<char *>(client->service_name));
-    }
-  }
-  rmw_client_free(client);
-
-  return result;
+  return clean_client(*node_info, client);
 }
 }  // extern "C"
