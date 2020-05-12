@@ -167,7 +167,8 @@ rmw_create_subscription(
   //  goto fail;
   //}
 
-  if (!topic_name || strlen(topic_name) == 0) {
+  std::string topic_str = get_topic_str(topic_name, qos_profile->avoid_ros_namespace_conventions);
+  if (topic_str.empty()) {
     RMW_SET_ERROR_MSG("subscription topic_name is null or empty");
     return nullptr;
   }
@@ -175,9 +176,6 @@ rmw_create_subscription(
     RMW_SET_ERROR_MSG("qos_profile is null");
     return nullptr;
   }
-
-  std::string topic_str;
-  get_topic_name(topic_name, qos_profile->avoid_ros_namespace_conventions, topic_str);
 
   // find or create DDS::Topic
   DDS::TopicDescription_var topic_description = participant->lookup_topicdescription(topic_str.c_str());

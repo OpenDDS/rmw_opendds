@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "process_topic_and_service_names.hpp"
 #include "rcutils/format_string.h"
 #include "rcutils/types.h"
 #include "rcutils/split.h"
@@ -23,18 +24,23 @@
 #include "rmw_opendds_shared_cpp/namespace_prefix.hpp"
 #include "rmw_opendds_shared_cpp/opendds_include.hpp"
 
-void
-get_topic_name(
-  const std::string topic_name,
-  bool avoid_ros_namespace_conventions,
-  std::string& topic_str)
+std::string
+get_topic_str(
+  const char * topic_name,
+  bool avoid_ros_namespace_conventions)
 {
-  topic_str = (avoid_ros_namespace_conventions ? "" : ros_topic_prefix) + topic_name;
+  if (!topic_name || strlen(topic_name) == 0) {
+    return "";
+  }
+  if (avoid_ros_namespace_conventions) {
+    return topic_name;
+  }
+  return std::string(ros_topic_prefix) + topic_name;
 }
 
 void
 get_service_topic_names(
-  const std::string service_name,
+  const std::string& service_name,
   bool avoid_ros_namespace_conventions,
   std::string& request_topic,
   std::string& response_topic)
