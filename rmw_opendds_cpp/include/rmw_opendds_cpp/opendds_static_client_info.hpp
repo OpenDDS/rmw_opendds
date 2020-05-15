@@ -23,10 +23,12 @@ extern "C"
 {
 struct OpenDDSStaticClientInfo
 {
-  void * requester_;
-  DDS::DataReader * response_datareader_;
-  DDS::ReadCondition * read_condition_;
   const service_type_support_callbacks_t * callbacks_;
+  void * requester_;
+  DDS::DataReader_var response_reader_;
+  DDS::ReadCondition_var read_condition_;
+  explicit OpenDDSStaticClientInfo(const service_type_support_callbacks_t * callbacks)
+  : callbacks_(callbacks), requester_(nullptr) {}
 };
 }  // extern "C"
 

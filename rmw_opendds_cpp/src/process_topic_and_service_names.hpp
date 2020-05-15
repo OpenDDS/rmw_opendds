@@ -15,17 +15,18 @@
 #ifndef PROCESS_TOPIC_AND_SERVICE_NAMES_HPP_
 #define PROCESS_TOPIC_AND_SERVICE_NAMES_HPP_
 
-bool
-_process_topic_name(
-  const char * topic_name,
-  bool avoid_ros_namespace_conventions,
-  char ** topic_str);
+#include <string>
 
-bool
-_process_service_name(
-  const char * service_name,
+std::string
+get_topic_str(
+  const char * topic_name,
+  bool avoid_ros_namespace_conventions);
+
+void
+get_service_topic_names(
+  const std::string& service_name,
   bool avoid_ros_namespace_conventions,
-  char ** request_topic_str,
-  char ** response_topic_str);
+  std::string& request_topic,
+  std::string& response_topic);
 
 #endif  // PROCESS_TOPIC_AND_SERVICE_NAMES_HPP_

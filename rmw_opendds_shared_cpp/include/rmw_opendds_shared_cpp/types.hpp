@@ -132,7 +132,7 @@ public:
 
 struct OpenDDSNodeInfo
 {
-  DDS::DomainParticipant * participant;
+  DDS::DomainParticipant_var participant;
   CustomPublisherListener * publisher_listener;
   CustomSubscriberListener * subscriber_listener;
   rmw_guard_condition_t * graph_guard_condition;

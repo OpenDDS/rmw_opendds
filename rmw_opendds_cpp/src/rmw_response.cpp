@@ -29,48 +29,18 @@ rmw_take_response(
   void * ros_response,
   bool * taken)
 {
-  if (!client) {
-    RMW_SET_ERROR_MSG("client handle is null");
-    return RMW_RET_ERROR;
-  }
-  RMW_CHECK_TYPE_IDENTIFIERS_MATCH(
-    client handle,
-    client->implementation_identifier, opendds_identifier,
-    return RMW_RET_ERROR)
+  RMW_CHECK_FOR_NULL_WITH_MSG(client, "client is null", return RMW_RET_ERROR);
+  RMW_CHECK_TYPE_IDENTIFIERS_MATCH(client, client->implementation_identifier, opendds_identifier, return RMW_RET_ERROR)
+  RMW_CHECK_FOR_NULL_WITH_MSG(request_header, "request_header is null", return RMW_RET_ERROR);
+  RMW_CHECK_FOR_NULL_WITH_MSG(ros_response, "ros_response is null", return RMW_RET_ERROR);
+  RMW_CHECK_FOR_NULL_WITH_MSG(taken, "taken is null", return RMW_RET_ERROR);
 
-  if (!request_header) {
-    RMW_SET_ERROR_MSG("ros request header handle is null");
-    return RMW_RET_ERROR;
-  }
-  if (!ros_response) {
-    RMW_SET_ERROR_MSG("ros response handle is null");
-    return RMW_RET_ERROR;
-  }
-  if (!taken) {
-    RMW_SET_ERROR_MSG("taken handle is null");
-    return RMW_RET_ERROR;
-  }
+  auto client_info = static_cast<OpenDDSStaticClientInfo *>(client->data);
+  RMW_CHECK_FOR_NULL_WITH_MSG(client_info, "client_info is null", return RMW_RET_ERROR);
+  RMW_CHECK_FOR_NULL_WITH_MSG(client_info->callbacks_, "callbacks_ is null", return RMW_RET_ERROR);
+  RMW_CHECK_FOR_NULL_WITH_MSG(client_info->requester_, "requester_ is null", return RMW_RET_ERROR);
 
-  OpenDDSStaticClientInfo * client_info =
-    static_cast<OpenDDSStaticClientInfo *>(client->data);
-  if (!client_info) {
-    RMW_SET_ERROR_MSG("client info handle is null");
-    return RMW_RET_ERROR;
-  }
-
-  void * requester = client_info->requester_;
-  if (!requester) {
-    RMW_SET_ERROR_MSG("requester handle is null");
-    return RMW_RET_ERROR;
-  }
-
-  const service_type_support_callbacks_t * callbacks = client_info->callbacks_;
-  if (!callbacks) {
-    RMW_SET_ERROR_MSG("callbacks handle is null");
-    return RMW_RET_ERROR;
-  }
-
-  *taken = callbacks->take_response(requester, request_header, ros_response);
+  *taken = client_info->callbacks_->take_response(client_info->requester_, request_header, ros_response);
 
   return RMW_RET_OK;
 }
@@ -81,44 +51,18 @@ rmw_send_response(
   rmw_request_id_t * request_header,
   void * ros_response)
 {
-  if (!service) {
-    RMW_SET_ERROR_MSG("service handle is null");
-    return RMW_RET_ERROR;
-  }
-  RMW_CHECK_TYPE_IDENTIFIERS_MATCH(
-    service handle,
-    service->implementation_identifier, opendds_identifier,
-    return RMW_RET_ERROR)
+  RMW_CHECK_FOR_NULL_WITH_MSG(service, "service is null", return RMW_RET_ERROR);
+  RMW_CHECK_TYPE_IDENTIFIERS_MATCH(service, service->implementation_identifier, opendds_identifier, return RMW_RET_ERROR)
+  RMW_CHECK_FOR_NULL_WITH_MSG(request_header, "request_header is null", return RMW_RET_ERROR);
+  RMW_CHECK_FOR_NULL_WITH_MSG(ros_response, "ros_response is null", return RMW_RET_ERROR);
 
-  if (!request_header) {
-    RMW_SET_ERROR_MSG("ros request header handle is null");
-    return RMW_RET_ERROR;
-  }
-  if (!ros_response) {
-    RMW_SET_ERROR_MSG("ros response handle is null");
-    return RMW_RET_ERROR;
-  }
+  auto service_info = static_cast<OpenDDSStaticServiceInfo *>(service->data);
+  RMW_CHECK_FOR_NULL_WITH_MSG(service_info, "service_info is null", return RMW_RET_ERROR);
+/*  TODO: uncommnet this block when type support is ready.
+  RMW_CHECK_FOR_NULL_WITH_MSG(service_info->callbacks_, "callbacks_ is null", return RMW_RET_ERROR);
+  RMW_CHECK_FOR_NULL_WITH_MSG(service_info->replier_, "replier_ is null", return RMW_RET_ERROR);
 
-  OpenDDSStaticServiceInfo * service_info =
-    static_cast<OpenDDSStaticServiceInfo *>(service->data);
-  if (!service_info) {
-    RMW_SET_ERROR_MSG("service info handle is null");
-    return RMW_RET_ERROR;
-  }
-/*  TODO: uncommnet this block when type support is ready and service is properly implemented.
-  void * replier = service_info->replier_;
-  if (!replier) {
-    RMW_SET_ERROR_MSG("replier handle is null");
-    return RMW_RET_ERROR;
-  }
-
-  const service_type_support_callbacks_t * callbacks = service_info->callbacks_;
-  if (!callbacks) {
-    RMW_SET_ERROR_MSG("callbacks handle is null");
-    return RMW_RET_ERROR;
-  }
-
-  callbacks->send_response(replier, request_header, ros_response);
+  service_info->callbacks_->send_response(service_info->replier_, request_header, ros_response);
 */
   return RMW_RET_OK;
 }

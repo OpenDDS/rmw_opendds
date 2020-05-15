@@ -28,37 +28,16 @@ rmw_send_request(
   const void * ros_request,
   int64_t * sequence_id)
 {
-  if (!client) {
-    RMW_SET_ERROR_MSG("client handle is null");
-    return RMW_RET_ERROR;
-  }
-  RMW_CHECK_TYPE_IDENTIFIERS_MATCH(
-    client handle,
-    client->implementation_identifier, opendds_identifier,
-    return RMW_RET_ERROR)
+  RMW_CHECK_FOR_NULL_WITH_MSG(client, "client is null", return RMW_RET_ERROR);
+  RMW_CHECK_TYPE_IDENTIFIERS_MATCH(client, client->implementation_identifier, opendds_identifier, return RMW_RET_ERROR)
+  RMW_CHECK_FOR_NULL_WITH_MSG(ros_request, "ros_request is null", return RMW_RET_ERROR);
 
-  if (!ros_request) {
-    RMW_SET_ERROR_MSG("ros request handle is null");
-    return RMW_RET_ERROR;
-  }
+  auto client_info = static_cast<OpenDDSStaticClientInfo *>(client->data);
+  RMW_CHECK_FOR_NULL_WITH_MSG(client_info, "client_info is null", return RMW_RET_ERROR);
+  RMW_CHECK_FOR_NULL_WITH_MSG(client_info->callbacks_, "callbacks_ is null", return RMW_RET_ERROR);
+  RMW_CHECK_FOR_NULL_WITH_MSG(client_info->requester_, "requester_ is null", return RMW_RET_ERROR);
 
-  OpenDDSStaticClientInfo * client_info = static_cast<OpenDDSStaticClientInfo *>(client->data);
-  if (!client_info) {
-    RMW_SET_ERROR_MSG("client info handle is null");
-    return RMW_RET_ERROR;
-  }
-  const service_type_support_callbacks_t * callbacks = client_info->callbacks_;
-  if (!callbacks) {
-    RMW_SET_ERROR_MSG("callbacks handle is null");
-    return RMW_RET_ERROR;
-  }
-  void * requester = client_info->requester_;
-  if (!requester) {
-    RMW_SET_ERROR_MSG("requester handle is null");
-    return RMW_RET_ERROR;
-  }
-
-  *sequence_id = callbacks->send_request(requester, ros_request);
+  *sequence_id = client_info->callbacks_->send_request(client_info->requester_, ros_request);
   return RMW_RET_OK;
 }
 
@@ -69,51 +48,21 @@ rmw_take_request(
   void * ros_request,
   bool * taken)
 {
-  if (!service) {
-    RMW_SET_ERROR_MSG("service handle is null");
-    return RMW_RET_ERROR;
-  }
-  RMW_CHECK_TYPE_IDENTIFIERS_MATCH(
-    service handle,
-    service->implementation_identifier, opendds_identifier,
-    return RMW_RET_ERROR)
+  RMW_CHECK_FOR_NULL_WITH_MSG(service, "service is null", return RMW_RET_ERROR);
+  RMW_CHECK_TYPE_IDENTIFIERS_MATCH(service, service->implementation_identifier, opendds_identifier, return RMW_RET_ERROR)
+  RMW_CHECK_FOR_NULL_WITH_MSG(request_header, "request_header is null", return RMW_RET_ERROR);
+  RMW_CHECK_FOR_NULL_WITH_MSG(ros_request, "ros_request is null", return RMW_RET_ERROR);
+  RMW_CHECK_FOR_NULL_WITH_MSG(taken, "taken is null", return RMW_RET_ERROR);
 
-  if (!request_header) {
-    RMW_SET_ERROR_MSG("ros request header handle is null");
-    return RMW_RET_ERROR;
-  }
-  if (!ros_request) {
-    RMW_SET_ERROR_MSG("ros request handle is null");
-    return RMW_RET_ERROR;
-  }
-  if (!taken) {
-    RMW_SET_ERROR_MSG("taken handle is null");
-    return RMW_RET_ERROR;
-  }
-
-  OpenDDSStaticServiceInfo * service_info =
-    static_cast<OpenDDSStaticServiceInfo *>(service->data);
-  if (!service_info) {
-    RMW_SET_ERROR_MSG("service info handle is null");
-    return RMW_RET_ERROR;
-  }
-
-  void * replier = service_info->replier_;
+  auto service_info = static_cast<OpenDDSStaticServiceInfo *>(service->data);
+  RMW_CHECK_FOR_NULL_WITH_MSG(service_info, "service_info is null", return RMW_RET_ERROR);
 /*
-  if (!replier) {
-    RMW_SET_ERROR_MSG("replier handle is null");
-    return RMW_RET_ERROR;
-  }
+  RMW_CHECK_FOR_NULL_WITH_MSG(service_info->callbacks_, "callbacks_ is null", return RMW_RET_ERROR);
+  RMW_CHECK_FOR_NULL_WITH_MSG(service_info->replier_, "replier_ is null", return RMW_RET_ERROR);
 
-  const service_type_support_callbacks_t * callbacks = service_info->callbacks_;
-  if (!callbacks) {
-    RMW_SET_ERROR_MSG("callbacks handle is null");
-    return RMW_RET_ERROR;
-  }
-
-  *taken = callbacks->take_request(replier, request_header, ros_request);
+  *taken = service_info->callbacks_->take_request(service_info->replier_, request_header, ros_request);
 */
-  *taken = true; //TODO: replaced this line with the above when service is implemented
+  *taken = true; //TODO: delete this line and uncomment the above block when type support is ready.
   return RMW_RET_OK;
 }
 }  // extern "C"
