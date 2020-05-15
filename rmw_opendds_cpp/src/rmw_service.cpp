@@ -160,7 +160,7 @@ rmw_create_service(
     if (!service->service_name) {
       throw std::string("failed to allocate memory for service name");
     }
-    std::strcpy(const_cast<char*>(service->service_name), service_name);
+    std::strcpy(const_cast<char *>(service->service_name), service_name);
 
     buf = rmw_allocate(sizeof(OpenDDSStaticServiceInfo));
     if (!buf) {
@@ -168,7 +168,7 @@ rmw_create_service(
     }
     OpenDDSStaticServiceInfo * info = nullptr;
     RMW_TRY_PLACEMENT_NEW(info, buf, throw 1, OpenDDSStaticServiceInfo,
-      static_cast<const service_type_support_callbacks_t*>(type_support->data))
+      static_cast<const service_type_support_callbacks_t *>(type_support->data))
     service->data = info;
     buf = nullptr;
     if (!info->callbacks_) {

@@ -161,7 +161,7 @@ rmw_create_client(
     if (!client->service_name) {
       throw std::string("failed to allocate memory for service name");
     }
-    std::strcpy(const_cast<char*>(client->service_name), service_name);
+    std::strcpy(const_cast<char *>(client->service_name), service_name);
 
     buf = rmw_allocate(sizeof(OpenDDSStaticClientInfo));
     if (!buf) {
@@ -169,7 +169,7 @@ rmw_create_client(
     }
     OpenDDSStaticClientInfo * info = nullptr;
     RMW_TRY_PLACEMENT_NEW(info, buf, throw 1, OpenDDSStaticClientInfo,
-      static_cast<const service_type_support_callbacks_t*>(type_support->data))
+      static_cast<const service_type_support_callbacks_t *>(type_support->data))
     client->data = info;
     buf = nullptr;
     if (!info->callbacks_) {
@@ -182,7 +182,7 @@ rmw_create_client(
       throw std::string("failed to create_requester");
     }
 
-    info->response_reader_ = static_cast<DDS::DataReader*>(
+    info->response_reader_ = static_cast<DDS::DataReader *>(
       info->callbacks_->get_reply_datareader(info->requester_));
     if (!info->response_reader_) {
       throw std::string("response_reader_ is null");
@@ -195,7 +195,7 @@ rmw_create_client(
     }
 
     // update node_info subscriber_listener
-    DDS::TopicDescription_ptr rtopic_des = info->response_reader_->get_topicdescription();
+    DDS::TopicDescription_var rtopic_des = info->response_reader_->get_topicdescription();
     if (!rtopic_des) {
       throw std::string("failed to get_topicdescription");
     }
@@ -209,12 +209,12 @@ rmw_create_client(
     node_info->subscriber_listener->trigger_graph_guard_condition();
 
     // update node_info publisher_listener
-    DDS::DataWriter_var writer = static_cast<DDS::DataWriter*>(
+    DDS::DataWriter_var writer = static_cast<DDS::DataWriter *>(
       info->callbacks_->get_request_datawriter(info->requester_));
     if (!writer) {
       throw std::string("reply writer is null");
     }
-    DDS::Topic_ptr wtopic = writer->get_topic();
+    DDS::Topic_var wtopic = writer->get_topic();
     if (!wtopic) {
       throw std::string("writer->get_topic failed");
     }
