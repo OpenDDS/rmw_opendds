@@ -63,17 +63,20 @@ take(
     if (info.valid_data) {
       cdr_stream->buffer_length = dds_messages[0].serialized_data.length();
       if (cdr_stream->buffer_length <= (std::numeric_limits<unsigned int>::max)()) {
-        cdr_stream->buffer = reinterpret_cast<uint8_t *>(malloc(cdr_stream->buffer_length * sizeof(uint8_t)));
-        for (unsigned int i = 0; i < static_cast<unsigned int>(cdr_stream->buffer_length); ++i) {
-          cdr_stream->buffer[i] = dds_messages[0].serialized_data[i];
-        }
-        *taken = true;
+        size_t buf_size = cdr_stream->buffer_length * sizeof(uint8_t);
+        cdr_stream->buffer = reinterpret_cast<uint8_t *>(malloc(buf_size));
+        if (cdr_stream->buffer) {
+          std::memcpy(cdr_stream->buffer, dds_messages[0].serialized_data.get_buffer(), buf_size);
+          *taken = true;
 
-        if (message_info) {
-          message_info->publisher_gid.implementation_identifier = opendds_identifier;
-          memset(message_info->publisher_gid.data, 0, RMW_GID_STORAGE_SIZE);
-          auto detail = reinterpret_cast<OpenDDSPublisherGID *>(message_info->publisher_gid.data);
-          detail->publication_handle = info.publication_handle;
+          if (message_info) {
+            message_info->publisher_gid.implementation_identifier = opendds_identifier;
+            memset(message_info->publisher_gid.data, 0, RMW_GID_STORAGE_SIZE);
+            auto detail = reinterpret_cast<OpenDDSPublisherGID *>(message_info->publisher_gid.data);
+            detail->publication_handle = info.publication_handle;
+          }
+        } else {
+          RMW_SET_ERROR_MSG("failed to allocate memory for uint8 array");
         }
       } else {
         RMW_SET_ERROR_MSG("cdr_stream->buffer_length > max unsigned int");
