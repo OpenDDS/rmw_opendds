@@ -61,13 +61,13 @@ take(
   if (DDS::RETCODE_OK == status) {
     DDS::SampleInfo & info = sample_infos[0];
     if (info.valid_data) {
-      if (dds_messages[0].serialized_data.length() <= (std::numeric_limits<unsigned int>::max)()) {
-        cdr_stream->buffer_length = dds_messages[0].serialized_data.length();
-        cdr_stream->buffer_capacity = cdr_stream->buffer_length;
-        const size_t buf_size = cdr_stream->buffer_length * sizeof(uint8_t);
-        cdr_stream->buffer = (uint8_t *)cdr_stream->allocator.allocate(buf_size, cdr_stream->allocator.state);
+      const size_t length = dds_messages[0].serialized_data.length();
+      if (length <= (std::numeric_limits<unsigned int>::max)()) {
+        cdr_stream->buffer_length = length;
+        cdr_stream->buffer_capacity = length;
+        cdr_stream->buffer = (uint8_t *)cdr_stream->allocator.allocate(length, cdr_stream->allocator.state);
         if (cdr_stream->buffer) {
-          std::memcpy(cdr_stream->buffer, dds_messages[0].serialized_data.get_buffer(), buf_size);
+          std::memcpy(cdr_stream->buffer, dds_messages[0].serialized_data.get_buffer(), length);
           *taken = true;
 
           if (message_info) {
