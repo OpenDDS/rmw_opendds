@@ -164,12 +164,12 @@ rmw_create_subscription(
   }
 
   // find or create DDS::Topic
-  DDS::TopicDescription_var topic_des = node_info->participant->lookup_topicdescription(topic_str.c_str());
-  DDS::Topic_var topic = topic_des ?
+  DDS::TopicDescription_var topic_description = node_info->participant->lookup_topicdescription(topic_str.c_str());
+  DDS::Topic_var topic = topic_description ?
     node_info->participant->find_topic(topic_str.c_str(), DDS::Duration_t{0, 0}) :
     node_info->participant->create_topic(topic_str.c_str(), type_name.c_str(), TOPIC_QOS_DEFAULT, NULL, OpenDDS::DCPS::NO_STATUS_MASK);
   if (!topic) {
-    RMW_SET_ERROR_MSG_WITH_FORMAT_STRING("failed to %s topic", (topic_des ? "find" : "create"));
+    RMW_SET_ERROR_MSG_WITH_FORMAT_STRING("failed to %s topic", (topic_description ? "find" : "create"));
     return nullptr;
   }
 
