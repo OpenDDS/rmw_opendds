@@ -61,22 +61,26 @@ take(
   if (DDS::RETCODE_OK == status) {
     DDS::SampleInfo & info = sample_infos[0];
     if (info.valid_data) {
-      cdr_stream->buffer_length = dds_messages[0].serialized_data.length();
-      if (cdr_stream->buffer_length <= (std::numeric_limits<unsigned int>::max)()) {
-        cdr_stream->buffer = reinterpret_cast<uint8_t *>(malloc(cdr_stream->buffer_length * sizeof(uint8_t)));
-        for (unsigned int i = 0; i < static_cast<unsigned int>(cdr_stream->buffer_length); ++i) {
-          cdr_stream->buffer[i] = dds_messages[0].serialized_data[i];
-        }
-        *taken = true;
+      const size_t length = dds_messages[0].serialized_data.length();
+      if (length <= (std::numeric_limits<unsigned int>::max)()) {
+        cdr_stream->buffer_length = length;
+        cdr_stream->buffer_capacity = length;
+        cdr_stream->buffer = (uint8_t *)cdr_stream->allocator.allocate(length, cdr_stream->allocator.state);
+        if (cdr_stream->buffer) {
+          std::memcpy(cdr_stream->buffer, dds_messages[0].serialized_data.get_buffer(), length);
+          *taken = true;
 
-        if (message_info) {
-          message_info->publisher_gid.implementation_identifier = opendds_identifier;
-          memset(message_info->publisher_gid.data, 0, RMW_GID_STORAGE_SIZE);
-          auto detail = reinterpret_cast<OpenDDSPublisherGID *>(message_info->publisher_gid.data);
-          detail->publication_handle = info.publication_handle;
+          if (message_info) {
+            message_info->publisher_gid.implementation_identifier = opendds_identifier;
+            memset(message_info->publisher_gid.data, 0, RMW_GID_STORAGE_SIZE);
+            auto detail = reinterpret_cast<OpenDDSPublisherGID *>(message_info->publisher_gid.data);
+            detail->publication_handle = info.publication_handle;
+          }
+        } else {
+          RMW_SET_ERROR_MSG("failed to allocate memory for uint8 array");
         }
       } else {
-        RMW_SET_ERROR_MSG("cdr_stream->buffer_length > max unsigned int");
+        RMW_SET_ERROR_MSG("dds message length > max unsigned int");
       }
     }
   } else if (DDS::RETCODE_NO_DATA != status) {
@@ -95,7 +99,7 @@ take(
   rmw_message_info_t * message_info)
 {
   RMW_CHECK_FOR_NULL_WITH_MSG(ros_message, "ros_message is null", return RMW_RET_ERROR);
-  rcutils_uint8_array_t cdr_stream = rcutils_get_zero_initialized_uint8_array();
+  rcutils_uint8_array_t cdr_stream = {nullptr, 0lu, 0lu, rcutils_get_default_allocator()};
   rmw_ret_t ret = take(subscription, &cdr_stream, taken, message_info);
   if (RMW_RET_OK == ret) {
     if (*taken) {
@@ -105,7 +109,7 @@ take(
         RMW_SET_ERROR_MSG("can't convert cdr stream to ros message");
         ret = RMW_RET_ERROR;
       }
-      free(cdr_stream.buffer);
+      cdr_stream.allocator.deallocate(cdr_stream.buffer, cdr_stream.allocator.state);
     }
   }
   return ret;
