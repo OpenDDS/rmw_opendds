@@ -126,7 +126,7 @@ rmw_create_subscription(
   const rosidl_message_type_support_t * type_supports,
   const char * topic_name,
   const rmw_qos_profile_t * qos_profile,
-  const rmw_subscription_options_t* subscription_options)
+  const rmw_subscription_options_t * subscription_options)
 {
   RMW_CHECK_FOR_NULL_WITH_MSG(node, "node is null", return nullptr);
   RMW_CHECK_TYPE_IDENTIFIERS_MATCH(node, node->implementation_identifier, opendds_identifier, return nullptr)
@@ -278,28 +278,14 @@ rmw_subscription_count_matched_publishers(
   const rmw_subscription_t * subscription,
   size_t * publisher_count)
 {
-  if (!subscription) {
-    RMW_SET_ERROR_MSG("subscription handle is null");
-    return RMW_RET_INVALID_ARGUMENT;
-  }
-
-  if (!publisher_count) {
-    RMW_SET_ERROR_MSG("publisher_count is null");
-    return RMW_RET_INVALID_ARGUMENT;
-  }
+  RMW_CHECK_ARGUMENT_FOR_NULL(subscription, RMW_RET_INVALID_ARGUMENT);
+  RMW_CHECK_ARGUMENT_FOR_NULL(publisher_count, RMW_RET_INVALID_ARGUMENT);
 
   auto info = static_cast<OpenDDSStaticSubscriberInfo *>(subscription->data);
-  if (!info) {
-    RMW_SET_ERROR_MSG("subscriber internal data is invalid");
-    return RMW_RET_ERROR;
-  }
-  if (!info->listener_) {
-    RMW_SET_ERROR_MSG("subscriber internal listener is invalid");
-    return RMW_RET_ERROR;
-  }
+  RMW_CHECK_FOR_NULL_WITH_MSG(info, "subscriber info is null", return RMW_RET_ERROR);
+  RMW_CHECK_FOR_NULL_WITH_MSG(info->listener_, "listener is null", return RMW_RET_ERROR);
 
   *publisher_count = info->listener_->current_count();
-
   return RMW_RET_OK;
 }
 
