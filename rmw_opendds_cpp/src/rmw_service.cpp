@@ -176,7 +176,6 @@ rmw_create_service(
     }
 
     // create replier
-/* TODO: open this block when service typesupport is ready.
     info->replier_ = info->callbacks_->create_replier(node_info->participant,
       request_topic.c_str(), response_topic.c_str(), publisher, subscriber, &rmw_allocate);
     if (!info->replier_) {
@@ -227,7 +226,7 @@ rmw_create_service(
     node_info->publisher_listener->add_information(node_info->participant->get_instance_handle(),
       writer->get_instance_handle(), name.in(), type_name.in(), EntityType::Publisher);
     node_info->publisher_listener->trigger_graph_guard_condition();
-*/
+
     return service;
 
   } catch (const std::string& e) {
