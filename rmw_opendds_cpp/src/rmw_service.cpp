@@ -179,7 +179,10 @@ rmw_create_service(
     info->replier_ = info->callbacks_->create_replier(node_info->participant,
       request_topic.c_str(), response_topic.c_str(), publisher, subscriber, &rmw_allocate);
     if (!info->replier_) {
+      return service;
+/* TODO: delete the line above and uncomment the line below when service typesupport is ready.
       throw std::string("failed to create_replier");
+*/
     }
 
     info->request_reader_ = static_cast<DDS::DataReader*>(
