@@ -36,344 +36,219 @@ wait(
   rmw_wait_set_t * wait_set,
   const rmw_time_t * wait_timeout)
 {
-  // To ensure that we properly clean up the wait set, we declare an
-  // object whose destructor will detach what we attached (this was previously
-  // being done inside the destructor of the wait set.
-  struct atexit_t
+  RMW_CHECK_ARGUMENT_FOR_NULL(wait_set, RMW_RET_ERROR);
+  RMW_CHECK_TYPE_IDENTIFIERS_MATCH(wait_set, wait_set->implementation_identifier,
+    implementation_identifier, return RMW_RET_ERROR);
+
+  auto wait_set_info = static_cast<OpenDDSWaitSetInfo *>(wait_set->data);
+  RMW_CHECK_FOR_NULL_WITH_MSG(wait_set_info, "wait_set_info is null", return RMW_RET_ERROR);
+
+  RMW_CHECK_FOR_NULL_WITH_MSG(wait_set_info->wait_set, "dds_wait_set is null", return RMW_RET_ERROR);
+  DDS::WaitSet & dds_wait_set = *(wait_set_info->wait_set);
+
+  RMW_CHECK_FOR_NULL_WITH_MSG(wait_set_info->active_conditions, "active_conditions is null", return RMW_RET_ERROR);
+  DDS::ConditionSeq & active_conditions = *(wait_set_info->active_conditions);
+
+  // Cleaner destructor will clean up the wait set (previously done in wait_set destructor)
+  struct Cleaner
   {
-    ~atexit_t()
+    OpenDDSWaitSetInfo & info;
+    DDS::WaitSet & waitset;
+    Cleaner(OpenDDSWaitSetInfo & i, DDS::WaitSet & w) : info(i), waitset(w) {}
+    ~Cleaner()
     {
-      // Manually detach conditions and clear sequences, to ensure a clean wait set for next time.
-      if (!wait_set) {
-        RMW_SET_ERROR_MSG("wait set handle is null");
-        return;
-      }
-      RMW_CHECK_TYPE_IDENTIFIERS_MATCH(
-        wait set handle,
-        wait_set->implementation_identifier, implementation_identifier,
-        return )
-      OpenDDSWaitSetInfo * wait_set_info = static_cast<OpenDDSWaitSetInfo *>(wait_set->data);
-      if (!wait_set_info) {
-        RMW_SET_ERROR_MSG("WaitSet implementation struct is null");
-        return;
-      }
-
-      DDS::WaitSet * dds_wait_set = static_cast<DDS::WaitSet *>(wait_set_info->wait_set);
-      if (!dds_wait_set) {
-        RMW_SET_ERROR_MSG("DDS wait set handle is null");
-        return;
-      }
-
-      DDS::ConditionSeq * attached_conditions =
-        static_cast<DDS::ConditionSeq *>(wait_set_info->attached_conditions);
-      if (!attached_conditions) {
-        RMW_SET_ERROR_MSG("DDS condition sequence handle is null");
-        return;
-      }
-
-      DDS::ReturnCode_t retcode;
-      retcode = dds_wait_set->get_conditions(*attached_conditions);
-      if (retcode != DDS::RETCODE_OK) {
-        RMW_SET_ERROR_MSG("Failed to get attached conditions for wait set");
-        return;
-      }
-
-      for (::CORBA::ULong i = 0; i < attached_conditions->length(); ++i) {
-        retcode = dds_wait_set->detach_condition((*attached_conditions)[i]);
-        if (retcode != DDS::RETCODE_OK) {
-          RMW_SET_ERROR_MSG("Failed to get detach condition from wait set");
+      if (info.attached_conditions && waitset.get_conditions(*(info.attached_conditions)) == DDS::RETCODE_OK) {
+        for (::CORBA::ULong i = 0; i < info.attached_conditions->length(); ++i) {
+          if (waitset.detach_condition((*(info.attached_conditions))[i]) != DDS::RETCODE_OK) {
+            RMW_SET_ERROR_MSG("failed to detach condition from wait set");
+          }
         }
+      } else {
+        RMW_SET_ERROR_MSG("failed to get attached conditions");
       }
     }
-    rmw_wait_set_t * wait_set = NULL;
-    const char * implementation_identifier = NULL;
-  } atexit;
-
-  atexit.wait_set = wait_set;
-  atexit.implementation_identifier = implementation_identifier;
-
-  if (!wait_set) {
-    RMW_SET_ERROR_MSG("wait set handle is null");
-    return RMW_RET_ERROR;
-  }
-  RMW_CHECK_TYPE_IDENTIFIERS_MATCH(
-    wait set handle,
-    wait_set->implementation_identifier, implementation_identifier,
-    return RMW_RET_ERROR);
-
-  OpenDDSWaitSetInfo * wait_set_info = static_cast<OpenDDSWaitSetInfo *>(wait_set->data);
-  if (!wait_set_info) {
-    RMW_SET_ERROR_MSG("WaitSet implementation struct is null");
-    return RMW_RET_ERROR;
-  }
-
-  DDS::WaitSet * dds_wait_set = static_cast<DDS::WaitSet *>(wait_set_info->wait_set);
-  if (!dds_wait_set) {
-    RMW_SET_ERROR_MSG("DDS wait set handle is null");
-    return RMW_RET_ERROR;
-  }
-
-  DDS::ConditionSeq * active_conditions =
-    static_cast<DDS::ConditionSeq *>(wait_set_info->active_conditions);
-  if (!active_conditions) {
-    RMW_SET_ERROR_MSG("DDS condition sequence handle is null");
-    return RMW_RET_ERROR;
-  }
+  } cleaner(*wait_set_info, dds_wait_set);
 
   // add a condition for each subscriber
   if (subscriptions) {
     for (size_t i = 0; i < subscriptions->subscriber_count; ++i) {
-      SubscriberInfo * subscriber_info =
-        static_cast<SubscriberInfo *>(subscriptions->subscribers[i]);
-      if (!subscriber_info) {
-        RMW_SET_ERROR_MSG("subscriber info handle is null");
+      auto info = static_cast<SubscriberInfo *>(subscriptions->subscribers[i]);
+      if (!info) {
+        RMW_SET_ERROR_MSG("subscriber info is null");
         return RMW_RET_ERROR;
       }
-      DDS::ReadCondition * read_condition = subscriber_info->read_condition_;
-      if (!read_condition) {
-        RMW_SET_ERROR_MSG("read condition handle is null");
+      if (!info->read_condition_) {
+        RMW_SET_ERROR_MSG("read condition is null");
         return RMW_RET_ERROR;
       }
-      rmw_ret_t rmw_status = check_attach_condition_error(
-        dds_wait_set->attach_condition(read_condition));
-      if (rmw_status != RMW_RET_OK) {
-        return rmw_status;
+      rmw_ret_t ret = check_attach_condition_error(dds_wait_set.attach_condition(info->read_condition_));
+      if (ret != RMW_RET_OK) {
+        return ret;
       }
     }
   }
 
-  // add a condition for each guard condition
+  // add each guard condition
   if (guard_conditions) {
     for (size_t i = 0; i < guard_conditions->guard_condition_count; ++i) {
-      DDS::GuardCondition * guard_condition =
-        static_cast<DDS::GuardCondition *>(guard_conditions->guard_conditions[i]);
-      if (!guard_condition) {
-        RMW_SET_ERROR_MSG("guard condition handle is null");
+      auto condition = static_cast<DDS::GuardCondition *>(guard_conditions->guard_conditions[i]);
+      if (!condition) {
+        RMW_SET_ERROR_MSG("guard condition is null");
         return RMW_RET_ERROR;
       }
-      rmw_ret_t rmw_status = check_attach_condition_error(
-        dds_wait_set->attach_condition(guard_condition));
-      if (rmw_status != RMW_RET_OK) {
-        return rmw_status;
+      rmw_ret_t ret = check_attach_condition_error(dds_wait_set.attach_condition(condition));
+      if (ret != RMW_RET_OK) {
+        return ret;
       }
     }
   }
-/*  TODO: uncommnet this block when type support is ready and service is properly implemented.
+
   // add a condition for each service
   if (services) {
     for (size_t i = 0; i < services->service_count; ++i) {
-      ServiceInfo * service_info =
-        static_cast<ServiceInfo *>(services->services[i]);
-
-      if (!service_info) {
-        RMW_SET_ERROR_MSG("service info handle is null");
+      auto info = static_cast<ServiceInfo *>(services->services[i]);
+      if (!info) {
+        RMW_SET_ERROR_MSG("service info is null");
         return RMW_RET_ERROR;
       }
-
-      DDS::ReadCondition * read_condition = service_info->read_condition_;
-      if (!read_condition) {
-        RMW_SET_ERROR_MSG("read condition handle is null");
+      if (!info->read_condition_) {
+        RMW_SET_ERROR_MSG("read condition is null");
+        break;
+/* TODO: delete the line above and uncomment the line below when service typesupport is ready.
         return RMW_RET_ERROR;
+*/
       }
-      rmw_ret_t rmw_status = check_attach_condition_error(
-        dds_wait_set->attach_condition(read_condition));
-      if (rmw_status != RMW_RET_OK) {
-        return rmw_status;
+      rmw_ret_t ret = check_attach_condition_error(dds_wait_set.attach_condition(info->read_condition_));
+      if (ret != RMW_RET_OK) {
+        return ret;
       }
     }
   }
-*/
+
   // add a condition for each client
   if (clients) {
     for (size_t i = 0; i < clients->client_count; ++i) {
-      ClientInfo * client_info =
-        static_cast<ClientInfo *>(clients->clients[i]);
-      if (!client_info) {
-        RMW_SET_ERROR_MSG("client info handle is null");
+      auto info = static_cast<ClientInfo *>(clients->clients[i]);
+      if (!info) {
+        RMW_SET_ERROR_MSG("client info is null");
         return RMW_RET_ERROR;
       }
-
-      DDS::DataReader * response_datareader = client_info->response_reader_;
-      if (!response_datareader) {
-        RMW_SET_ERROR_MSG("response datareader handle is null");
+      if (!info->read_condition_) {
+        RMW_SET_ERROR_MSG("read condition is null");
         return RMW_RET_ERROR;
       }
-
-      // MIGHT BE IMPORTANT !!!
-      DDS::ReadCondition * read_condition = client_info->read_condition_;
-      if (!read_condition) {
-        RMW_SET_ERROR_MSG("read condition handle is null");
-        return RMW_RET_ERROR;
-      }
-      rmw_ret_t rmw_status = check_attach_condition_error(
-        dds_wait_set->attach_condition(read_condition));
-      if (rmw_status != RMW_RET_OK) {
-        return rmw_status;
+      rmw_ret_t ret = check_attach_condition_error(dds_wait_set.attach_condition(info->read_condition_));
+      if (ret != RMW_RET_OK) {
+        return ret;
       }
     }
   }
 
-  // invoke wait until one of the conditions triggers
-  DDS::Duration_t timeout;
-  if (!wait_timeout) {
-    timeout = { DDS::DURATION_INFINITE_SEC, DDS::DURATION_INFINITE_NSEC };
-  } else {
-    timeout.sec = static_cast<::CORBA::ULong>(wait_timeout->sec);
-    timeout.nanosec = static_cast<::CORBA::ULong>(wait_timeout->nsec);
-  }
-
-  DDS::ReturnCode_t status = dds_wait_set->wait(*active_conditions, timeout);
-
+  // wait until one condition triggers or timeout
+  DDS::Duration_t timeout = {
+    wait_timeout ? static_cast<::CORBA::Long>(wait_timeout->sec) : DDS::DURATION_INFINITE_SEC,
+    wait_timeout ? static_cast<::CORBA::ULong>(wait_timeout->nsec) : DDS::DURATION_INFINITE_NSEC
+  };
+  DDS::ReturnCode_t status = dds_wait_set.wait(active_conditions, timeout);
   if (status != DDS::RETCODE_OK && status != DDS::RETCODE_TIMEOUT) {
     RMW_SET_ERROR_MSG("failed to wait on wait set");
     return RMW_RET_ERROR;
   }
 
-  // set subscriber handles to zero for all not triggered conditions
+  // reset subscriber for all untriggered conditions
   if (subscriptions) {
     for (size_t i = 0; i < subscriptions->subscriber_count; ++i) {
-      SubscriberInfo * subscriber_info =
-        static_cast<SubscriberInfo *>(subscriptions->subscribers[i]);
-      if (!subscriber_info) {
-        RMW_SET_ERROR_MSG("subscriber info handle is null");
+      auto info = static_cast<SubscriberInfo *>(subscriptions->subscribers[i]);
+      if (!info) {
+        RMW_SET_ERROR_MSG("subscriber info is null");
         return RMW_RET_ERROR;
       }
-      DDS::ReadCondition * read_condition = subscriber_info->read_condition_;
-      if (!read_condition) {
-        RMW_SET_ERROR_MSG("read condition handle is null");
+      if (!info->read_condition_) {
+        RMW_SET_ERROR_MSG("read condition is null");
         return RMW_RET_ERROR;
       }
 
-      // search for subscriber condition in active set
+      // reset the subscriber if its read_condition is not in the active set
       ::CORBA::ULong j = 0;
-      for (; j < active_conditions->length(); ++j) {
-        if ((*active_conditions)[j] == read_condition) {
-          break;
-        }
-      }
-      // if subscriber condition is not found in the active set
-      // reset the subscriber handle
-      if (!(j < active_conditions->length())) {
-        subscriptions->subscribers[i] = 0;
-      }
-      DDS::ReturnCode_t retcode = dds_wait_set->detach_condition(read_condition);
-      if (retcode != DDS::RETCODE_OK) {
-        RMW_SET_ERROR_MSG("Failed to get detach condition from wait set");
-        return RMW_RET_ERROR;
+      while (j < active_conditions.length() && active_conditions[j] != info->read_condition_) { ++j; }
+      if (!(j < active_conditions.length())) {
+        subscriptions->subscribers[i] = nullptr;
       }
     }
   }
 
-  // set guard condition handles to zero for all not triggered conditions
+  // reset guard condition for all untriggered conditions
   if (guard_conditions) {
     for (size_t i = 0; i < guard_conditions->guard_condition_count; ++i) {
-      DDS::Condition * condition =
-        static_cast<DDS::Condition *>(guard_conditions->guard_conditions[i]);
+      auto condition = static_cast<DDS::Condition *>(guard_conditions->guard_conditions[i]);
       if (!condition) {
-        RMW_SET_ERROR_MSG("condition handle is null");
+        RMW_SET_ERROR_MSG("guard_condition is null");
         return RMW_RET_ERROR;
       }
 
-      // search for guard condition in active set
+      // reset the guard condition
       ::CORBA::ULong j = 0;
-      for (; j < active_conditions->length(); ++j) {
-        if ((*active_conditions)[j] == condition) {
-          DDS::GuardCondition_var guard = DDS::GuardCondition::_narrow(condition);
-          DDS::ReturnCode_t status = guard->set_trigger_value(false);
-          if (status != DDS::RETCODE_OK) {
-            RMW_SET_ERROR_MSG("failed to set trigger value");
-            return RMW_RET_ERROR;
-          }
-          break;
+      while (j < active_conditions.length() && active_conditions[j] != condition) { ++j; }
+      if (j < active_conditions.length()) {
+        DDS::GuardCondition_var guard = DDS::GuardCondition::_narrow(condition);
+        if (guard->set_trigger_value(false) != DDS::RETCODE_OK) {
+          RMW_SET_ERROR_MSG("failed to set trigger value");
+          return RMW_RET_ERROR;
         }
-      }
-      // if guard condition is not found in the active set
-      // reset the guard handle
-      if (!(j < active_conditions->length())) {
-        guard_conditions->guard_conditions[i] = 0;
-      }
-      DDS::ReturnCode_t retcode = dds_wait_set->detach_condition(condition);
-      if (retcode != DDS::RETCODE_OK) {
-        RMW_SET_ERROR_MSG("Failed to get detach condition from wait set");
-        return RMW_RET_ERROR;
+      } else {
+        guard_conditions->guard_conditions[i] = nullptr;
       }
     }
   }
-/*  TODO: uncommnet this block when type support is ready and service is properly implemented.
-  // set service handles to zero for all not triggered conditions
+
+  // reset service for all untriggered conditions
   if (services) {
     for (size_t i = 0; i < services->service_count; ++i) {
-      ServiceInfo * service_info =
-        static_cast<ServiceInfo *>(services->services[i]);
-      if (!service_info) {
-        RMW_SET_ERROR_MSG("service info handle is null");
+      auto info = static_cast<ServiceInfo *>(services->services[i]);
+      if (!info) {
+        RMW_SET_ERROR_MSG("service info is null");
         return RMW_RET_ERROR;
       }
-      DDS::ReadCondition * read_condition = service_info->read_condition_;
-      if (!read_condition) {
-        RMW_SET_ERROR_MSG("read condition handle is null");
+      if (!info->read_condition_) {
+        RMW_SET_ERROR_MSG("read condition is null");
+        break;
+/* TODO: delete the line above and uncomment the line below when service typesupport is ready.
         return RMW_RET_ERROR;
+*/
       }
 
-      // search for service condition in active set
+      // reset the service if its read_condition is not in the active set
       ::CORBA::ULong j = 0;
-      for (; j < active_conditions->length(); ++j) {
-        if ((*active_conditions)[j] == read_condition) {
-          break;
-        }
-      }
-      // if service condition is not found in the active set
-      // reset the subscriber handle
-      if (!(j < active_conditions->length())) {
-        services->services[i] = 0;
-      }
-      DDS::ReturnCode_t retcode = dds_wait_set->detach_condition(read_condition);
-      if (retcode != DDS::RETCODE_OK) {
-        RMW_SET_ERROR_MSG("Failed to get detach condition from wait set");
-        return RMW_RET_ERROR;
+      while (j < active_conditions.length() && active_conditions[j] != info->read_condition_) { ++j; }
+      if (!(j < active_conditions.length())) {
+        services->services[i] = nullptr;
       }
     }
   }
-*/
-  // set client handles to zero for all not triggered conditions
+
+  // reset client for all untriggered conditions
   if (clients) {
     for (size_t i = 0; i < clients->client_count; ++i) {
-      ClientInfo * client_info =
-        static_cast<ClientInfo *>(clients->clients[i]);
-      if (!client_info) {
-        RMW_SET_ERROR_MSG("client info handle is null");
+      auto info = static_cast<ClientInfo *>(clients->clients[i]);
+      if (!info) {
+        RMW_SET_ERROR_MSG("client info is null");
         return RMW_RET_ERROR;
       }
-      DDS::ReadCondition * read_condition = client_info->read_condition_;
-      if (!read_condition) {
-        RMW_SET_ERROR_MSG("read condition handle is null");
+      if (!info->read_condition_) {
+        RMW_SET_ERROR_MSG("read condition is null");
         return RMW_RET_ERROR;
       }
 
-      // search for service condition in active set
+      // reset the client if its read_condition is not in the active set
       ::CORBA::ULong j = 0;
-      for (; j < active_conditions->length(); ++j) {
-        if ((*active_conditions)[j] == read_condition) {
-          break;
-        }
-      }
-      // if client condition is not found in the active set
-      // reset the subscriber handle
-      if (!(j < active_conditions->length())) {
-        clients->clients[i] = 0;
-      }
-      DDS::ReturnCode_t retcode = dds_wait_set->detach_condition(read_condition);
-      if (retcode != DDS::RETCODE_OK) {
-        RMW_SET_ERROR_MSG("Failed to get detach condition from wait set");
-        return RMW_RET_ERROR;
+      while (j < active_conditions.length() && active_conditions[j] != info->read_condition_) { ++j; }
+      if (!(j < active_conditions.length())) {
+        clients->clients[i] = nullptr;
       }
     }
   }
 
-  if (status == DDS::RETCODE_TIMEOUT) {
-    return RMW_RET_TIMEOUT;
-  }
-  return RMW_RET_OK;
+  return (status == DDS::RETCODE_TIMEOUT) ? RMW_RET_TIMEOUT : RMW_RET_OK;
 }
 
 #endif  // RMW_OPENDDS_SHARED_CPP__WAIT_HPP_

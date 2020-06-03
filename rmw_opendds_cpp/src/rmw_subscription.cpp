@@ -327,7 +327,6 @@ rmw_destroy_subscription(rmw_node_t * node, rmw_subscription_t * subscription)
   RMW_CHECK_TYPE_IDENTIFIERS_MATCH(subscription, subscription->implementation_identifier,
     opendds_identifier, return RMW_RET_ERROR)
 
-  // TODO(wjwwood): need to figure out when to unregister types with the participant.
   return clean_subscription(subscription, *node_info, *node_info->participant);
 }
 }  // extern "C"
