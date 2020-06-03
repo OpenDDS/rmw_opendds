@@ -104,7 +104,6 @@ wait(
   }
 
   // add a condition for each service
-/* TODO: uncommnet this block when type support is ready.
   if (services) {
     for (size_t i = 0; i < services->service_count; ++i) {
       auto info = static_cast<ServiceInfo *>(services->services[i]);
@@ -114,7 +113,10 @@ wait(
       }
       if (!info->read_condition_) {
         RMW_SET_ERROR_MSG("read condition is null");
+        break;
+/* TODO: delete the line above and uncomment the line below when service typesupport is ready.
         return RMW_RET_ERROR;
+*/
       }
       rmw_ret_t ret = check_attach_condition_error(dds_wait_set.attach_condition(info->read_condition_));
       if (ret != RMW_RET_OK) {
@@ -122,7 +124,6 @@ wait(
       }
     }
   }
-*/
 
   // add a condition for each client
   if (clients) {
@@ -173,11 +174,6 @@ wait(
       if (!(j < active_conditions.length())) {
         subscriptions->subscribers[i] = nullptr;
       }
-
-      if (dds_wait_set.detach_condition(info->read_condition_) != DDS::RETCODE_OK) {
-        RMW_SET_ERROR_MSG("failed to detach condition");
-        return RMW_RET_ERROR;
-      }
     }
   }
 
@@ -202,16 +198,10 @@ wait(
       } else {
         guard_conditions->guard_conditions[i] = nullptr;
       }
-
-      if (dds_wait_set.detach_condition(condition) != DDS::RETCODE_OK) {
-        RMW_SET_ERROR_MSG("failed to detach condition");
-        return RMW_RET_ERROR;
-      }
     }
   }
 
   // reset service for all untriggered conditions
-/* TODO: uncommnet this block when type support is ready.
   if (services) {
     for (size_t i = 0; i < services->service_count; ++i) {
       auto info = static_cast<ServiceInfo *>(services->services[i]);
@@ -221,7 +211,10 @@ wait(
       }
       if (!info->read_condition_) {
         RMW_SET_ERROR_MSG("read condition is null");
+        break;
+/* TODO: delete the line above and uncomment the line below when service typesupport is ready.
         return RMW_RET_ERROR;
+*/
       }
 
       // reset the service if its read_condition is not in the active set
@@ -230,14 +223,8 @@ wait(
       if (!(j < active_conditions.length())) {
         services->services[i] = nullptr;
       }
-
-      if (dds_wait_set.detach_condition(info->read_condition_) != DDS::RETCODE_OK) {
-        RMW_SET_ERROR_MSG("failed to detach condition");
-        return RMW_RET_ERROR;
-      }
     }
   }
-*/
 
   // reset client for all untriggered conditions
   if (clients) {
@@ -257,11 +244,6 @@ wait(
       while (j < active_conditions.length() && active_conditions[j] != info->read_condition_) { ++j; }
       if (!(j < active_conditions.length())) {
         clients->clients[i] = nullptr;
-      }
-
-      if (dds_wait_set.detach_condition(info->read_condition_) != DDS::RETCODE_OK) {
-        RMW_SET_ERROR_MSG("failed to detach condition");
-        return RMW_RET_ERROR;
       }
     }
   }
