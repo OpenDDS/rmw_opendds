@@ -31,6 +31,8 @@ jobs:
   - script: |
       cd $(Agent.BuildDirectory)/s
       git clone https://github.com/oci-labs/rosidl_typesupport_opendds.git
+      cd ../rosidl_typesupport_opendds
+      pwd
       git checkout 7eb0964b11548566b95dae85719d835a33a0faf1
     displayName: clone rosidl_typesupport_opendds
   - script: |
