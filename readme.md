@@ -24,14 +24,4 @@ Add the two repos above to the `src/` folder within a ROS2 workspace that you wa
   - `printenv|grep ROS`
 - Build the code.
   - `colcon build --symlink-install` 
-
-## Project Status
-1. `rosidl_typesupport_opendds_c` is partially implemented. Currently, it correctly converts any MSG/SRV files to OMG IDLs, detects the OpenDDS and TAO libraries/preprocessors, and attemps to process the IDLs using those preprocessors. The next step is to integrate the Python script from the `opendds_cmake_module` (which is not written/implemented) into this module's root CMake file so that it runs *before* the OpenDDS and TAO processors. Once that is done, all of the expected C/C++ output files from OpenDDS/TAO must be added to a library that ROS2 can detect (which should happen automatically).
-
-2. `rosidl_typesupport_opendds_cpp` is largely incorrect or unimplemented. It should be re-written based on the `rosidl_typesupport_opendds_c` package once that package is complete.
-
-3. `rmw_opendds_cpp` contains buildable stubs of the implementation of `rmw.h`. They must be filled in with the appropriate calls to the underlying OpenDDS functions.
-
-4. `opendds_cmake_module` contains a Python file with no extension (`opendds_cmake_module/opendds_cmake_module`) which contains a method `openDdsPreprocessIdls`. This method must be implemented and tested against different ROS2-produced IDLs to ensure it correctly:
-    - Inserts `#pragma` statements for the fields in those IDLs.
-    - Inserts `typedef` statements for the fields which would be anonymous in those IDLs.
+  
