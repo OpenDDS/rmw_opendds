@@ -34,6 +34,7 @@ rmw_get_message_type_support(const rosidl_message_type_support_t * type_support)
     RMW_SET_ERROR_MSG("type support is null");
     return nullptr;
   }
+  std::cout << "message typesupport_identifier[" << type_support->typesupport_identifier << "]\n"; //??
   const rosidl_message_type_support_t * ts = get_message_typesupport_handle(
     type_support, rosidl_typesupport_opendds_c__identifier);
   if (!ts) {
@@ -53,6 +54,7 @@ rmw_get_service_type_support(const rosidl_service_type_support_t * type_support)
     RMW_SET_ERROR_MSG("type support is null");
     return nullptr;
   }
+  std::cout << "service typesupport_identifier[" << type_support->typesupport_identifier << "]\n"; //??
   const rosidl_service_type_support_t * ts = get_service_typesupport_handle(
     type_support, rosidl_typesupport_opendds_c__identifier);
   if (!ts) {
@@ -70,6 +72,7 @@ _create_type_name(
   const message_type_support_callbacks_t * callbacks,
   const std::string & sep)
 {
+  std::cout << std::string(callbacks->message_namespace) + "::" + sep + "::dds_::" + callbacks->message_name + "_\n"; //??
   return std::string(callbacks->message_namespace) + "::" + sep + "::dds_::" + callbacks->message_name + "_";
 }
 

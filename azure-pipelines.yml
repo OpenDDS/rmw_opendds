@@ -10,7 +10,7 @@ resources:
   pipelines:
   - pipeline: oci-labs.rosidl_typesupport_opendds
     source: oci-labs.rosidl_typesupport_opendds
-    trigger: 
+    trigger:
       branches:
       - master
 
@@ -31,6 +31,7 @@ jobs:
   - script: |
       cd $(Agent.BuildDirectory)/s
       git clone https://github.com/oci-labs/rosidl_typesupport_opendds.git
+      git checkout 7eb0964b11548566b95dae85719d835a33a0faf1
     displayName: clone rosidl_typesupport_opendds
   - script: |
         cd $(Agent.BuildDirectory)
