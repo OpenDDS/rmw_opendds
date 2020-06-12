@@ -58,12 +58,12 @@ rmw_send_response(
 
   auto service_info = static_cast<OpenDDSStaticServiceInfo *>(service->data);
   RMW_CHECK_FOR_NULL_WITH_MSG(service_info, "service_info is null", return RMW_RET_ERROR);
-/*  TODO: uncommnet this block when type support is ready.
+
   RMW_CHECK_FOR_NULL_WITH_MSG(service_info->callbacks_, "callbacks_ is null", return RMW_RET_ERROR);
   RMW_CHECK_FOR_NULL_WITH_MSG(service_info->replier_, "replier_ is null", return RMW_RET_ERROR);
 
   service_info->callbacks_->send_response(service_info->replier_, request_header, ros_response);
-*/
+
   return RMW_RET_OK;
 }
 }  // extern "C"
