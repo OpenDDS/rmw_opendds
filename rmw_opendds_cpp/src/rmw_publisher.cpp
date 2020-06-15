@@ -128,7 +128,7 @@ rmw_create_publisher(
     RMW_SET_ERROR_MSG("callbacks handle is null");
     return nullptr;
   }
-  std::string type_name = _create_type_name(callbacks, "msg");
+  std::string type_name = _create_type_name(callbacks);
   OpenDDSStaticSerializedDataTypeSupport_var ts = new OpenDDSStaticSerializedDataTypeSupportImpl();
   if (ts->register_type(participant, type_name.c_str()) != DDS::RETCODE_OK) {
     RMW_SET_ERROR_MSG("failed to register OpenDDS type");
