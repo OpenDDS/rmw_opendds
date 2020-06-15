@@ -177,7 +177,7 @@ rmw_create_client(
     }
 
     info->requester_ = info->callbacks_->create_requester(node_info->participant,
-      request_topic.c_str(), response_topic.c_str(), publisher, subscriber, &rmw_allocate);
+      request_topic.c_str(), response_topic.c_str(), publisher, subscriber, &rmw_allocate, &rmw_free);
     if (!info->requester_) {
       throw std::string("failed to create_requester");
     }
