@@ -90,7 +90,6 @@ __rmw_take_event(
     RMW_SET_ERROR_MSG_WITH_FORMAT_STRING("event %d not supported", event_handle->event_type);
   }
 
-  // if ret_code is not okay, return error and set taken to false.
   *taken = (ret_code == RMW_RET_OK);
   return ret_code;
 }

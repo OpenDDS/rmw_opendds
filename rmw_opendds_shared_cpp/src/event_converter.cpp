@@ -35,17 +35,3 @@ bool is_event_supported(const rmw_event_type_t event_t)
 {
   return mask_map.count(event_t) > 0;
 }
-
-//rmw_ret_t check_dds_ret_code(const DDS::ReturnCode_t dds_return_code)
-//{
-//  switch (dds_return_code) {
-//    case DDS_RETCODE_OK:
-//      return RMW_RET_OK;
-//    case DDS_RETCODE_ERROR:
-//      return RMW_RET_ERROR;
-//    case DDS_RETCODE_TIMEOUT:
-//      return RMW_RET_TIMEOUT;
-//    default:
-//      return RMW_RET_ERROR;
-//  }
-//}
