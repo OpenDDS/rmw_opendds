@@ -66,11 +66,9 @@ rmw_get_service_type_support(const rosidl_service_type_support_t * type_support)
 }
 
 inline std::string
-_create_type_name(
-  const message_type_support_callbacks_t * callbacks,
-  const std::string & sep)
+_create_type_name(const message_type_support_callbacks_t * callbacks)
 {
-  return std::string(callbacks->message_namespace) + "::" + sep + "::dds_::" + callbacks->message_name + "_";
+  return std::string(callbacks->message_namespace) + "::dds_::" + callbacks->message_name + "_";
 }
 
 #endif  // TYPE_SUPPORT_COMMON_HPP_
