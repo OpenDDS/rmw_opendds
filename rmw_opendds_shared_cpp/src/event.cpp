@@ -67,7 +67,9 @@ __rmw_take_event(
     implementation_identifier,
     return RMW_RET_ERROR);
 
-  rmw_ret_t ret_code = RMW_RET_UNSUPPORTED;
+  // TODO: uncomment and remove next line
+  //rmw_ret_t ret_code = RMW_RET_UNSUPPORTED;
+  rmw_ret_t ret_code = RMW_RET_OK;
 
   // check if we support the input event type
   if (is_event_supported(event_handle->event_type)) {
