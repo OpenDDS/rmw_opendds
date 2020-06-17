@@ -14,11 +14,14 @@
 
 #include "rmw/error_handling.h"
 #include "rmw/impl/cpp/macros.hpp"
+#include "rmw/incompatible_qos_events_statuses.h"
+#include "rmw/visibility_control.h"
 
 //#include "rmw_connext_shared_cpp/connext_static_event_info.hpp"
 #include "rmw_opendds_shared_cpp/event.hpp"
 #include "rmw_opendds_shared_cpp/event_converter.hpp"
 #include "rmw_opendds_shared_cpp/types.hpp"
+#include "rmw_opendds_shared_cpp/qos.hpp"
 
 rmw_ret_t
 __rmw_init_event(
@@ -88,6 +91,62 @@ __rmw_take_event(
     // get_status should fill the event with the appropriate status information
     ret_code = custom_event_info->get_status(status_kind, event_info);
     */
+    switch (status_kind) {
+      case DDS::LIVELINESS_LOST_STATUS:
+      {
+        rmw_liveliness_lost_status_t* rmw_liveliness_lost =
+          static_cast<rmw_liveliness_lost_status_t*>(event_info);
+        rmw_liveliness_lost->total_count = 0;
+        rmw_liveliness_lost->total_count_change = 0;
+        break;
+      }
+      case DDS::OFFERED_DEADLINE_MISSED_STATUS:
+      {
+        rmw_offered_deadline_missed_status_t* rmw_offered_deadline_missed =
+          static_cast<rmw_offered_deadline_missed_status_t*>(event_info);
+        rmw_offered_deadline_missed->total_count = 0;
+        rmw_offered_deadline_missed->total_count_change = 0;
+        break;
+      }
+      case DDS::OFFERED_INCOMPATIBLE_QOS_STATUS:
+      {
+        rmw_offered_qos_incompatible_event_status_t* rmw_offered_qos_incompatible =
+          static_cast<rmw_offered_qos_incompatible_event_status_t*>(event_info);
+        rmw_offered_qos_incompatible->total_count = 0;
+        rmw_offered_qos_incompatible->total_count_change = 0;
+        rmw_offered_qos_incompatible->last_policy_kind = RMW_QOS_POLICY_INVALID;
+        break;
+      }
+      case DDS::LIVELINESS_CHANGED_STATUS:
+      {
+        rmw_liveliness_changed_status_t* rmw_liveliness_changed_status =
+          static_cast<rmw_liveliness_changed_status_t*>(event_info);
+        rmw_liveliness_changed_status->alive_count = 0;
+        rmw_liveliness_changed_status->not_alive_count = 0;
+        rmw_liveliness_changed_status->alive_count_change = 0;
+        rmw_liveliness_changed_status->not_alive_count_change = 0;
+        break;
+      }
+      case DDS::REQUESTED_DEADLINE_MISSED_STATUS:
+      {
+        rmw_requested_deadline_missed_status_t* rmw_requested_deadline_missed_status =
+          static_cast<rmw_requested_deadline_missed_status_t*>(event_info);
+        rmw_requested_deadline_missed_status->total_count = 0;
+        rmw_requested_deadline_missed_status->total_count_change = 0;
+        break;
+      }
+      case DDS::REQUESTED_INCOMPATIBLE_QOS_STATUS:
+      {
+        rmw_requested_qos_incompatible_event_status_t* rmw_requested_qos_incompatible =
+          static_cast<rmw_requested_qos_incompatible_event_status_t*>(event_info);
+        rmw_requested_qos_incompatible->total_count = 0;
+        rmw_requested_qos_incompatible->total_count_change = 0;
+        rmw_requested_qos_incompatible->last_policy_kind = RMW_QOS_POLICY_INVALID;
+        break;
+      }
+      default:
+        return RMW_RET_UNSUPPORTED;
+    }
   } else {
     RMW_SET_ERROR_MSG_WITH_FORMAT_STRING("event %d not supported", event_handle->event_type);
   }
