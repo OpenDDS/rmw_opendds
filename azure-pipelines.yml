@@ -10,7 +10,7 @@ resources:
   pipelines:
   - pipeline: oci-labs.rosidl_typesupport_opendds
     source: oci-labs.rosidl_typesupport_opendds
-    trigger: 
+    trigger:
       branches:
       - master
 
@@ -41,6 +41,10 @@ jobs:
         echo "ls s"
         ls s/
     displayName:  rmw build repo and dependencies
+  - script: |
+        cd $(Agent.BuildDirectory)
+        ./rmw_build/all_git_repos.sh -S
+    displayName:  all repo summary
   - script: |
         cd $(Agent.BuildDirectory)
         ./rmw_build/build_all.sh
