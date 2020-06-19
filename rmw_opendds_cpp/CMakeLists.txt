@@ -105,8 +105,7 @@ add_library(
   src/rmw_trigger_guard_condition.cpp
   src/rmw_wait.cpp
   src/rmw_wait_set.cpp
-  src/serialization_format.cpp
-  src/rmw_get_topic_endpoint_info.cpp)
+  src/serialization_format.cpp)
 
 OPENDDS_TARGET_SOURCES(rmw_opendds_cpp resources/opendds_static_serialized_data.idl TAO_IDL_OPTIONS "-Sa -St")
 target_link_libraries(rmw_opendds_cpp ${opendds_libs})
