@@ -43,7 +43,10 @@ jobs:
     displayName:  rmw build repo and dependencies
   - script: |
         cd $(Agent.BuildDirectory)
+        echo "SUMMARY"
         ./rmw_build/all_git_repos.sh -S
+        echo "CURRENT BRANCHES"
+        ./rmw_build/all_git_repos.sh -B
     displayName:  all repo summary
   - script: |
         cd $(Agent.BuildDirectory)
