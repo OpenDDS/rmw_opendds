@@ -18,8 +18,8 @@ jobs:
 - job: Linux
   timeoutInMinutes: 90
   pool:
-    vmImage: 'ubuntu-18.04'
-  container: objectcomputing/opendds_ros2:latest
+    vmImage: 'ubuntu-20.04'
+  container: objectcomputing/opendds_ros2_foxy:latest
   steps:
   - script: |
       printenv
@@ -30,11 +30,11 @@ jobs:
     displayName: filesystem check
   - script: |
       cd $(Agent.BuildDirectory)/s
-      git clone https://github.com/oci-labs/rosidl_typesupport_opendds.git
+      git clone -b foxy https://github.com/oci-labs/rosidl_typesupport_opendds
     displayName: clone rosidl_typesupport_opendds
   - script: |
         cd $(Agent.BuildDirectory)
-        git clone https://github.com/adamsj-oci/rmw_build
+        git clone -b foxy-release https://github.com/adamsj-oci/rmw_build
         vcs import s < rmw_build/ros2.repos
         echo "ls"
         ls
