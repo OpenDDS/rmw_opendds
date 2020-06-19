@@ -22,6 +22,7 @@
 
 #include "rmw/error_handling.h"
 #include "rmw/types.h"
+#include "rmw/incompatible_qos_events_statuses.h"
 
 #include "rmw_opendds_shared_cpp/visibility_control.h"
 
@@ -31,6 +32,10 @@ get_datareader_qos(
   DDS::Subscriber * subscriber,
   const rmw_qos_profile_t & qos_profile,
   DDS::DataReaderQos & datareader_qos);
+
+RMW_OPENDDS_SHARED_CPP_PUBLIC
+rmw_qos_policy_kind_t
+dds_qos_policy_to_rmw_qos_policy(DDS::QosPolicyId_t policy_id);
 
 RMW_OPENDDS_SHARED_CPP_PUBLIC
 bool
@@ -132,9 +137,10 @@ rmw_qos_to_dds_qos(
     case RMW_QOS_POLICY_LIVELINESS_AUTOMATIC:
       dds_qos.liveliness.kind = DDS::AUTOMATIC_LIVELINESS_QOS;
       break;
-    case RMW_QOS_POLICY_LIVELINESS_MANUAL_BY_NODE:
-      dds_qos.liveliness.kind = DDS::MANUAL_BY_PARTICIPANT_LIVELINESS_QOS;
-      break;
+    // RMW_QOS_POLICY_LIVELINESS_MANUAL_BY_NODE has been depricated: use RMW_QOS_POLICY_LIVELINESS_MANUAL_BY_TOPIC below
+    //case RMW_QOS_POLICY_LIVELINESS_MANUAL_BY_NODE:
+    //  dds_qos.liveliness.kind = DDS::MANUAL_BY_PARTICIPANT_LIVELINESS_QOS;
+    //  break;
     case RMW_QOS_POLICY_LIVELINESS_MANUAL_BY_TOPIC:
       dds_qos.liveliness.kind = DDS::MANUAL_BY_TOPIC_LIVELINESS_QOS;
       break;
@@ -202,7 +208,9 @@ dds_qos_to_rmw_qos(
     rmw_qos.liveliness = RMW_QOS_POLICY_LIVELINESS_AUTOMATIC;
     break;
   case DDS::MANUAL_BY_PARTICIPANT_LIVELINESS_QOS:
-    rmw_qos.liveliness = RMW_QOS_POLICY_LIVELINESS_MANUAL_BY_NODE;
+    // RMW_QOS_POLICY_LIVELINESS_MANUAL_BY_NODE has been depricated: use RMW_QOS_POLICY_LIVELINESS_MANUAL_BY_TOPIC if manually asserted liveliness is needed.
+    // rmw_qos.liveliness = RMW_QOS_POLICY_LIVELINESS_MANUAL_BY_NODE;
+    rmw_qos.liveliness = RMW_QOS_POLICY_LIVELINESS_MANUAL_BY_TOPIC;
     break;
   case DDS::MANUAL_BY_TOPIC_LIVELINESS_QOS:
     rmw_qos.liveliness = RMW_QOS_POLICY_LIVELINESS_MANUAL_BY_TOPIC;

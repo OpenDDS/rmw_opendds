@@ -18,6 +18,7 @@
 #include <atomic>
 
 #include "rmw_opendds_shared_cpp/opendds_include.hpp"
+#include "rmw_opendds_shared_cpp/opendds_static_event_info.hpp"
 
 #include "rosidl_typesupport_opendds_cpp/message_type_support.h"
 
@@ -25,7 +26,7 @@ class OpenDDSSubscriberListener;
 
 extern "C"
 {
-struct OpenDDSStaticSubscriberInfo
+struct OpenDDSStaticSubscriberInfo : OpenDDSCustomEventInfo
 {
   DDS::Subscriber_var dds_subscriber_;
   OpenDDSSubscriberListener * listener_;
@@ -40,6 +41,19 @@ struct OpenDDSStaticSubscriberInfo
     read_condition_(),
     ignore_local_publications(false),
     callbacks_(nullptr) {}
+
+  /// Remap the specific OpenDDS DataReader Status to a generic RMW status type.
+  /**
+   * \param mask input status mask
+   * \param event
+   */
+  rmw_ret_t get_status(DDS::StatusMask mask, void* event) override;
+  /// Return the topic reader entity for this subscriber.
+  /**
+   * \return the topic reader associated with this subscriber
+   */
+  DDS::Entity* get_entity() override;
+
 };
 }  // extern "C"
 
