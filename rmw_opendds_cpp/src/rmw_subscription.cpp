@@ -36,6 +36,7 @@
 //   rmw_opendds_shared_cpp/shared_functions.cpp
 // #define DISCOVERY_DEBUG_LOGGING 1
 #include <dds/DCPS/Marked_Default_Qos.h>
+#include <dds/DCPS/DomainParticipantImpl.h>
 
 extern "C"
 {
@@ -73,8 +74,10 @@ clean_subscription(rmw_subscription_t * subscription, OpenDDSNodeInfo & node_inf
   auto info = static_cast<OpenDDSStaticSubscriberInfo*>(subscription->data);
   if (info) {
     if (info->dds_subscriber_) {
-      node_info.subscriber_listener->remove_information(
-        info->dds_subscriber_->get_instance_handle(), EntityType::Subscriber);
+      OpenDDS::DCPS::DomainParticipantImpl* dpi = dynamic_cast<OpenDDS::DCPS::DomainParticipantImpl*>(node_info.participant.in());
+      DDS::GUID_t guid = dpi->get_repoid(info->dds_subscriber_->get_instance_handle());
+
+      node_info.subscriber_listener->remove_information(guid, EntityType::Subscriber);
       node_info.subscriber_listener->trigger_graph_guard_condition();
       if (info->topic_reader_) {
         if (info->read_condition_) {
@@ -254,9 +257,14 @@ rmw_create_subscription(
         throw std::string("failed to get topic name");
       }
     }
+
+    OpenDDS::DCPS::DomainParticipantImpl* dpi = dynamic_cast<OpenDDS::DCPS::DomainParticipantImpl*>(node_info->participant.in());
+    DDS::GUID_t part_guid = dpi->get_repoid(node_info->participant->get_instance_handle());
+    DDS::GUID_t guid = dpi->get_repoid(subscriber_info->dds_subscriber_->get_instance_handle());
+
     node_info->subscriber_listener->add_information(
-      node_info->participant->get_instance_handle(),
-      subscriber_info->dds_subscriber_->get_instance_handle(),
+      part_guid,
+      guid,
       mangled_name, type_name, EntityType::Subscriber);
     node_info->subscriber_listener->trigger_graph_guard_condition();
 

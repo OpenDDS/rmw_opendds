@@ -35,6 +35,8 @@
 
 enum EntityType {Publisher, Subscriber};
 
+using DDSTopicEndpointInfo = TopicCache<DDS::GUID_t>::TopicInfo;
+
 class CustomDataReaderListener
   : public DDS::DataReaderListener
 {
@@ -46,16 +48,18 @@ public:
     graph_guard_condition_(graph_guard_condition)
   {}
 
-  virtual void add_information(
-    const DDS::InstanceHandle_t & participant_instance_handle,
-    const DDS::InstanceHandle_t & instance_handle,
+  virtual bool add_information(
+    const DDS::GUID_t& participant_guid,
+    const DDS::GUID_t& instance_handle,
     const std::string & topic_name,
     const std::string & type_name,
+    // TODO: uncomment when underlying qos_profile logic is implemented
+    // const rmw_qos_profile_t& qos_profile,
     EntityType entity_type);
 
   RMW_OPENDDS_SHARED_CPP_PUBLIC
-  virtual void remove_information(
-    const DDS::InstanceHandle_t & instance_handle,
+  virtual bool remove_information(
+    const DDS::GUID_t& instance_handle,
     EntityType entity_type);
 
   RMW_OPENDDS_SHARED_CPP_PUBLIC
@@ -63,21 +67,28 @@ public:
 
   size_t count_topic(const char * topic_name);
 
-  void fill_topic_names_and_types(
+  RMW_OPENDDS_SHARED_CPP_PUBLIC
+  virtual void fill_topic_endpoint_infos(
+    const std::string& topic_name,
+    bool no_mangle,
+    std::vector<const DDSTopicEndpointInfo*>& topic_endpoint_infos);
+
+  virtual void fill_topic_names_and_types(
     bool no_demangle,
     std::map<std::string, std::set<std::string>> & topic_names_to_types);
 
-  void fill_service_names_and_types(
+  virtual void fill_service_names_and_types(
     std::map<std::string, std::set<std::string>> & services);
 
-  void fill_topic_names_and_types_by_guid(
+  virtual void fill_topic_names_and_types_by_guid(
     bool no_demangle,
     std::map<std::string, std::set<std::string>> & topic_names_to_types_by_guid,
-    DDS::InstanceHandle_t & participant_guid);
+    DDS::GUID_t& participant_guid);
 
-  void fill_service_names_and_types_by_guid(
+  virtual void fill_service_names_and_types_by_guid(
     std::map<std::string, std::set<std::string>> & services,
-    DDS::InstanceHandle_t & participant_guid);
+    DDS::GUID_t& participant_guid,
+    const std::string& suffix);
 
   virtual void on_requested_deadline_missed(
     ::DDS::DataReader_ptr, const ::DDS::RequestedDeadlineMissedStatus&) {}
@@ -99,7 +110,7 @@ public:
 
 protected:
   std::mutex mutex_;
-  TopicCache<DDS::InstanceHandle_t> topic_cache;
+  TopicCache<DDS::GUID_t> topic_cache;
 
 private:
   const char * implementation_identifier_;

@@ -12,44 +12,30 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "rmw/get_topic_endpoint_info.h"
+#ifndef RMW_OPENDDS_SHARED_CPP__TOPIC_ENDPOINT_INFO_HPP_
+#define RMW_OPENDDS_SHARED_CPP__TOPIC_ENDPOINT_INFO_HPP_
+
 #include "rmw/topic_endpoint_info_array.h"
-#include "rmw_opendds_shared_cpp/topic_endpoint_info.hpp"
-#include "rmw_opendds_cpp/identifier.hpp"
+#include "rmw_opendds_shared_cpp/visibility_control.h"
 
-extern "C"
-{
+RMW_OPENDDS_SHARED_CPP_PUBLIC
 rmw_ret_t
-rmw_get_publishers_info_by_topic(
+get_publishers_info_by_topic(
+  const char * identifier,
   const rmw_node_t * node,
   rcutils_allocator_t * allocator,
   const char * topic_name,
   bool no_mangle,
-  rmw_topic_endpoint_info_array_t * publishers_info)
-{
-  return get_publishers_info_by_topic(
-    opendds_identifier,
-    node,
-    allocator,
-    topic_name,
-    no_mangle,
-    publishers_info);
-}
+  rmw_topic_endpoint_info_array_t * publishers_info);
 
+RMW_OPENDDS_SHARED_CPP_PUBLIC
 rmw_ret_t
-rmw_get_subscriptions_info_by_topic(
+get_subscriptions_info_by_topic(
+  const char * identifier,
   const rmw_node_t * node,
   rcutils_allocator_t * allocator,
   const char * topic_name,
   bool no_mangle,
-  rmw_topic_endpoint_info_array_t * subscriptions_info)
-{
-  return get_subscriptions_info_by_topic(
-    opendds_identifier,
-    node,
-    allocator,
-    topic_name,
-    no_mangle,
-    subscriptions_info);
-}
-}  // extern "C"
+  rmw_topic_endpoint_info_array_t * subscriptions_info);
+
+#endif  // RMW_OPENDDS_SHARED_CPP__TOPIC_ENDPOINT_INFO_HPP_
