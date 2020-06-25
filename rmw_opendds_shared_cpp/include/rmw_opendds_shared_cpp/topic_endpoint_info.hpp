@@ -13,8 +13,8 @@
 #ifndef RMW_OPENDDS_SHARED_CPP__TOPIC_ENDPOINT_INFO_HPP_
 #define RMW_OPENDDS_SHARED_CPP__TOPIC_ENDPOINT_INFO_HPP_
 
-#include "rmw/topic_endpoint_info_array.h"
-#include "rmw_opendds_shared_cpp/visibility_control.h"
+#include <rmw/topic_endpoint_info_array.h>
+#include <rmw_opendds_shared_cpp/visibility_control.h>
 
 RMW_OPENDDS_SHARED_CPP_PUBLIC
 rmw_ret_t
