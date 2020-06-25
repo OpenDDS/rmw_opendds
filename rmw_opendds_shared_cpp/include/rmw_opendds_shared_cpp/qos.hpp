@@ -137,10 +137,6 @@ rmw_qos_to_dds_qos(
     case RMW_QOS_POLICY_LIVELINESS_AUTOMATIC:
       dds_qos.liveliness.kind = DDS::AUTOMATIC_LIVELINESS_QOS;
       break;
-    // RMW_QOS_POLICY_LIVELINESS_MANUAL_BY_NODE has been depricated: use RMW_QOS_POLICY_LIVELINESS_MANUAL_BY_TOPIC below
-    //case RMW_QOS_POLICY_LIVELINESS_MANUAL_BY_NODE:
-    //  dds_qos.liveliness.kind = DDS::MANUAL_BY_PARTICIPANT_LIVELINESS_QOS;
-    //  break;
     case RMW_QOS_POLICY_LIVELINESS_MANUAL_BY_TOPIC:
       dds_qos.liveliness.kind = DDS::MANUAL_BY_TOPIC_LIVELINESS_QOS;
       break;
@@ -208,8 +204,6 @@ dds_qos_to_rmw_qos(
     rmw_qos.liveliness = RMW_QOS_POLICY_LIVELINESS_AUTOMATIC;
     break;
   case DDS::MANUAL_BY_PARTICIPANT_LIVELINESS_QOS:
-    // RMW_QOS_POLICY_LIVELINESS_MANUAL_BY_NODE has been depricated: use RMW_QOS_POLICY_LIVELINESS_MANUAL_BY_TOPIC if manually asserted liveliness is needed.
-    // rmw_qos.liveliness = RMW_QOS_POLICY_LIVELINESS_MANUAL_BY_NODE;
     rmw_qos.liveliness = RMW_QOS_POLICY_LIVELINESS_MANUAL_BY_TOPIC;
     break;
   case DDS::MANUAL_BY_TOPIC_LIVELINESS_QOS:

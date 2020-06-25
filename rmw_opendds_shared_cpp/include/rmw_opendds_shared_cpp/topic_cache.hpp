@@ -114,7 +114,7 @@ public:
       return false;
     }
     endpoint_guid_to_info_[endpoint_guid] =
-      // Implement qos logic
+      // TODO: pass qos_profile when supported
       //TopicInfo{ topic_name, type_name, participant_guid, endpoint_guid, qos_profile };
       TopicInfo{ topic_name, type_name, participant_guid, endpoint_guid};
     participant_to_endpoint_guids_[participant_guid].insert(endpoint_guid);

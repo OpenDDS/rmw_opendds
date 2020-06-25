@@ -1,5 +1,3 @@
-// Copyright 2019 Open Source Robotics Foundation, Inc.
-//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -17,7 +15,7 @@
 
 #include "rmw/ret_types.h"
 
-typedef struct OpenDDSCustomEventInfo
+struct OpenDDSCustomEventInfo
 {
   virtual ~OpenDDSCustomEventInfo() = default;
 
@@ -31,6 +29,6 @@ typedef struct OpenDDSCustomEventInfo
    */
   virtual rmw_ret_t get_status(const DDS::StatusMask mask, void * event) = 0;
   virtual DDS::Entity * get_entity() = 0;
-} OpenDDSCustomEventInfo;
+};
 
 #endif  // RMW_OPENDDS_SHARED_CPP__OPENDDS_STATIC_EVENT_INFO_HPP_

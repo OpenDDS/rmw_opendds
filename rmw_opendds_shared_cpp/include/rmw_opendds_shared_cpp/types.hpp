@@ -50,7 +50,7 @@ public:
 
   virtual bool add_information(
     const DDS::GUID_t& participant_guid,
-    const DDS::GUID_t& instance_handle,
+    const DDS::GUID_t& guid,
     const std::string & topic_name,
     const std::string & type_name,
     // TODO: uncomment when underlying qos_profile logic is implemented
@@ -59,7 +59,7 @@ public:
 
   RMW_OPENDDS_SHARED_CPP_PUBLIC
   virtual bool remove_information(
-    const DDS::GUID_t& instance_handle,
+    const DDS::GUID_t& guid,
     EntityType entity_type);
 
   RMW_OPENDDS_SHARED_CPP_PUBLIC
