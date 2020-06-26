@@ -25,7 +25,7 @@ jobs:
       printenv
       pwd
       ls
-      echo "agend build directory"
+      echo "Agent.BuildDirectory"
       echo $(Agent.BuildDirectory)
     displayName: filesystem check
   - script: |
@@ -34,7 +34,7 @@ jobs:
     displayName: clone rosidl_typesupport_opendds
   - script: |
         cd $(Agent.BuildDirectory)
-        git clone -b foxy-release https://github.com/adamsj-oci/rmw_build
+        git clone -b foxy-release https://github.com/oci-labs/rmw_build
         vcs import s < rmw_build/ros2.repos
         echo "ls"
         ls
@@ -60,3 +60,20 @@ jobs:
         cd $(Agent.BuildDirectory)
         ./rmw_build/run_ci_test_rpc.sh
     displayName:  run tests (run_ci_test_rpc.sh)
+  - script: |
+        rm -rf build
+        rm -rf install
+    displayName:  remove previous build artifacts (only do this short term)
+  - script: |
+        cd $(Agent.BuildDirectory)
+        ./rmw_build/build_system_test.sh
+    displayName:  build system tests
+  - script: |
+        cd $(Agent.BuildDirectory)
+        ./rmw_build/run_system_test.sh
+    displayName:  run system tests
+  - task: PublishTestResults@2
+    inputs:
+      testResultsFormat: 'JUnit'
+      testResultsFiles: '**/*.xml'
+      searchFolder: '$(Agent.BuildDirectory)/build/test_communication/'
