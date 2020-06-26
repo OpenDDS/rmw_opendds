@@ -44,6 +44,8 @@ add_library(
   src/condition_error.cpp
   src/count.cpp
   src/demangle.cpp
+  src/event.cpp
+  src/event_converter.cpp
   src/guard_condition.cpp
   src/init.cpp
   src/namespace_prefix.cpp
@@ -59,7 +61,8 @@ add_library(
   src/wait_set.cpp
   src/types/custom_data_reader_listener.cpp
   src/types/custom_publisher_listener.cpp
-  src/types/custom_subscriber_listener.cpp)
+  src/types/custom_subscriber_listener.cpp
+  src/topic_endpoint_info.cpp)
 
 target_link_libraries(rmw_opendds_shared_cpp ${opendds_libs_1})
 

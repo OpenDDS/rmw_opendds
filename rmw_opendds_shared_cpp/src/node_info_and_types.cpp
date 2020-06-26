@@ -41,6 +41,8 @@
 #include "rmw_opendds_shared_cpp/opendds_include.hpp"
 #include "rmw_opendds_shared_cpp/guid_helper.hpp"
 
+#include <dds/DCPS/DomainParticipantImpl.h>
+
 /**
  * Check to see if a node name and namespace match the user data QoS policy
  * of a node.
@@ -84,11 +86,11 @@ __is_node_match(
  * @return RMW_RET_OK if success, ERROR otherwise
  */
 rmw_ret_t
-__get_instancehandle(
+__get_key(
   OpenDDSNodeInfo * node_info,
   const char * node_name,
   const char * node_namespace,
-  DDS::InstanceHandle_t & handle)
+  DDS::GUID_t& key)
 {
   auto participant = node_info->participant;
   RMW_CHECK_FOR_NULL_WITH_MSG(participant, "participant handle is null", return RMW_RET_ERROR);
@@ -96,7 +98,8 @@ __get_instancehandle(
   DDS::DomainParticipantQos dpqos;
   auto dds_ret = participant->get_qos(dpqos);
   if (dds_ret == DDS::RETCODE_OK && __is_node_match(dpqos.user_data, node_name, node_namespace)) {
-    handle = participant->get_instance_handle();
+    OpenDDS::DCPS::DomainParticipantImpl* dpi = dynamic_cast<OpenDDS::DCPS::DomainParticipantImpl*>(node_info->participant.in());
+    key = dpi->get_repoid(participant->get_instance_handle());
     return RMW_RET_OK;
   }
 
@@ -110,30 +113,22 @@ __get_instancehandle(
     DDS::ParticipantBuiltinTopicData pbtd;
     auto dds_ret = participant->get_discovered_participant_data(pbtd, handles[i]);
     if (dds_ret == DDS::RETCODE_OK) {
-      uint8_t * buf = pbtd.user_data.value.get_buffer();
-      if (buf) {
-        std::vector<uint8_t> kv(buf, buf + pbtd.user_data.value.length());
-        auto map = rmw::impl::cpp::parse_key_value(kv);
-        auto name_found = map.find("name");
-        auto ns_found = map.find("namespace");
-
-        if (name_found != map.end() && ns_found != map.end()) {
-          std::string name(name_found->second.begin(), name_found->second.end());
-          std::string ns(ns_found->second.begin(), ns_found->second.end());
-          if ((name == node_name) && (node_namespace == ns))
-          {
-            handle = handles[i];
-            return RMW_RET_OK;
-          }
-        }
+      if (__is_node_match(pbtd.user_data, node_name, node_namespace)) {
+        DDS_BuiltinTopicKey_to_GUID(&key, pbtd.key);
+        return RMW_RET_OK;
       }
-    } else {
+    }
+    else {
       RMW_SET_ERROR_MSG("unable to fetch discovered participants data.");
       return RMW_RET_ERROR;
     }
   }
-  RMW_SET_ERROR_MSG("unable to match node_name/namespace with discovered nodes.");
-  return RMW_RET_ERROR;
+  RMW_SET_ERROR_MSG_WITH_FORMAT_STRING(
+    "Node name not found: ns='%s', name='%s",
+    node_namespace,
+    node_name
+  );
+  return RMW_RET_NODE_NAME_NON_EXISTENT;
 }
 
 rmw_ret_t
@@ -186,15 +181,15 @@ get_subscriber_names_and_types_by_node(
     return RMW_RET_ERROR;
   }
 
-  DDS::InstanceHandle_t handle;
-  auto get_guid_err = __get_instancehandle(node_info, node_name, node_namespace, handle);
+  DDS::GUID_t key;
+  auto get_guid_err = __get_key(node_info, node_name, node_namespace, key);
   if (get_guid_err != RMW_RET_OK) {
     return get_guid_err;
   }
 
   // combine publisher and subscriber information
   std::map<std::string, std::set<std::string>> topics;
-  node_info->subscriber_listener->fill_topic_names_and_types_by_guid(no_demangle, topics, handle);
+  node_info->subscriber_listener->fill_topic_names_and_types_by_guid(no_demangle, topics, key);
 
   return copy_topics_names_and_types(topics, allocator, no_demangle, topic_names_and_types);
 }
@@ -233,27 +228,28 @@ get_publisher_names_and_types_by_node(
     return RMW_RET_ERROR;
   }
 
-  DDS::InstanceHandle_t handle;
-  auto get_guid_err = __get_instancehandle(node_info, node_name, node_namespace, handle);
+  DDS::GUID_t key;
+  auto get_guid_err = __get_key(node_info, node_name, node_namespace, key);
   if (get_guid_err != RMW_RET_OK) {
     return get_guid_err;
   }
 
   // combine publisher and subscriber information
   std::map<std::string, std::set<std::string>> topics;
-  node_info->publisher_listener->fill_topic_names_and_types_by_guid(no_demangle, topics, handle);
+  node_info->publisher_listener->fill_topic_names_and_types_by_guid(no_demangle, topics, key);
 
   return copy_topics_names_and_types(topics, allocator, no_demangle, topic_names_and_types);
 }
 
 rmw_ret_t
-get_service_names_and_types_by_node(
-  const char * implementation_identifier,
-  const rmw_node_t * node,
-  rcutils_allocator_t * allocator,
-  const char * node_name,
-  const char * node_namespace,
-  rmw_names_and_types_t * service_names_and_types)
+__get_service_names_and_types_by_node(
+  const char* implementation_identifier,
+  const rmw_node_t* node,
+  rcutils_allocator_t* allocator,
+  const char* node_name,
+  const char* node_namespace,
+  rmw_names_and_types_t* service_names_and_types,
+  const char* suffix)
 {
   if (!node) {
     RMW_SET_ERROR_MSG("null node handle");
@@ -269,27 +265,66 @@ get_service_names_and_types_by_node(
     return ret;
   }
 
-  auto node_info = static_cast<OpenDDSNodeInfo *>(node->data);
+  auto node_info = static_cast<OpenDDSNodeInfo*>(node->data);
   if (!node_info) {
     RMW_SET_ERROR_MSG("node info handle is null");
     return RMW_RET_ERROR;
   }
 
-  DDS::InstanceHandle_t handle;
-  auto get_guid_err = __get_instancehandle(node_info, node_name, node_namespace, handle);
+  DDS::GUID_t key;
+  auto get_guid_err = __get_key(node_info, node_name, node_namespace, key);
   if (get_guid_err != RMW_RET_OK) {
     return get_guid_err;
   }
 
   // combine publisher and subscriber information
   std::map<std::string, std::set<std::string>> services;
-  node_info->subscriber_listener->fill_service_names_and_types_by_guid(services, handle);
+  node_info->subscriber_listener->fill_service_names_and_types_by_guid(services, key, suffix);
 
-  rmw_ret_t rmw_ret;
-  rmw_ret = copy_services_to_names_and_types(services, allocator, service_names_and_types);
+  rmw_ret_t rmw_ret =
+    copy_services_to_names_and_types(services, allocator, service_names_and_types);
   if (rmw_ret != RMW_RET_OK) {
     return rmw_ret;
   }
 
   return RMW_RET_OK;
-}  // extern "C"
+}
+
+rmw_ret_t
+get_service_names_and_types_by_node(
+  const char* implementation_identifier,
+  const rmw_node_t* node,
+  rcutils_allocator_t* allocator,
+  const char* node_name,
+  const char* node_namespace,
+  rmw_names_and_types_t* service_names_and_types)
+{
+  return __get_service_names_and_types_by_node(
+    implementation_identifier,
+    node,
+    allocator,
+    node_name,
+    node_namespace,
+    service_names_and_types,
+    "Request");
+}
+
+rmw_ret_t
+get_client_names_and_types_by_node(
+  const char* implementation_identifier,
+  const rmw_node_t* node,
+  rcutils_allocator_t* allocator,
+  const char* node_name,
+  const char* node_namespace,
+  rmw_names_and_types_t* service_names_and_types)
+{
+  return __get_service_names_and_types_by_node(
+    implementation_identifier,
+    node,
+    allocator,
+    node_name,
+    node_namespace,
+    service_names_and_types,
+    "Reply");
+}
+

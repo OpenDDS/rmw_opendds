@@ -69,6 +69,8 @@ register_rmw_implementation(
 add_library(
   rmw_opendds_cpp
   SHARED
+  src/opendds_static_publisher_info.cpp
+  src/opendds_static_subscriber_info.cpp
   src/get_client.cpp
   src/get_participant.cpp
   src/get_publisher.cpp
@@ -79,6 +81,7 @@ add_library(
   src/rmw_client.cpp
   src/rmw_compare_gid_equals.cpp
   src/rmw_count.cpp
+  src/rmw_event.cpp
   src/rmw_get_gid_for_publisher.cpp
   src/rmw_get_implementation_identifier.cpp
   src/rmw_get_serialization_format.cpp
@@ -103,7 +106,7 @@ add_library(
   src/rmw_wait.cpp
   src/rmw_wait_set.cpp
   src/serialization_format.cpp
-  src/rmw_event.cpp)
+  src/rmw_get_topic_endpoint_info.cpp)
 
 OPENDDS_TARGET_SOURCES(rmw_opendds_cpp resources/opendds_static_serialized_data.idl TAO_IDL_OPTIONS "-Sa -St")
 target_link_libraries(rmw_opendds_cpp ${opendds_libs})

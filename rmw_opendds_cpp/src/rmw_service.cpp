@@ -33,6 +33,8 @@
 //   rmw_opendds_shared_cpp/shared_functions.cpp
 // #define DISCOVERY_DEBUG_LOGGING 1
 
+#include <dds/DCPS/DomainParticipantImpl.h>
+
 extern "C"
 {
 rmw_ret_t clean_service(OpenDDSNodeInfo & node_info, rmw_service_t * service)
@@ -42,10 +44,12 @@ rmw_ret_t clean_service(OpenDDSNodeInfo & node_info, rmw_service_t * service)
     return ret;
   }
   auto info = static_cast<OpenDDSStaticServiceInfo*>(service->data);
+  OpenDDS::DCPS::DomainParticipantImpl* dpi = dynamic_cast<OpenDDS::DCPS::DomainParticipantImpl*>(node_info.participant.in());
   if (info) {
     if (info->request_reader_) {
-      node_info.subscriber_listener->remove_information(
-        info->request_reader_->get_instance_handle(), EntityType::Subscriber);
+      DDS::GUID_t guid = dpi->get_repoid(info->request_reader_->get_instance_handle());
+
+      node_info.subscriber_listener->remove_information(guid, EntityType::Subscriber);
       node_info.subscriber_listener->trigger_graph_guard_condition();
       if (info->read_condition_) {
         if (info->request_reader_->delete_readcondition(info->read_condition_) != DDS::RETCODE_OK) {
@@ -64,8 +68,9 @@ rmw_ret_t clean_service(OpenDDSNodeInfo & node_info, rmw_service_t * service)
       DDS::DataWriter_var reply_datawriter = static_cast<DDS::DataWriter *>(
         info->callbacks_->get_reply_datawriter(info->replier_));
       if (reply_datawriter) {
-        node_info.publisher_listener->remove_information(
-          reply_datawriter->get_instance_handle(), EntityType::Publisher);
+        DDS::GUID_t guid = dpi->get_repoid(reply_datawriter->get_instance_handle());
+
+        node_info.publisher_listener->remove_information(guid, EntityType::Publisher);
         node_info.publisher_listener->trigger_graph_guard_condition();
       }
       info->callbacks_->destroy_replier(info->replier_, &rmw_free);
@@ -179,10 +184,7 @@ rmw_create_service(
     info->replier_ = info->callbacks_->create_replier(node_info->participant,
       request_topic.c_str(), response_topic.c_str(), publisher, subscriber, &rmw_allocate, &rmw_free);
     if (!info->replier_) {
-      return service;
-/* TODO: delete the line above and uncomment the line below when service typesupport is ready.
       throw std::string("failed to create_replier");
-*/
     }
 
     info->request_reader_ = static_cast<DDS::DataReader*>(
@@ -207,8 +209,12 @@ rmw_create_service(
     if (!name || !type_name) {
       throw std::string("topicdescription name or type_name is null");
     }
-    node_info->subscriber_listener->add_information(node_info->participant->get_instance_handle(),
-      info->request_reader_->get_instance_handle(), name.in(), type_name.in(), EntityType::Subscriber);
+
+    OpenDDS::DCPS::DomainParticipantImpl* dpi = dynamic_cast<OpenDDS::DCPS::DomainParticipantImpl*>(node_info->participant.in());
+    DDS::GUID_t part_guid = dpi->get_repoid(node_info->participant->get_instance_handle());
+    DDS::GUID_t r_guid = dpi->get_repoid(info->request_reader_->get_instance_handle());
+
+    node_info->subscriber_listener->add_information(part_guid, r_guid, name.in(), type_name.in(), EntityType::Subscriber);
     node_info->subscriber_listener->trigger_graph_guard_condition();
 
     // update node_info publisher_listener
@@ -226,8 +232,10 @@ rmw_create_service(
     if (!name || !type_name) {
       throw std::string("writer topic name or type_name is null");
     }
-    node_info->publisher_listener->add_information(node_info->participant->get_instance_handle(),
-      writer->get_instance_handle(), name.in(), type_name.in(), EntityType::Publisher);
+
+    DDS::GUID_t w_guid = dpi->get_repoid(writer->get_instance_handle());
+
+    node_info->publisher_listener->add_information(part_guid, w_guid, name.in(), type_name.in(), EntityType::Publisher);
     node_info->publisher_listener->trigger_graph_guard_condition();
 
     return service;

@@ -39,3 +39,25 @@ get_datawriter_qos(
   }
   return rmw_qos_to_dds_qos(qos_profile, datawriter_qos);
 }
+
+rmw_qos_policy_kind_t
+dds_qos_policy_to_rmw_qos_policy(DDS::QosPolicyId_t policy_id)
+{
+  switch (policy_id) {
+  case DDS::DURABILITY_QOS_POLICY_ID:
+    return RMW_QOS_POLICY_DURABILITY;
+  case DDS::DEADLINE_QOS_POLICY_ID:
+    return RMW_QOS_POLICY_DEADLINE;
+  case DDS::LIVELINESS_QOS_POLICY_ID:
+    return RMW_QOS_POLICY_LIVELINESS;
+  case DDS::RELIABILITY_QOS_POLICY_ID:
+    return RMW_QOS_POLICY_RELIABILITY;
+  case DDS::HISTORY_QOS_POLICY_ID:
+    return RMW_QOS_POLICY_HISTORY;
+  case DDS::LIFESPAN_QOS_POLICY_ID:
+    return RMW_QOS_POLICY_LIFESPAN;
+  default:
+    return RMW_QOS_POLICY_INVALID;
+  }
+}
+
