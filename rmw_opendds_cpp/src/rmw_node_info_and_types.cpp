@@ -73,9 +73,7 @@ rmw_get_client_names_and_types_by_node(
   const char * node_namespace,
   rmw_names_and_types_t * service_names_and_types)
 {
-  // Needs implementation
-  //return get_client_names_and_types_by_node(
-  //  opendds_identifier, node, allocator, node_name, node_namespace, service_names_and_types);
-  return NULL;
+  return get_client_names_and_types_by_node(
+    opendds_identifier, node, allocator, node_name, node_namespace, service_names_and_types);
 }
 }  // extern "C"

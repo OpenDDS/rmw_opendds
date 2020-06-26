@@ -61,7 +61,8 @@ add_library(
   src/wait_set.cpp
   src/types/custom_data_reader_listener.cpp
   src/types/custom_publisher_listener.cpp
-  src/types/custom_subscriber_listener.cpp)
+  src/types/custom_subscriber_listener.cpp
+  src/topic_endpoint_info.cpp)
 
 target_link_libraries(rmw_opendds_shared_cpp ${opendds_libs_1})
 
