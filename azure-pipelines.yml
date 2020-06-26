@@ -34,7 +34,7 @@ jobs:
     displayName: clone rosidl_typesupport_opendds
   - script: |
         cd $(Agent.BuildDirectory)
-        git clone -b foxy-release https://github.com/adamsj-oci/rmw_build
+        git clone -b foxy-release https://github.com/oci-labs/rmw_build
         vcs import s < rmw_build/ros2.repos
         echo "ls"
         ls
