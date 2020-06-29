@@ -18,10 +18,10 @@ These packages are built using ROS2's `Colcon` and `Ament` build tools. `rosidl_
 Add the two repos above to the `src/` folder within a ROS2 workspace that you want to compile with support for OpenDDS. You can pull the `objectcomputing/opendds_ros2` docker image as a build environment. A [volume mapped docker container](https://github.com/adamsj-oci/workspace_tools/blob/master/start_docker.sh) to the ROS2 workspace, can be used to build the sources from the following steps:
 
 - `source /opt/OpenDDS/setenv.sh`
-- `source /opt/ros/eloquent/setup.bash`
+- `source /opt/ros/foxy/setup.bash`
 - Verify the environment.
   - `printenv|grep DDS`
   - `printenv|grep ROS`
 - Build the code.
-  - `colcon build --symlink-install` 
-  
+  - `colcon build --symlink-install`
+
