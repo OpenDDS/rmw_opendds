@@ -17,6 +17,7 @@
 #include "rmw_opendds_shared_cpp/guid_helper.hpp"
 #include "rmw_opendds_shared_cpp/types.hpp"
 #include "dds/DdsDcpsCoreTypeSupportC.h"
+#include "dds/DCPS/DomainParticipantImpl.h"
 // Uncomment this to get extra console output about discovery.
 // #define DISCOVERY_DEBUG_LOGGING 1
 
@@ -24,6 +25,11 @@ void CustomPublisherListener::on_data_available(DDS::DataReader * reader)
 {
   DDS::PublicationBuiltinTopicDataDataReader * builtin_reader =
     dynamic_cast<DDS::PublicationBuiltinTopicDataDataReader *>(reader);
+
+  if (!builtin_reader) {
+    fprintf(stderr, "failed to narrow to DDS::PublicationBuiltinTopicDataDataReader\n");
+    return;
+  }
 
   DDS::PublicationBuiltinTopicDataSeq data_seq;
   DDS::SampleInfoSeq info_seq;
@@ -39,22 +45,29 @@ void CustomPublisherListener::on_data_available(DDS::DataReader * reader)
     return;
   }
 
+  DDS::Subscriber_var subscriber = builtin_reader->get_subscriber();
+  DDS::DomainParticipant_var participant = subscriber->get_participant();
+  OpenDDS::DCPS::DomainParticipantImpl* dpi =
+    dynamic_cast<OpenDDS::DCPS::DomainParticipantImpl*>(participant.in());
+
   for (CORBA::ULong i = 0; i < data_seq.length(); ++i) {
+    DDS::GUID_t guid = dpi->get_repoid(info_seq[i].instance_handle);
+
     if (info_seq[i].valid_data &&
       info_seq[i].instance_state == DDS::ALIVE_INSTANCE_STATE)
     {
-      DDS::InstanceHandle_t participant_guid;
-      // @todo jwi
-      //DDS::BuiltinTopicKey_to_GUID(&participant_guid, data_seq[i].participant_key);
+      DDS::GUID_t participant_guid;
+      DDS_BuiltinTopicKey_to_GUID(&participant_guid, data_seq[i].participant_key);
+
       add_information(
         participant_guid,
-        info_seq[i].instance_handle,
+        guid,
         data_seq[i].topic_name.in (),
         data_seq[i].type_name.in (),
         EntityType::Publisher);
     } else {
       remove_information(
-        info_seq[i].instance_handle,
+        guid,
         EntityType::Publisher);
     }
   }

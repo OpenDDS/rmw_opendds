@@ -186,14 +186,8 @@ create_node(
   const char * implementation_identifier,
   const char * name,
   const char * namespace_,
-  size_t domain_id,
-  const rmw_node_security_options_t * security_options)
+  size_t domain_id)
 {
-  if (!security_options) {
-    RMW_SET_ERROR_MSG("security_options is null");
-    return nullptr;
-  }
-
   DDS::DomainParticipantFactory * dpf = TheParticipantFactory;
   if (!dpf) {
     RMW_SET_ERROR_MSG("failed to get participant factory");
@@ -215,14 +209,6 @@ create_node(
     RMW_SET_ERROR_MSG("failed to populate user_data buffer");
     return nullptr;
   }
-
-#ifdef OPENDDS_SECURITY
-  if (security_options->security_root_path) {
-    if (!enable_security(security_options->security_root_path, qos.property.value)) {
-      return nullptr;
-    }
-  }
-#endif
 
   rmw_node_t * node = nullptr;
   void * buf = nullptr;

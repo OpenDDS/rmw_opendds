@@ -18,6 +18,7 @@
 #include <atomic>
 
 #include "rmw_opendds_shared_cpp/types.hpp"
+#include "rmw_opendds_shared_cpp/opendds_static_event_info.hpp"
 
 #include "rosidl_typesupport_opendds_cpp/message_type_support.h"
 
@@ -25,7 +26,7 @@ class OpenDDSPublisherListener;
 
 extern "C"
 {
-struct OpenDDSStaticPublisherInfo
+struct OpenDDSStaticPublisherInfo : OpenDDSCustomEventInfo
 {
   DDS::Publisher_var dds_publisher_;
   OpenDDSPublisherListener * listener_;
@@ -38,6 +39,20 @@ struct OpenDDSStaticPublisherInfo
     topic_writer_(),
     callbacks_(nullptr),
     publisher_gid() {}
+
+  /**
+   * Remap the OpenDDS DataWriter Status to a generic RMW status type.
+   *
+   * \param mask input status mask
+   * \param event
+   */
+  rmw_ret_t get_status(DDS::StatusMask mask, void* event) override;
+
+  /// Return the topic writer entity for this publisher.
+  /**
+   * \return the topic writer associated with this publisher
+   */
+  DDS::Entity* get_entity() override;
 };
 }  // extern "C"
 

@@ -28,11 +28,12 @@
 #include "rmw_opendds_shared_cpp/types.hpp"
 
 rmw_ret_t
-get_node_names(
+get_node_names_impl(
   const char * implementation_identifier,
   const rmw_node_t * node,
   rcutils_string_array_t * node_names,
-  rcutils_string_array_t * node_namespaces)
+  rcutils_string_array_t * node_namespaces,
+  rcutils_string_array_t * enclaves)
 {
   if (!node) {
     RMW_SET_ERROR_MSG("node handle is null");
@@ -64,6 +65,13 @@ get_node_names(
     RMW_SET_ERROR_MSG(rcutils_get_error_string().str);
     return rmw_convert_rcutils_ret_to_rmw_ret(rcutils_ret);
   }
+  if (enclaves) {
+    rcutils_ret = rcutils_string_array_init(enclaves, length, &allocator);
+    if (rcutils_ret != RCUTILS_RET_OK) {
+      RMW_SET_ERROR_MSG(rcutils_get_error_string().str);
+      return rmw_convert_rcutils_ret_to_rmw_ret(rcutils_ret);
+    }
+  }
 
   DDS::DomainParticipantQos participant_qos;
   DDS::ReturnCode_t status = participant->get_qos(participant_qos);
@@ -76,24 +84,38 @@ get_node_names(
     RMW_SET_ERROR_MSG("could not allocate memory for node namespace");
     return RMW_RET_BAD_ALLOC;
   }
+  if (enclaves) {
+    enclaves->data[0] = rcutils_strdup(
+      node->context->options.enclave, allocator);
+    if (!enclaves->data[0]) {
+      RMW_SET_ERROR_MSG("could not allocate memory for a enclave name");
+      return RMW_RET_BAD_ALLOC;
+    }
+  }
 
   for (CORBA::ULong i = 1; i < length; ++i) {
     DDS::ParticipantBuiltinTopicData pbtd;
     auto dds_ret = participant->get_discovered_participant_data(pbtd, handles[i - 1]);
     std::string name;
     std::string namespace_;
+    std::string enclave;
     if (DDS::RETCODE_OK == dds_ret) {
       auto data = static_cast<unsigned char *>(pbtd.user_data.value.get_buffer());
       std::vector<uint8_t> kv(data, data + pbtd.user_data.value.length());
       auto map = rmw::impl::cpp::parse_key_value(kv);
       auto name_found = map.find("name");
       auto ns_found = map.find("namespace");
+      auto enclave_found = map.find("enclave");
 
       if (name_found != map.end()) {
         name = std::string(name_found->second.begin(), name_found->second.end());
       }
       if (name_found != map.end()) {
         namespace_ = std::string(ns_found->second.begin(), ns_found->second.end());
+      }
+      if (enclave_found != map.end()) {
+        enclave = std::string(
+          enclave_found->second.begin(), enclave_found->second.end());
       }
     }
     if (name.empty()) {
@@ -114,6 +136,15 @@ get_node_names(
       RMW_SET_ERROR_MSG("could not allocate memory for node namespace");
       goto fail;
     }
+
+    if (enclaves) {
+      enclaves->data[i] = rcutils_strdup(enclave.c_str(), allocator);
+      if (!enclaves->data[i]) {
+        RMW_SET_ERROR_MSG("could not allocate memory for enclave namespace");
+        goto fail;
+      }
+    }
+
   }
 
   return RMW_RET_OK;
@@ -136,5 +167,41 @@ fail:
       rcutils_reset_error();
     }
   }
+  if (enclaves) {
+    rcutils_ret = rcutils_string_array_fini(enclaves);
+    if (rcutils_ret != RCUTILS_RET_OK) {
+      RCUTILS_LOG_ERROR_NAMED(
+        "rmw_opendds_cpp",
+        "failed to cleanup during error handling: %s", rcutils_get_error_string().str
+      );
+      rcutils_reset_error();
+    }
+  }
+
   return RMW_RET_BAD_ALLOC;
 }
+
+rmw_ret_t
+get_node_names(
+  const char* implementation_identifier,
+  const rmw_node_t* node,
+  rcutils_string_array_t* node_names,
+  rcutils_string_array_t* node_namespaces)
+{
+  return get_node_names_impl(implementation_identifier, node, node_names, node_namespaces, nullptr);
+}
+
+rmw_ret_t
+get_node_names_with_enclaves(
+  const char* implementation_identifier,
+  const rmw_node_t* node,
+  rcutils_string_array_t* node_names,
+  rcutils_string_array_t* node_namespaces,
+  rcutils_string_array_t* enclaves)
+{
+  if (rmw_check_zero_rmw_string_array(enclaves) != RMW_RET_OK) {
+    return RMW_RET_ERROR;
+  }
+  return get_node_names_impl(implementation_identifier, node, node_names, node_namespaces, enclaves);
+}
+

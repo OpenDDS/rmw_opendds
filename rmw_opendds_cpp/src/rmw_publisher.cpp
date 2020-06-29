@@ -39,13 +39,14 @@
 // #define DISCOVERY_DEBUG_LOGGING 1
 
 #include <dds/DCPS/Marked_Default_Qos.h>
+#include <dds/DCPS/DomainParticipantImpl.h>
 
 extern "C"
 {
 rmw_ret_t
 rmw_init_publisher_allocation(
   const rosidl_message_type_support_t * type_support,
-  const rosidl_message_bounds_t * message_bounds,
+  const rosidl_runtime_c__Sequence__bound * message_bounds,
   rmw_publisher_allocation_t * allocation)
 {
   // Unused in current implementation.
@@ -235,8 +236,12 @@ rmw_create_publisher(
         throw std::string("failed to get topic name");
       }
     }
-    node_info->publisher_listener->add_information(participant->get_instance_handle(),
-      publisher_info->dds_publisher_->get_instance_handle(), mangled_name, type_name, EntityType::Publisher);
+
+    OpenDDS::DCPS::DomainParticipantImpl* dpi = dynamic_cast<OpenDDS::DCPS::DomainParticipantImpl*>(node_info->participant.in());
+    DDS::GUID_t part_guid = dpi->get_repoid(node_info->participant->get_instance_handle());
+    DDS::GUID_t guid = dpi->get_repoid(publisher_info->dds_publisher_->get_instance_handle());
+
+    node_info->publisher_listener->add_information(part_guid, guid, mangled_name, type_name, EntityType::Publisher);
     node_info->publisher_listener->trigger_graph_guard_condition();
 
     return publisher;
@@ -398,8 +403,10 @@ rmw_destroy_publisher(rmw_node_t * node, rmw_publisher_t * publisher)
   OpenDDSStaticPublisherInfo * publisher_info =
     static_cast<OpenDDSStaticPublisherInfo *>(publisher->data);
   if (publisher_info) {
-    node_info->publisher_listener->remove_information(
-      publisher_info->dds_publisher_->get_instance_handle(), EntityType::Publisher);
+    OpenDDS::DCPS::DomainParticipantImpl* dpi = dynamic_cast<OpenDDS::DCPS::DomainParticipantImpl*>(node_info->participant.in());
+    DDS::GUID_t guid = dpi->get_repoid(publisher_info->dds_publisher_->get_instance_handle());
+
+    node_info->publisher_listener->remove_information(guid, EntityType::Publisher);
     node_info->publisher_listener->trigger_graph_guard_condition();
     //DDS::Publisher * dds_publisher = publisher_info->dds_publisher_;
 

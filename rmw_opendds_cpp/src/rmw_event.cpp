@@ -20,25 +20,44 @@
 
 extern "C"
 {
-/// Take an event from the event handle.
-/**
- * \param event_handle event object to take from
- * \param event_info event info object to write taken data into
- * \param taken boolean flag indicating if an event was taken or not
- * \return `RMW_RET_OK` if successful, or
- * \return `RMW_RET_BAD_ALLOC` if memory allocation failed, or
- * \return `RMW_RET_ERROR` if an unexpected error occurs.
- */
-rmw_ret_t
-rmw_take_event(
-  const rmw_event_t * event_handle,
-  void * event_info,
-  bool * taken)
-{
-  return __rmw_take_event(
-    opendds_identifier,
-    event_handle,
-    event_info,
-    taken);
-}
+  rmw_ret_t
+    rmw_publisher_event_init(
+      rmw_event_t* rmw_event,
+      const rmw_publisher_t* publisher,
+      rmw_event_type_t event_type)
+  {
+    return __rmw_init_event(
+      opendds_identifier,
+      rmw_event,
+      publisher->implementation_identifier,
+      publisher->data,
+      event_type);
+  }
+
+  rmw_ret_t
+    rmw_subscription_event_init(
+      rmw_event_t* rmw_event,
+      const rmw_subscription_t* subscription,
+      rmw_event_type_t event_type)
+  {
+    return __rmw_init_event(
+      opendds_identifier,
+      rmw_event,
+      subscription->implementation_identifier,
+      subscription->data,
+      event_type);
+  }
+
+  rmw_ret_t
+    rmw_take_event(
+      const rmw_event_t* event_handle,
+      void* event_info,
+      bool* taken)
+  {
+    return __rmw_take_event(
+      opendds_identifier,
+      event_handle,
+      event_info,
+      taken);
+  }
 }  // extern "C"
