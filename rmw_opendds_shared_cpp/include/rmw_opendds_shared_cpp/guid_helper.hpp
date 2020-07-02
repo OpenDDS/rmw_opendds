@@ -25,23 +25,9 @@ namespace DDS
   typedef OpenDDS::DCPS::GUID_t GUID_t;
 }
 
-//  Taken from http://community.rti.com/comment/689#comment-689
 inline void DDS_BuiltinTopicKey_to_GUID(DDS::GUID_t* guid, DDS::BuiltinTopicKey_t builtinTopicKey)
 {
-#if BIG_ENDIAN
-  memcpy(guid, reinterpret_cast<CORBA::Octet const*>(&builtinTopicKey), 16);
-#else
-  /* little endian */
-  DDS_Octet const* keyBuffer = reinterpret_cast<CORBA::Octet*>(&builtinTopicKey);
-  for (uint8_t i = 0; i < 4; ++i) {
-    CORBA::Octet* guidElement = guid;
-    DDS_Octet const* keyBufferElement = keyBuffer + (i * 4);
-    guidElement[0] = keyBufferElement[3];
-    guidElement[1] = keyBufferElement[2];
-    guidElement[2] = keyBufferElement[1];
-    guidElement[3] = keyBufferElement[0];
-  }
-#endif
+  std::memcpy(guid, partBitData(pdata).key.value, sizeof(DDS::BuiltinTopicKey_t));
 }
 
 #endif  // RMW_OPENDDS_SHARED_CPP__GUID_HELPER_HPP_
