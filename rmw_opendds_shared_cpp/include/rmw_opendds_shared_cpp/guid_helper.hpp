@@ -27,7 +27,7 @@ namespace DDS
 
 inline void DDS_BuiltinTopicKey_to_GUID(DDS::GUID_t* guid, DDS::BuiltinTopicKey_t builtinTopicKey)
 {
-  std::memcpy(guid, partBitData(pdata).key.value, sizeof(DDS::BuiltinTopicKey_t));
+  std::memcpy(guid, builtinTopicKey.value, sizeof(DDS::BuiltinTopicKey_t));
 }
 
 #endif  // RMW_OPENDDS_SHARED_CPP__GUID_HELPER_HPP_
