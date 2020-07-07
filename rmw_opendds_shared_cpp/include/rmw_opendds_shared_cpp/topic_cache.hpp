@@ -162,7 +162,7 @@ public:
 
     endpoint_guid_to_info_.erase(topic_endpoint_info_it);
     participant_to_topic_guid->second.erase(topic_guid_to_remove);
-    if (participant_to_endpoint_guids_.empty()) {
+    if (participant_to_topic_guid->second.empty()) {
       participant_to_endpoint_guids_.erase(participant_to_topic_guid);
     }
     return true;

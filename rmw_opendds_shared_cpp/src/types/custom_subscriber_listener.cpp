@@ -49,7 +49,7 @@ void CustomSubscriberListener::on_data_available(DDS::DataReader * reader)
     dynamic_cast<OpenDDS::DCPS::DomainParticipantImpl*>(participant.in());
 
   for (CORBA::ULong i = 0; i < data_seq.length(); ++i) {
-    DDS::GUID_t guid = dpi->get_repoid(info_seq[i].instance_handle);
+    DDS::GUID_t guid = dpi->get_repoid(info_seq[i].publication_handle);
 
     if (info_seq[i].valid_data &&
       info_seq[i].instance_state == DDS::ALIVE_INSTANCE_STATE)
