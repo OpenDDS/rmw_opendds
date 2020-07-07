@@ -27,6 +27,7 @@ namespace DDS
 
 inline void DDS_BuiltinTopicKey_to_GUID(DDS::GUID_t* guid, DDS::BuiltinTopicKey_t builtinTopicKey)
 {
+  guid->entityId = OpenDDS::DCPS::ENTITYID_PARTICIPANT;
   std::memcpy(guid, builtinTopicKey.value, sizeof(DDS::BuiltinTopicKey_t));
 }
 
