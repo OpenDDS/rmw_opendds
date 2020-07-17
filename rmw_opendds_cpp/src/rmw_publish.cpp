@@ -26,19 +26,6 @@
 
 #include <ace/Message_Block.h>
 
-bool set_key(OpenDDSStaticSerializedData & instance, DDS::DataWriter * dds_data_writer) {
-  OpenDDS::DCPS::DataWriterImpl* dwImpl = dynamic_cast<OpenDDS::DCPS::DataWriterImpl*>(dds_data_writer);
-  if (!dwImpl) {
-    RMW_SET_ERROR_MSG("failed to cast dds_data_writer to DataWriterImpl");
-    return false;
-  }
-  OpenDDS::DCPS::RepoId id = dwImpl->get_publication_id();
-  std::memcpy(instance.key_hash, &id, KEY_HASH_LENGTH_16);
-  instance.serialized_key.length(KEY_HASH_LENGTH_16);
-  std::memcpy(instance.serialized_key.get_buffer(), &id, KEY_HASH_LENGTH_16);
-  return true;
-}
-
 bool
 publish(DDS::DataWriter * dds_data_writer, const rcutils_uint8_array_t * cdr_stream)
 {
@@ -54,9 +41,6 @@ publish(DDS::DataWriter * dds_data_writer, const rcutils_uint8_array_t * cdr_str
   }
 
   OpenDDSStaticSerializedData instance;
-  if (!set_key(instance, dds_data_writer)) {
-    return false;
-  }
   instance.serialized_data.length(static_cast<CORBA::ULong>(cdr_stream->buffer_length));
   std::memcpy(instance.serialized_data.get_buffer(), cdr_stream->buffer, cdr_stream->buffer_length);
 
