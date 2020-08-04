@@ -32,6 +32,7 @@
 // include patched generated code from the build folder
 //#include "opendds_static_serialized_dataTypeSupportC.h"
 #include "opendds_static_serialized_dataTypeSupportImpl.h"
+#include "dds/DCPS/DataWriterImpl_T.h"
 
 // Uncomment this to get extra console output about discovery.
 // This affects code in this file, but there is a similar variable in:
@@ -211,6 +212,10 @@ rmw_create_publisher(
     if (!publisher_info->topic_writer_) {
       throw std::string("failed to create datawriter");
     }
+
+    OpenDDS::DCPS::DataWriterImpl_T<OpenDDSStaticSerializedData> * trt = dynamic_cast<OpenDDS::DCPS::DataWriterImpl_T<OpenDDSStaticSerializedData>*>(publisher_info->topic_writer_.in());
+
+    trt->set_marshal_skip_serialize(true);
 
     // set remaining OpenDDSStaticPublisherInfo members
     publisher_info->callbacks_ = callbacks;
