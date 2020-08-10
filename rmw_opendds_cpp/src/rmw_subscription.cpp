@@ -37,6 +37,7 @@
 // #define DISCOVERY_DEBUG_LOGGING 1
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/DomainParticipantImpl.h>
+#include "dds/DCPS/DataReaderImpl_T.h"
 
 extern "C"
 {
@@ -232,6 +233,10 @@ rmw_create_subscription(
     if (!subscriber_info->topic_reader_) {
       throw std::string("failed to create datareader");
     }
+
+    OpenDDS::DCPS::DataReaderImpl_T<OpenDDSStaticSerializedData> * trt = dynamic_cast<OpenDDS::DCPS::DataReaderImpl_T<OpenDDSStaticSerializedData>*>(subscriber_info->topic_reader_.in());
+
+    trt->set_marshal_skip_serialize(true);
 
     // create read_condition
     subscriber_info->read_condition_ = subscriber_info->topic_reader_->create_readcondition(
