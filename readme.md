@@ -13,7 +13,7 @@ This project contains several ROS2 packages:
   - `rosidl_typesupport_opendds_c`: Responsible for generating OpenDDS C headers based on the OMG IDLs produced by ROS2 preprocessors.
   - `rosidl_typesupport_opendds_cpp`: Responsible for generating OpenDDS C++ headers based on the OMG IDLs produced by ROS2 preprocessors.
 
-These packages are built using ROS2's `Colcon` and `Ament` build tools. `rosidl_typesupport_c` and `rosidl_typesupport_cpp` are almost identical, but must be provided as separate packages in order to satisfy the build-time requirements of the ROS2 demo projects.
+These packages are built using ROS2's `Colcon` build tool. `rosidl_typesupport_c` and `rosidl_typesupport_cpp` are almost identical, but must be provided as separate packages in order to satisfy the build-time requirements of the ROS2 demo projects.
 
 ## Usage
 See https://github.com/oci-labs/rmw_build/blob/master/README.md for details on how to build and run this repo.
