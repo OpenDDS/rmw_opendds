@@ -37,37 +37,27 @@ get_topic_names_and_types(
   bool no_demangle,
   rmw_names_and_types_t * topic_names_and_types)
 {
-  if (!node) {
-    RMW_SET_ERROR_MSG("node handle is null");
-    return RMW_RET_ERROR;
-  }
-  if (node->implementation_identifier != implementation_identifier) {
-    RMW_SET_ERROR_MSG("node handle is not from this rmw implementation");
+  OpenDDSNode* dds_node = OpenDDSNode::get_from(node, implementation_identifier);
+  if (!dds_node) {
     return RMW_RET_ERROR;
   }
   rmw_ret_t rmw_ret = rmw_names_and_types_check_zero(topic_names_and_types);
   if (rmw_ret != RMW_RET_OK) {
     return rmw_ret;
   }
-
-  auto node_info = static_cast<OpenDDSNodeInfo *>(node->data);
-  if (!node_info) {
-    RMW_SET_ERROR_MSG("node info handle is null");
+  if (!dds_node->pub_listener_) {
+    RMW_SET_ERROR_MSG("publisher listener is null");
     return RMW_RET_ERROR;
   }
-  if (!node_info->publisher_listener) {
-    RMW_SET_ERROR_MSG("publisher listener handle is null");
-    return RMW_RET_ERROR;
-  }
-  if (!node_info->subscriber_listener) {
-    RMW_SET_ERROR_MSG("subscriber listener handle is null");
+  if (!dds_node->sub_listener_) {
+    RMW_SET_ERROR_MSG("subscriber listener is null");
     return RMW_RET_ERROR;
   }
 
   // combine publisher and subscriber information
   std::map<std::string, std::set<std::string>> topics;
-  node_info->publisher_listener->fill_topic_names_and_types(no_demangle, topics);
-  node_info->subscriber_listener->fill_topic_names_and_types(no_demangle, topics);
+  dds_node->pub_listener_->fill_topic_names_and_types(no_demangle, topics);
+  dds_node->sub_listener_->fill_topic_names_and_types(no_demangle, topics);
 
   // Copy data to results handle
   if (!topics.empty()) {

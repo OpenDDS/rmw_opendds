@@ -182,13 +182,13 @@ _get_info_by_topic(
 
   const char * node_name = node->name;
   const char * node_namespace = node->namespace_;
-  const OpenDDSNodeInfo* opendds_node_info = static_cast<OpenDDSNodeInfo*>(node->data);
-  RMW_CHECK_ARGUMENT_FOR_NULL(opendds_node_info, RMW_RET_ERROR);
-  DDS::DomainParticipant * participant = opendds_node_info->participant;
+  const OpenDDSNode* dds_node = static_cast<OpenDDSNode*>(node->data);
+  RMW_CHECK_ARGUMENT_FOR_NULL(dds_node, RMW_RET_ERROR);
+  DDS::DomainParticipant * participant = dds_node->dp_;
   const std::vector<std::string> topic_fqdns = _get_topic_fqdns(topic_name, no_mangle);
 
   DDS::GUID_t participant_guid;
-  OpenDDS::DCPS::DomainParticipantImpl* dpi = dynamic_cast<OpenDDS::DCPS::DomainParticipantImpl*>(opendds_node_info->participant.in());
+  OpenDDS::DCPS::DomainParticipantImpl* dpi = dynamic_cast<OpenDDS::DCPS::DomainParticipantImpl*>(dds_node->dp_.in());
   participant_guid = dpi->get_repoid(participant->get_instance_handle());
 
   DDS::InstanceHandleSeq handles;
@@ -228,8 +228,8 @@ _get_info_by_topic(
   }
 
   CustomDataReaderListener * slave_target = is_publisher ?
-    static_cast<CustomDataReaderListener *>(opendds_node_info->publisher_listener) :
-    static_cast<CustomDataReaderListener *>(opendds_node_info->subscriber_listener);
+    static_cast<CustomDataReaderListener *>(dds_node->pub_listener_) :
+    static_cast<CustomDataReaderListener *>(dds_node->sub_listener_);
 
   std::vector<const DDSTopicEndpointInfo *> dds_topic_endpoint_infos;
   for (const auto & topic_fqdn : topic_fqdns) {

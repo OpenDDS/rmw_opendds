@@ -65,7 +65,7 @@ rmw_fini_subscription_allocation(rmw_subscription_allocation_t * allocation)
 }
 
 rmw_ret_t
-clean_subscription(rmw_subscription_t * subscription, OpenDDSNodeInfo & node_info, DDS::DomainParticipant & participant)
+clean_subscription(rmw_subscription_t * subscription, OpenDDSNode & dds_node, DDS::DomainParticipant & participant)
 {
   auto ret = RMW_RET_OK;
   if (!subscription) {
@@ -75,11 +75,11 @@ clean_subscription(rmw_subscription_t * subscription, OpenDDSNodeInfo & node_inf
   auto info = static_cast<OpenDDSStaticSubscriberInfo*>(subscription->data);
   if (info) {
     if (info->dds_subscriber_) {
-      OpenDDS::DCPS::DomainParticipantImpl* dpi = dynamic_cast<OpenDDS::DCPS::DomainParticipantImpl*>(node_info.participant.in());
+      OpenDDS::DCPS::DomainParticipantImpl* dpi = dynamic_cast<OpenDDS::DCPS::DomainParticipantImpl*>(dds_node.dp_.in());
       DDS::GUID_t guid = dpi->get_repoid(info->dds_subscriber_->get_instance_handle());
 
-      node_info.subscriber_listener->remove_information(guid, EntityType::Subscriber);
-      node_info.subscriber_listener->trigger_graph_guard_condition();
+      dds_node.sub_listener_->remove_information(guid, EntityType::Subscriber);
+      dds_node.sub_listener_->trigger_graph_guard_condition();
       if (info->topic_reader_) {
         if (info->read_condition_) {
           if (info->topic_reader_->delete_readcondition(info->read_condition_) != DDS::RETCODE_OK) {
@@ -132,13 +132,12 @@ rmw_create_subscription(
   const rmw_qos_profile_t * qos_profile,
   const rmw_subscription_options_t * subscription_options)
 {
-  RMW_CHECK_FOR_NULL_WITH_MSG(node, "node is null", return nullptr);
-  RMW_CHECK_TYPE_IDENTIFIERS_MATCH(node, node->implementation_identifier, opendds_identifier, return nullptr)
-
-  auto node_info = static_cast<OpenDDSNodeInfo *>(node->data);
-  RMW_CHECK_FOR_NULL_WITH_MSG(node_info, "node_info is null", return nullptr);
-  RMW_CHECK_FOR_NULL_WITH_MSG(node_info->participant.in(), "participant is null", return nullptr);
-  RMW_CHECK_FOR_NULL_WITH_MSG(node_info->subscriber_listener, "subscriber_listener is null", return nullptr);
+  OpenDDSNode* dds_node = OpenDDSNode::get_from(node, opendds_identifier);
+  if (!dds_node) {
+    return nullptr;
+  }
+  RMW_CHECK_FOR_NULL_WITH_MSG(dds_node->dp_.in(), "participant is null", return nullptr);
+  RMW_CHECK_FOR_NULL_WITH_MSG(dds_node->sub_listener_, "sub_listener_ is null", return nullptr);
 
   // message type support
   const rosidl_message_type_support_t * type_support = rmw_get_message_type_support(type_supports);
@@ -153,7 +152,7 @@ rmw_create_subscription(
   std::string type_name = _create_type_name(callbacks);
 
   OpenDDSStaticSerializedDataTypeSupport_var ts = new OpenDDSStaticSerializedDataTypeSupportImpl();
-  if (ts->register_type(node_info->participant, type_name.c_str()) != DDS::RETCODE_OK) {
+  if (ts->register_type(dds_node->dp_, type_name.c_str()) != DDS::RETCODE_OK) {
     RMW_SET_ERROR_MSG("failed to register OpenDDS type");
     return nullptr;
   }
@@ -169,10 +168,10 @@ rmw_create_subscription(
   }
 
   // find or create DDS::Topic
-  DDS::TopicDescription_var topic_description = node_info->participant->lookup_topicdescription(topic_str.c_str());
+  DDS::TopicDescription_var topic_description = dds_node->dp_->lookup_topicdescription(topic_str.c_str());
   DDS::Topic_var topic = topic_description ?
-    node_info->participant->find_topic(topic_str.c_str(), DDS::Duration_t{0, 0}) :
-    node_info->participant->create_topic(topic_str.c_str(), type_name.c_str(), TOPIC_QOS_DEFAULT, NULL, OpenDDS::DCPS::NO_STATUS_MASK);
+    dds_node->dp_->find_topic(topic_str.c_str(), DDS::Duration_t{0, 0}) :
+    dds_node->dp_->create_topic(topic_str.c_str(), type_name.c_str(), TOPIC_QOS_DEFAULT, NULL, OpenDDS::DCPS::NO_STATUS_MASK);
   if (!topic) {
     RMW_SET_ERROR_MSG_WITH_FORMAT_STRING("failed to %s topic", (topic_description ? "find" : "create"));
     return nullptr;
@@ -217,7 +216,7 @@ rmw_create_subscription(
     buf = nullptr;
 
     // create DDS::Subscriber
-    subscriber_info->dds_subscriber_ = node_info->participant->create_subscriber(
+    subscriber_info->dds_subscriber_ = dds_node->dp_->create_subscriber(
       SUBSCRIBER_QOS_DEFAULT, subscriber_info->listener_, DDS::SUBSCRIPTION_MATCHED_STATUS);
     if (!subscriber_info->dds_subscriber_) {
       throw std::string("failed to create subscriber");
@@ -248,7 +247,7 @@ rmw_create_subscription(
     subscriber_info->ignore_local_publications = false;
     subscriber_info->callbacks_ = callbacks;
 
-    // update node_info
+    // update dds_node
     std::string mangled_name;
     if (qos_profile->avoid_ros_namespace_conventions) {
       mangled_name = topic_name;
@@ -263,15 +262,15 @@ rmw_create_subscription(
       }
     }
 
-    OpenDDS::DCPS::DomainParticipantImpl* dpi = dynamic_cast<OpenDDS::DCPS::DomainParticipantImpl*>(node_info->participant.in());
-    DDS::GUID_t part_guid = dpi->get_repoid(node_info->participant->get_instance_handle());
+    OpenDDS::DCPS::DomainParticipantImpl* dpi = dynamic_cast<OpenDDS::DCPS::DomainParticipantImpl*>(dds_node->dp_.in());
+    DDS::GUID_t part_guid = dpi->get_repoid(dds_node->dp_->get_instance_handle());
     DDS::GUID_t guid = dpi->get_repoid(subscriber_info->dds_subscriber_->get_instance_handle());
 
-    node_info->subscriber_listener->add_information(
+    dds_node->sub_listener_->add_information(
       part_guid,
       guid,
       mangled_name, type_name, EntityType::Subscriber);
-    node_info->subscriber_listener->trigger_graph_guard_condition();
+    dds_node->sub_listener_->trigger_graph_guard_condition();
 
     return subscription;
 
@@ -280,7 +279,7 @@ rmw_create_subscription(
   } catch (...) {
     RMW_SET_ERROR_MSG("rmw_create_subscription failed");
   }
-  clean_subscription(subscription, *node_info, *node_info->participant);
+  clean_subscription(subscription, *dds_node, *dds_node->dp_);
   if (buf) {
     rmw_free(buf);
   }
@@ -329,18 +328,15 @@ rmw_subscription_get_actual_qos(
 rmw_ret_t
 rmw_destroy_subscription(rmw_node_t * node, rmw_subscription_t * subscription)
 {
-  RMW_CHECK_FOR_NULL_WITH_MSG(node, "node is null", return RMW_RET_ERROR);
-  RMW_CHECK_TYPE_IDENTIFIERS_MATCH(node, node->implementation_identifier,
-    opendds_identifier, return RMW_RET_ERROR)
-
-  auto node_info = static_cast<OpenDDSNodeInfo *>(node->data);
-  RMW_CHECK_FOR_NULL_WITH_MSG(node_info, "node_info is null", return RMW_RET_ERROR);
-  RMW_CHECK_FOR_NULL_WITH_MSG(node_info->participant.in(), "participant is null", return RMW_RET_ERROR);
-
+  OpenDDSNode* dds_node = OpenDDSNode::get_from(node, opendds_identifier);
+  if (!dds_node) {
+    return RMW_RET_ERROR;
+  }
+  RMW_CHECK_FOR_NULL_WITH_MSG(dds_node->dp_.in(), "participant is null", return RMW_RET_ERROR);
   RMW_CHECK_FOR_NULL_WITH_MSG(subscription, "subscription is null", return RMW_RET_ERROR);
   RMW_CHECK_TYPE_IDENTIFIERS_MATCH(subscription, subscription->implementation_identifier,
     opendds_identifier, return RMW_RET_ERROR)
 
-  return clean_subscription(subscription, *node_info, *node_info->participant);
+  return clean_subscription(subscription, *dds_node, *dds_node->dp_);
 }
 }  // extern "C"

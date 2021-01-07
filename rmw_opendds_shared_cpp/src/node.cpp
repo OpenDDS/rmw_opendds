@@ -18,6 +18,7 @@
 
 #include "rmw_opendds_shared_cpp/guard_condition.hpp"
 #include "rmw_opendds_shared_cpp/opendds_include.hpp"
+#include "rmw_opendds_shared_cpp/init.hpp"
 #include "rmw_opendds_shared_cpp/node.hpp"
 #include "rmw_opendds_shared_cpp/types.hpp"
 
@@ -26,6 +27,7 @@
 #include "rmw/impl/cpp/macros.hpp"
 
 #include "dds/DdsDcpsCoreTypeSupportC.h"
+#include <dds/DCPS/Marked_Default_Qos.h>
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/BuiltInTopicUtils.h"
 #include <dds/DCPS/transport/framework/TransportRegistry.h>
@@ -130,198 +132,165 @@ bool configureTransport(DDS::DomainParticipant_ptr participant, size_t domain_id
   }
 }
 
-void clean_node(DDS::DomainParticipantFactory * dpf, rmw_node_t * node)
+OpenDDSNode* OpenDDSNode::get_from(const rmw_node_t * node, const char * implementation_identifier)
+{
+  RMW_CHECK_FOR_NULL_WITH_MSG(node, "node is null", return nullptr);
+  RMW_CHECK_TYPE_IDENTIFIERS_MATCH(node, node->implementation_identifier, implementation_identifier, return nullptr)
+  auto dds_node = static_cast<OpenDDSNode *>(node->data);
+  RMW_CHECK_FOR_NULL_WITH_MSG(dds_node, "dds_node is null", return nullptr);
+  return dds_node;
+}
+
+DDS::DomainParticipant_var OpenDDSNode::create_dp(rmw_context_t& context)
+{
+  DDS::DomainParticipant_var dp = context.impl->dpf_->create_participant(
+    static_cast<DDS::DomainId_t>(context.options.domain_id), PARTICIPANT_QOS_DEFAULT, 0, 0);
+  if (!dp) {
+    RMW_SET_ERROR_MSG("create_participant failed");
+  }
+  return dp;
+}
+
+void OpenDDSNode::cleanup()
+{
+  if (dp_) {
+    if (dp_->delete_contained_entities() != DDS::RETCODE_OK) {
+      RMW_SET_ERROR_MSG("dp_->delete_contained_entities failed");
+    }
+    if (context_.impl->dpf_->delete_participant(dp_) != DDS::RETCODE_OK) {
+      RMW_SET_ERROR_MSG("delete_participant failed");
+    }
+    dp_ = nullptr;
+  }
+
+  CustomSubscriberListener::Raf::destroy(sub_listener_);
+  CustomPublisherListener::Raf::destroy(pub_listener_);
+
+  if (gc_) {
+    if (destroy_guard_condition(context_.implementation_identifier, gc_) != RMW_RET_OK) {
+      RMW_SET_ERROR_MSG("destroy_guard_condition failed");
+    }
+    gc_ = nullptr;
+  }
+}
+
+OpenDDSNode::OpenDDSNode(rmw_context_t& context)
+  : context_(context)
+  , gc_(create_guard_condition(context_.implementation_identifier))
+  , pub_listener_(gc_ ? CustomPublisherListener::Raf::create(context_.implementation_identifier, gc_) : 0)
+  , sub_listener_(pub_listener_ ? CustomSubscriberListener::Raf::create(context_.implementation_identifier, gc_) : 0)
+  , dp_(sub_listener_ ? create_dp(context_) : 0)
+{
+  try {
+    if (!dp_) throw std::runtime_error("OpenDDSNode failed");
+
+    if (!configureTransport(dp_, context_.options.domain_id)) {
+      throw std::runtime_error("configureTransport failed");
+    }
+
+    DDS::Subscriber_ptr sub = dp_->get_builtin_subscriber();
+    if (!sub) throw std::runtime_error("get_builtin_subscriber failed");
+
+    // setup publisher listener
+    DDS::DataReader_ptr dr = sub->lookup_datareader(OpenDDS::DCPS::BUILT_IN_PUBLICATION_TOPIC);
+    auto pub_dr = dynamic_cast<DDS::PublicationBuiltinTopicDataDataReader*>(dr);
+    if (!pub_dr) throw std::runtime_error("builtin publication datareader is null");
+    pub_dr->set_listener(pub_listener_, DDS::DATA_AVAILABLE_STATUS);
+
+    // setup subscriber listener
+    dr = sub->lookup_datareader(OpenDDS::DCPS::BUILT_IN_SUBSCRIPTION_TOPIC);
+    auto sub_dr = dynamic_cast<DDS::SubscriptionBuiltinTopicDataDataReader*>(dr);
+    if (!sub_dr) throw std::runtime_error("builtin subscription datareader is null");
+    sub_dr->set_listener(sub_listener_, DDS::DATA_AVAILABLE_STATUS);
+
+  } catch (const std::exception& e) {
+    RMW_SET_ERROR_MSG(e.what());
+    cleanup();
+    throw;
+  } catch (...) {
+    RMW_SET_ERROR_MSG("OpenDDSNode construtor failed");
+    cleanup();
+    throw;
+  }
+}
+
+bool set_default_participant_qos(rmw_context_t & context, const char * name, const char * name_space)
+{
+  DDS::DomainParticipantQos qos;
+  if (context.impl->dpf_->get_default_participant_qos(qos) != DDS::RETCODE_OK) {
+    RMW_SET_ERROR_MSG("get_default_participant_qos failed");
+    return false;
+  }
+  // since participant name is not part of DDS spec, set node name in user_data
+  size_t length = strlen(name) + strlen("name=;") + strlen(name_space) + strlen("namespace=;") + 1;
+  qos.user_data.value.length(static_cast<CORBA::Long>(length));
+  int written = snprintf(reinterpret_cast<char *>(qos.user_data.value.get_buffer()),
+                         length, "name=%s;namespace=%s;", name, name_space);
+  if (written < 0 || written > static_cast<int>(length) - 1) {
+    RMW_SET_ERROR_MSG("failed to populate user_data buffer");
+    return false;
+  }
+  if (context.impl->dpf_->set_default_participant_qos(qos) != DDS::RETCODE_OK) {
+    RMW_SET_ERROR_MSG("set_default_participant_qos failed");
+    return false;
+  }
+  return true;
+}
+
+void clean_node(rmw_node_t * node)
 {
   if (!node) {
     return;
   }
-  if (node->name) {
-    rmw_free(const_cast<char*>(node->name));
-    node->name = nullptr;
-  }
-  if (node->namespace_) {
-    rmw_free(const_cast<char*>(node->namespace_));
-    node->namespace_ = nullptr;
-  }
-  //node->context
-  auto info = static_cast<OpenDDSNodeInfo*>(node->data);
-  if (info) {
-    if (info->participant) {
-      // unregisters types and destroys topics shared between publishers and subscribers
-      if (info->participant->delete_contained_entities() != DDS::RETCODE_OK) {
-        RMW_SET_ERROR_MSG("failed to delete contained entities of participant");
-      }
-      if (dpf->delete_participant(info->participant) != DDS::RETCODE_OK) {
-        RMW_SET_ERROR_MSG("failed to delete participant");
-      }
-      info->participant = nullptr;
-    }
-    if (info->publisher_listener) {
-      RMW_TRY_DESTRUCTOR_FROM_WITHIN_FAILURE(
-        info->publisher_listener->~CustomPublisherListener(), CustomPublisherListener)
-      rmw_free(info->publisher_listener);
-      info->publisher_listener = nullptr;
-    }
-    if (info->subscriber_listener) {
-      RMW_TRY_DESTRUCTOR_FROM_WITHIN_FAILURE(
-        info->subscriber_listener->~CustomSubscriberListener(), CustomSubscriberListener)
-      rmw_free(info->subscriber_listener);
-      info->subscriber_listener = nullptr;
-    }
-    if (info->graph_guard_condition) {
-      if (destroy_guard_condition(node->implementation_identifier, info->graph_guard_condition) != RMW_RET_OK) {
-        RMW_SET_ERROR_MSG("failed to delete graph guard condition");
-      }
-      info->graph_guard_condition = nullptr;
-    }
-    RMW_TRY_DESTRUCTOR_FROM_WITHIN_FAILURE(info->~OpenDDSNodeInfo(), OpenDDSNodeInfo)
-    rmw_free(info);
+  node->namespace_ = nullptr;
+  node->name = nullptr;
+  auto dds_node = static_cast<OpenDDSNode*>(node->data);
+  if (dds_node) {
+    OpenDDSNode::Raf::destroy(dds_node);
     node->data = nullptr;
   }
+  node->implementation_identifier = nullptr;
+  node->context = nullptr;
   rmw_node_free(node);
 }
 
+// caller checks implementation_identifier
 rmw_node_t *
-create_node(
-  const char * implementation_identifier,
-  const char * name,
-  const char * namespace_,
-  size_t domain_id)
+create_node(rmw_context_t & context, const char * name, const char * name_space)
 {
-  DDS::DomainParticipantFactory * dpf = TheParticipantFactory;
-  if (!dpf) {
-    RMW_SET_ERROR_MSG("failed to get participant factory");
+  if (set_default_participant_qos(context, name, name_space)) {
     return nullptr;
   }
-
-  // use loopback interface to enable cross vendor communication
-  DDS::DomainParticipantQos qos;
-  if (dpf->get_default_participant_qos(qos) != DDS::RETCODE_OK) {
-    RMW_SET_ERROR_MSG("failed to get default participant qos");
-    return nullptr;
-  }
-  // since participant name is not part of DDS spec, set node name in user_data
-  size_t length = strlen(name) + strlen("name=;") + strlen(namespace_) + strlen("namespace=;") + 1;
-  qos.user_data.value.length(static_cast<CORBA::Long>(length));
-  int written = snprintf(reinterpret_cast<char *>(qos.user_data.value.get_buffer()),
-      length, "name=%s;namespace=%s;", name, namespace_);
-  if (written < 0 || written > static_cast<int>(length) - 1) {
-    RMW_SET_ERROR_MSG("failed to populate user_data buffer");
-    return nullptr;
-  }
-
   rmw_node_t * node = nullptr;
-  void * buf = nullptr;
   try {
     node = rmw_node_allocate();
     if (!node) {
-      throw std::string("failed to allocate memory for node");
+      throw std::runtime_error("rmw_node_allocate failed");
     }
-    node->implementation_identifier = implementation_identifier;
-    node->data = nullptr;
-
-    node->name = reinterpret_cast<const char *>(rmw_allocate(sizeof(char) * strlen(name) + 1));
-    if (!node->name) {
-      throw std::string("failed to allocate memory for node name");
+    node->context = &context;
+    node->implementation_identifier = context.implementation_identifier;
+    node->data = OpenDDSNode::Raf::create(context);
+    if (!node->data) {
+      throw std::runtime_error("OpenDDSNode failed");
     }
-    memcpy(const_cast<char *>(node->name), name, strlen(name) + 1);
-
-    node->namespace_ = reinterpret_cast<const char *>(rmw_allocate(sizeof(char) * strlen(namespace_) + 1));
-    if (!node->namespace_) {
-      throw std::string("failed to allocate memory for node namespace");
-    }
-    memcpy(const_cast<char *>(node->namespace_), namespace_, strlen(namespace_) + 1);
-
-    buf = rmw_allocate(sizeof(OpenDDSNodeInfo));
-    if (!buf) {
-      throw std::string("failed to allocate memory for OpenDDSNodeInfo");
-    }
-    OpenDDSNodeInfo * info = nullptr;
-    RMW_TRY_PLACEMENT_NEW(info, buf, throw 1, OpenDDSNodeInfo,)
-    node->data = info;
-    buf = nullptr;
-
-    info->participant = dpf->create_participant(static_cast<DDS::DomainId_t>(domain_id), qos, 0, 0);
-    if (!info->participant) {
-      throw std::string("failed to create participant");
-    }
-
-    if (!configureTransport(info->participant, domain_id)) {
-      throw std::string("failed to configureTransport");
-    }
-
-    info->graph_guard_condition = create_guard_condition(implementation_identifier);
-    if (!info->graph_guard_condition) {
-      throw std::string("failed to create graph guard condition");
-    }
-
-    DDS::Subscriber * sub = info->participant->get_builtin_subscriber();
-    if (!sub) {
-      throw std::string("builtin subscriber is null");
-    }
-
-    // setup publisher listener
-    DDS::DataReader * dr = sub->lookup_datareader(OpenDDS::DCPS::BUILT_IN_PUBLICATION_TOPIC);
-    DDS::PublicationBuiltinTopicDataDataReader * pub_dr = dynamic_cast<DDS::PublicationBuiltinTopicDataDataReader*>(dr);
-    if (!pub_dr) {
-      throw std::string("builtin publication datareader is null");
-    }
-    buf = rmw_allocate(sizeof(CustomPublisherListener));
-    if (!buf) {
-      throw std::string("failed to allocate memory for CustomPublisherListener");
-    }
-    RMW_TRY_PLACEMENT_NEW(info->publisher_listener, buf, throw 1, CustomPublisherListener,
-      implementation_identifier, info->graph_guard_condition)
-    buf = nullptr;
-    pub_dr->set_listener(info->publisher_listener, DDS::DATA_AVAILABLE_STATUS);
-
-    // setup subscriber listener
-    dr = sub->lookup_datareader(OpenDDS::DCPS::BUILT_IN_SUBSCRIPTION_TOPIC);
-    DDS::SubscriptionBuiltinTopicDataDataReader * sub_dr = dynamic_cast<DDS::SubscriptionBuiltinTopicDataDataReader*>(dr);
-    if (!sub_dr) {
-      throw std::string("builtin subscription datareader is null");
-    }
-    buf = rmw_allocate(sizeof(CustomSubscriberListener));
-    if (!buf) {
-      throw std::string("failed to allocate memory for CustomSubscriberListener");
-    }
-    RMW_TRY_PLACEMENT_NEW(info->subscriber_listener, buf, throw 1, CustomSubscriberListener,
-      implementation_identifier, info->graph_guard_condition)
-    buf = nullptr;
-    sub_dr->set_listener(info->subscriber_listener, DDS::DATA_AVAILABLE_STATUS);
-
+    node->name = name;
+    node->namespace_ = name_space;
     return node;
 
-  } catch (const std::string& e) {
-    RMW_SET_ERROR_MSG(e.c_str());
-  } catch (...) {}
-
-  clean_node(dpf, node);
-  if (buf) {
-    rmw_free(buf);
+  } catch (const std::exception& e) {
+    RMW_SET_ERROR_MSG(e.what());
+  } catch (...) {
+    RMW_SET_ERROR_MSG("create_node unkown exception");
   }
+  clean_node(node);
   return nullptr;
 }
 
+// caller checks implementation_identifier
 rmw_ret_t
-destroy_node(const char * implementation_identifier, rmw_node_t * node)
+destroy_node(rmw_node_t * node)
 {
-  if (!node) {
-    RMW_SET_ERROR_MSG("node handle is null");
-    return RMW_RET_ERROR;
-  }
-  RMW_CHECK_TYPE_IDENTIFIERS_MATCH(
-    node handle,
-    node->implementation_identifier, implementation_identifier,
-    return RMW_RET_ERROR)
-
-  DDS::DomainParticipantFactory * dpf = TheParticipantFactory;
-  if (!dpf) {
-    RMW_SET_ERROR_MSG("failed to get participant factory");
-    return RMW_RET_ERROR;
-  }
-
-  clean_node(dpf, node);
+  clean_node(node);
   return RMW_RET_OK;
 }
 
@@ -330,29 +299,28 @@ const rmw_guard_condition_t *
 node_get_graph_guard_condition(const rmw_node_t * node)
 {
   // node argument is checked in calling function.
-  OpenDDSNodeInfo * node_info = static_cast<OpenDDSNodeInfo *>(node->data);
-  if (!node_info) {
-    RMW_SET_ERROR_MSG("node info handle is null");
+  OpenDDSNode * dds_node = static_cast<OpenDDSNode *>(node->data);
+  if (!dds_node) {
+    RMW_SET_ERROR_MSG("dds_node is null");
     return nullptr;
   }
-
-  return node_info->graph_guard_condition;
+  return dds_node->gc_;
 }
 
 RMW_OPENDDS_SHARED_CPP_PUBLIC
 rmw_ret_t
 node_assert_liveliness(const rmw_node_t * node)
 {
-  auto node_info = static_cast<OpenDDSNodeInfo *>(node->data);
-  if (nullptr == node_info) {
-    RMW_SET_ERROR_MSG("node info is null");
+  auto dds_node = static_cast<OpenDDSNode *>(node->data);
+  if (!dds_node) {
+    RMW_SET_ERROR_MSG("dds_node is null");
     return RMW_RET_ERROR;
   }
-  if (nullptr == node_info->participant) {
-    RMW_SET_ERROR_MSG("node info participant is null");
+  if (!dds_node->dp_) {
+    RMW_SET_ERROR_MSG("dds_node participant is null");
     return RMW_RET_ERROR;
   }
-  if (node_info->participant->assert_liveliness() != DDS::RETCODE_OK) {
+  if (dds_node->dp_->assert_liveliness() != DDS::RETCODE_OK) {
    RMW_SET_ERROR_MSG("failed to assert liveliness of participant");
    return RMW_RET_ERROR;
   }

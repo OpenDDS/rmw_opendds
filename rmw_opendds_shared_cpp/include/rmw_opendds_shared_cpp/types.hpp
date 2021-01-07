@@ -15,6 +15,15 @@
 #ifndef RMW_OPENDDS_SHARED_CPP__TYPES_HPP_
 #define RMW_OPENDDS_SHARED_CPP__TYPES_HPP_
 
+#include "topic_cache.hpp"
+#include "rmw_opendds_shared_cpp/RmwAllocateFree.hpp"
+#include "rmw_opendds_shared_cpp/opendds_include.hpp"
+#include "rmw_opendds_shared_cpp/visibility_control.h"
+
+#include "rmw/rmw.h"
+
+#include "dds/DCPS/WaitSet.h"
+
 #include <cassert>
 #include <exception>
 #include <iostream>
@@ -27,26 +36,15 @@
 #include <stdexcept>
 #include <string>
 
-#include "rmw/rmw.h"
-#include "topic_cache.hpp"
-#include "rmw_opendds_shared_cpp/opendds_include.hpp"
-#include "rmw_opendds_shared_cpp/visibility_control.h"
-#include "dds/DCPS/WaitSet.h"
-
 enum EntityType {Publisher, Subscriber};
 
 using DDSTopicEndpointInfo = TopicCache<DDS::GUID_t>::TopicInfo;
 
-class CustomDataReaderListener
-  : public DDS::DataReaderListener
+class CustomDataReaderListener : public DDS::DataReaderListener
 {
 public:
-  explicit
-  CustomDataReaderListener(
-    const char * implementation_identifier, rmw_guard_condition_t * graph_guard_condition)
-  : implementation_identifier_(implementation_identifier),
-    graph_guard_condition_(graph_guard_condition)
-  {}
+  CustomDataReaderListener(const char * implementation_identifier, rmw_guard_condition_t * gc)
+    : implementation_identifier_(implementation_identifier), graph_guard_condition_(gc) {}
 
   virtual bool add_information(
     const DDS::GUID_t& participant_guid,
@@ -117,41 +115,47 @@ private:
   rmw_guard_condition_t * graph_guard_condition_;
 };
 
-class CustomPublisherListener
-  : public CustomDataReaderListener
+class CustomPublisherListener : public CustomDataReaderListener
 {
 public:
-  CustomPublisherListener(
-    const char * implementation_identifier, rmw_guard_condition_t * graph_guard_condition)
-  : CustomDataReaderListener(implementation_identifier, graph_guard_condition)
-  {}
+  typedef RmwAllocateFree<CustomPublisherListener> Raf;
+
+  CustomPublisherListener(const char * implementation_identifier, rmw_guard_condition_t * gc)
+    : CustomDataReaderListener(implementation_identifier, gc) {}
+  ~CustomPublisherListener() {}
 
   virtual void on_data_available(DDS::DataReader * reader);
 };
 
-class CustomSubscriberListener
-  : public CustomDataReaderListener
+class CustomSubscriberListener : public CustomDataReaderListener
 {
 public:
-  CustomSubscriberListener(
-    const char * implementation_identifier, rmw_guard_condition_t * graph_guard_condition)
-  : CustomDataReaderListener(implementation_identifier, graph_guard_condition)
-  {}
+  typedef RmwAllocateFree<CustomSubscriberListener> Raf;
+
+  CustomSubscriberListener(const char * implementation_identifier, rmw_guard_condition_t * gc)
+    : CustomDataReaderListener(implementation_identifier, gc) {}
+  ~CustomSubscriberListener() {}
 
   virtual void on_data_available(DDS::DataReader * reader);
 };
 
-struct OpenDDSNodeInfo
+class OpenDDSNode
 {
-  DDS::DomainParticipant_var participant;
-  CustomPublisherListener * publisher_listener;
-  CustomSubscriberListener * subscriber_listener;
-  rmw_guard_condition_t * graph_guard_condition;
-  OpenDDSNodeInfo() :
-    participant(nullptr),
-    publisher_listener(nullptr),
-    subscriber_listener(nullptr),
-    graph_guard_condition(nullptr) {}
+public:
+  rmw_context_t& context_;
+  rmw_guard_condition_t* gc_;
+  CustomPublisherListener* pub_listener_;
+  CustomSubscriberListener* sub_listener_;
+  DDS::DomainParticipant_var dp_;
+
+  typedef RmwAllocateFree<OpenDDSNode> Raf;
+  static OpenDDSNode* get_from(const rmw_node_t * node, const char * implementation_identifier);
+private:
+  friend Raf;
+  OpenDDSNode(rmw_context_t& context);
+  ~OpenDDSNode(){ cleanup(); }
+  static DDS::DomainParticipant_var create_dp(rmw_context_t& context);
+  void cleanup();
 };
 
 struct OpenDDSPublisherGID

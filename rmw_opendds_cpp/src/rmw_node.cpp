@@ -20,6 +20,15 @@
 
 #include "rmw_opendds_cpp/identifier.hpp"
 
+OpenDDSNode* get_dds_node(const rmw_node_t * node)
+{
+  RMW_CHECK_FOR_NULL_WITH_MSG(node, "node is null", return nullptr);
+  RMW_CHECK_TYPE_IDENTIFIERS_MATCH(node, node->implementation_identifier, opendds_identifier, return nullptr)
+  auto dds_node = static_cast<OpenDDSNode *>(node->data);
+  RMW_CHECK_FOR_NULL_WITH_MSG(dds_node, "dds_node is null", return nullptr);
+  return dds_node;
+}
+
 extern "C"
 {
 rmw_node_t *
@@ -27,10 +36,11 @@ rmw_create_node(
   rmw_context_t * context,
   const char * name,
   const char * namespace_,
-  size_t domain_id,
-  bool localhost_only)
+  size_t domain_id,    //?? removed
+  bool localhost_only) //?? removed
 {
   RCUTILS_CHECK_ARGUMENT_FOR_NULL(context, NULL);
+/*
   RMW_CHECK_TYPE_IDENTIFIERS_MATCH(
     init context,
     context->implementation_identifier,
@@ -38,12 +48,24 @@ rmw_create_node(
     // TODO(wjwwood): replace this with RMW_RET_INCORRECT_RMW_IMPLEMENTATION when refactored
     return NULL);
   return create_node(opendds_identifier, name, namespace_, domain_id);
+*/
+  RCUTILS_CHECK_ARGUMENT_FOR_NULL(name, NULL);
+  RCUTILS_CHECK_ARGUMENT_FOR_NULL(namespace_, NULL);
+  RCUTILS_CHECK_ARGUMENT_FOR_NULL(context->impl, NULL);
+  RMW_CHECK_TYPE_IDENTIFIERS_MATCH(context, context->implementation_identifier, opendds_identifier, return NULL);
+  std::cout << "rmw_create_node context:" << context << '\n'; //??
+  return create_node(*context, name, namespace_);
 }
 
 rmw_ret_t
 rmw_destroy_node(rmw_node_t * node)
 {
-  return destroy_node(opendds_identifier, node);
+//return destroy_node(opendds_identifier, node);
+  RMW_CHECK_ARGUMENT_FOR_NULL(node, RMW_RET_INVALID_ARGUMENT);
+  RMW_CHECK_ARGUMENT_FOR_NULL(node->implementation_identifier, RMW_RET_INVALID_ARGUMENT);
+  RMW_CHECK_TYPE_IDENTIFIERS_MATCH(node, node->implementation_identifier,
+    opendds_identifier, return RMW_RET_INCORRECT_RMW_IMPLEMENTATION)
+  return destroy_node(node);
 }
 
 rmw_ret_t

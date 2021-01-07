@@ -15,21 +15,18 @@
 #ifndef RMW_OPENDDS_SHARED_CPP__NODE_HPP_
 #define RMW_OPENDDS_SHARED_CPP__NODE_HPP_
 
-#include "rmw/types.h"
-
+#include "rmw_opendds_shared_cpp/types.hpp"
 #include "rmw_opendds_shared_cpp/visibility_control.h"
+
+#include "rmw/types.h"
 
 RMW_OPENDDS_SHARED_CPP_PUBLIC
 rmw_node_t *
-create_node(
-  const char * implementation_identifier,
-  const char * name,
-  const char * namespace_,
-  size_t domain_id);
+create_node(rmw_context_t& context, const char * name, const char * namespace_);
 
 RMW_OPENDDS_SHARED_CPP_PUBLIC
 rmw_ret_t
-destroy_node(const char * implementation_identifier, rmw_node_t * node);
+destroy_node(rmw_node_t * node);
 
 RMW_OPENDDS_SHARED_CPP_PUBLIC
 const rmw_guard_condition_t *
@@ -37,7 +34,6 @@ node_get_graph_guard_condition(const rmw_node_t * node);
 
 RMW_OPENDDS_SHARED_CPP_PUBLIC
 rmw_ret_t
-//node_assert_liveliness(const char * implementation_identifier, const rmw_node_t * node);
 node_assert_liveliness(const rmw_node_t * node);
 
 #endif  // RMW_OPENDDS_SHARED_CPP__NODE_HPP_

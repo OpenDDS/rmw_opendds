@@ -100,23 +100,8 @@ rmw_create_publisher(
   const rmw_qos_profile_t * qos_policies,
   const rmw_publisher_options_t * publisher_options)
 {
-  if (!node) {
-    RMW_SET_ERROR_MSG("node is null");
-    return nullptr;
-  }
-  RMW_CHECK_TYPE_IDENTIFIERS_MATCH(
-    node handle, node->implementation_identifier, opendds_identifier,
-    return nullptr)
-
-  auto node_info = static_cast<OpenDDSNodeInfo *>(node->data);
-  if (!node_info) {
-    RMW_SET_ERROR_MSG("node info is null");
-    return nullptr;
-  }
-
-  auto participant = static_cast<DDS::DomainParticipant *>(node_info->participant);
-  if (!participant) {
-    RMW_SET_ERROR_MSG("participant is null");
+  OpenDDSNode* dds_node = OpenDDSNode::get_from(node, opendds_identifier);
+  if (!dds_node) {
     return nullptr;
   }
 
@@ -132,7 +117,7 @@ rmw_create_publisher(
   }
   std::string type_name = _create_type_name(callbacks);
   OpenDDSStaticSerializedDataTypeSupport_var ts = new OpenDDSStaticSerializedDataTypeSupportImpl();
-  if (ts->register_type(participant, type_name.c_str()) != DDS::RETCODE_OK) {
+  if (ts->register_type(dds_node->dp_, type_name.c_str()) != DDS::RETCODE_OK) {
     RMW_SET_ERROR_MSG("failed to register OpenDDS type");
     return nullptr;
   }
@@ -148,10 +133,10 @@ rmw_create_publisher(
   }
 
   // find or create DDS::Topic
-  DDS::TopicDescription_var topic_description = participant->lookup_topicdescription(topic_str.c_str());
+  DDS::TopicDescription_var topic_description = dds_node->dp_->lookup_topicdescription(topic_str.c_str());
   DDS::Topic_var topic = topic_description ?
-    participant->find_topic(topic_str.c_str(), DDS::Duration_t{0, 0}) :
-    participant->create_topic(topic_str.c_str(), type_name.c_str(), TOPIC_QOS_DEFAULT, NULL, OpenDDS::DCPS::NO_STATUS_MASK);
+    dds_node->dp_->find_topic(topic_str.c_str(), DDS::Duration_t{0, 0}) :
+    dds_node->dp_->create_topic(topic_str.c_str(), type_name.c_str(), TOPIC_QOS_DEFAULT, NULL, OpenDDS::DCPS::NO_STATUS_MASK);
   if (!topic) {
     RMW_SET_ERROR_MSG_WITH_FORMAT_STRING("failed to %s topic", (topic_description ? "find" : "create"));
     return nullptr;
@@ -196,7 +181,7 @@ rmw_create_publisher(
     buf = nullptr;
 
     // create DDS::Publisher
-    publisher_info->dds_publisher_ = participant->create_publisher(
+    publisher_info->dds_publisher_ = dds_node->dp_->create_publisher(
       PUBLISHER_QOS_DEFAULT, publisher_info->listener_, DDS::PUBLICATION_MATCHED_STATUS);
     if (!publisher_info->dds_publisher_) {
       throw std::string("failed to create publisher");
@@ -227,7 +212,7 @@ rmw_create_publisher(
       publisher_gid->publication_handle = publisher_info->topic_writer_->get_instance_handle();
     }
 
-    // update node_info
+    // update dds_node
     std::string mangled_name;
     if (qos_policies->avoid_ros_namespace_conventions) {
       mangled_name = topic_name;
@@ -242,12 +227,12 @@ rmw_create_publisher(
       }
     }
 
-    OpenDDS::DCPS::DomainParticipantImpl* dpi = dynamic_cast<OpenDDS::DCPS::DomainParticipantImpl*>(node_info->participant.in());
-    DDS::GUID_t part_guid = dpi->get_repoid(node_info->participant->get_instance_handle());
+    OpenDDS::DCPS::DomainParticipantImpl* dpi = dynamic_cast<OpenDDS::DCPS::DomainParticipantImpl*>(dds_node->dp_.in());
+    DDS::GUID_t part_guid = dpi->get_repoid(dds_node->dp_->get_instance_handle());
     DDS::GUID_t guid = dpi->get_repoid(publisher_info->dds_publisher_->get_instance_handle());
 
-    node_info->publisher_listener->add_information(part_guid, guid, mangled_name, type_name, EntityType::Publisher);
-    node_info->publisher_listener->trigger_graph_guard_condition();
+    dds_node->pub_listener_->add_information(part_guid, guid, mangled_name, type_name, EntityType::Publisher);
+    dds_node->pub_listener_->trigger_graph_guard_condition();
 
     return publisher;
 
@@ -376,17 +361,13 @@ rmw_return_loaned_message_from_publisher(
 rmw_ret_t
 rmw_destroy_publisher(rmw_node_t * node, rmw_publisher_t * publisher)
 {
-  if (!node) {
-    RMW_SET_ERROR_MSG("node handle is null");
+  OpenDDSNode* dds_node = OpenDDSNode::get_from(node, opendds_identifier);
+  if (!dds_node) {
     return RMW_RET_ERROR;
   }
-  RMW_CHECK_TYPE_IDENTIFIERS_MATCH(
-    node handle,
-    node->implementation_identifier, opendds_identifier,
-    return RMW_RET_ERROR)
 
   if (!publisher) {
-    RMW_SET_ERROR_MSG("publisher handle is null");
+    RMW_SET_ERROR_MSG("publisher is null");
     return RMW_RET_ERROR;
   }
   RMW_CHECK_TYPE_IDENTIFIERS_MATCH(
@@ -394,25 +375,19 @@ rmw_destroy_publisher(rmw_node_t * node, rmw_publisher_t * publisher)
     publisher->implementation_identifier, opendds_identifier,
     return RMW_RET_ERROR)
 
-  auto node_info = static_cast<OpenDDSNodeInfo *>(node->data);
-  if (!node_info) {
-    RMW_SET_ERROR_MSG("node info handle is null");
-    return RMW_RET_ERROR;
-  }
-  auto participant = static_cast<DDS::DomainParticipant *>(node_info->participant);
-  if (!participant) {
-    RMW_SET_ERROR_MSG("participant handle is null");
+  if (!dds_node->dp_) {
+    RMW_SET_ERROR_MSG("participant is null");
     return RMW_RET_ERROR;
   }
   // TODO(wjwwood): need to figure out when to unregister types with the participant.
   OpenDDSStaticPublisherInfo * publisher_info =
     static_cast<OpenDDSStaticPublisherInfo *>(publisher->data);
   if (publisher_info) {
-    OpenDDS::DCPS::DomainParticipantImpl* dpi = dynamic_cast<OpenDDS::DCPS::DomainParticipantImpl*>(node_info->participant.in());
+    OpenDDS::DCPS::DomainParticipantImpl* dpi = dynamic_cast<OpenDDS::DCPS::DomainParticipantImpl*>(dds_node->dp_.in());
     DDS::GUID_t guid = dpi->get_repoid(publisher_info->dds_publisher_->get_instance_handle());
 
-    node_info->publisher_listener->remove_information(guid, EntityType::Publisher);
-    node_info->publisher_listener->trigger_graph_guard_condition();
+    dds_node->pub_listener_->remove_information(guid, EntityType::Publisher);
+    dds_node->pub_listener_->trigger_graph_guard_condition();
     //DDS::Publisher * dds_publisher = publisher_info->dds_publisher_;
 
     //if (dds_publisher) {

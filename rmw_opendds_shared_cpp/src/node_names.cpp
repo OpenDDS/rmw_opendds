@@ -47,7 +47,7 @@ get_node_names_impl(
     return RMW_RET_ERROR;
   }
 
-  DDS::DomainParticipant * participant = static_cast<OpenDDSNodeInfo *>(node->data)->participant;
+  DDS::DomainParticipant * participant = static_cast<OpenDDSNode *>(node->data)->dp_;
   DDS::InstanceHandleSeq handles;
   if (participant->get_discovered_participants(handles) != DDS::RETCODE_OK) {
     RMW_SET_ERROR_MSG("unable to fetch discovered participants.");

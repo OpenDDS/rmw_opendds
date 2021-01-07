@@ -27,12 +27,12 @@ count_publishers(
   const char * topic_name,
   size_t * count)
 {
-  if (!node) {
-    RMW_SET_ERROR_MSG("node handle is null");
+  OpenDDSNode* dds_node = OpenDDSNode::get_from(node, implementation_identifier);
+  if (!dds_node) {
     return RMW_RET_ERROR;
   }
-  if (node->implementation_identifier != implementation_identifier) {
-    RMW_SET_ERROR_MSG("node handle is not from this rmw implementation");
+  if (!dds_node->pub_listener_) {
+    RMW_SET_ERROR_MSG("publisher listener is null");
     return RMW_RET_ERROR;
   }
   if (!topic_name) {
@@ -43,19 +43,7 @@ count_publishers(
     RMW_SET_ERROR_MSG("count handle is null");
     return RMW_RET_ERROR;
   }
-
-  auto node_info = static_cast<OpenDDSNodeInfo *>(node->data);
-  if (!node_info) {
-    RMW_SET_ERROR_MSG("node info handle is null");
-    return RMW_RET_ERROR;
-  }
-  if (!node_info->publisher_listener) {
-    RMW_SET_ERROR_MSG("publisher listener handle is null");
-    return RMW_RET_ERROR;
-  }
-
-  *count = node_info->publisher_listener->count_topic(topic_name);
-
+  *count = dds_node->pub_listener_->count_topic(topic_name);
   return RMW_RET_OK;
 }
 
@@ -66,12 +54,12 @@ count_subscribers(
   const char * topic_name,
   size_t * count)
 {
-  if (!node) {
-    RMW_SET_ERROR_MSG("node handle is null");
+  OpenDDSNode* dds_node = OpenDDSNode::get_from(node, implementation_identifier);
+  if (!dds_node) {
     return RMW_RET_ERROR;
   }
-  if (node->implementation_identifier != implementation_identifier) {
-    RMW_SET_ERROR_MSG("node handle is not from this rmw implementation");
+  if (!dds_node->sub_listener_) {
+    RMW_SET_ERROR_MSG("subscriber listener is null");
     return RMW_RET_ERROR;
   }
   if (!topic_name) {
@@ -82,18 +70,6 @@ count_subscribers(
     RMW_SET_ERROR_MSG("count handle is null");
     return RMW_RET_ERROR;
   }
-
-  auto node_info = static_cast<OpenDDSNodeInfo *>(node->data);
-  if (!node_info) {
-    RMW_SET_ERROR_MSG("node info handle is null");
-    return RMW_RET_ERROR;
-  }
-  if (!node_info->subscriber_listener) {
-    RMW_SET_ERROR_MSG("subscriber listener handle is null");
-    return RMW_RET_ERROR;
-  }
-
-  *count = node_info->subscriber_listener->count_topic(topic_name);
-
+  *count = dds_node->sub_listener_->count_topic(topic_name);
   return RMW_RET_OK;
 }
