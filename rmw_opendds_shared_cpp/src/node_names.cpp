@@ -35,21 +35,16 @@ get_node_names_impl(
   rcutils_string_array_t * node_namespaces,
   rcutils_string_array_t * enclaves)
 {
-  if (!node) {
-    RMW_SET_ERROR_MSG("node handle is null");
-    return RMW_RET_ERROR;
-  }
-  if (node->implementation_identifier != implementation_identifier) {
-    RMW_SET_ERROR_MSG("node handle is not from this rmw implementation");
+  OpenDDSNode* dds_node = OpenDDSNode::get_from(node, implementation_identifier);
+  if (!dds_node) {
     return RMW_RET_ERROR;
   }
   if (rmw_check_zero_rmw_string_array(node_names) != RMW_RET_OK) {
     return RMW_RET_ERROR;
   }
 
-  DDS::DomainParticipant * participant = static_cast<OpenDDSNode *>(node->data)->dp_;
   DDS::InstanceHandleSeq handles;
-  if (participant->get_discovered_participants(handles) != DDS::RETCODE_OK) {
+  if (dds_node->dp_->get_discovered_participants(handles) != DDS::RETCODE_OK) {
     RMW_SET_ERROR_MSG("unable to fetch discovered participants.");
     return RMW_RET_ERROR;
   }
@@ -74,7 +69,7 @@ get_node_names_impl(
   }
 
   DDS::DomainParticipantQos participant_qos;
-  DDS::ReturnCode_t status = participant->get_qos(participant_qos);
+  DDS::ReturnCode_t status = dds_node->dp_->get_qos(participant_qos);
   if (status != DDS::RETCODE_OK) {
     RMW_SET_ERROR_MSG("failed to get default participant qos");
     return RMW_RET_ERROR;
@@ -95,7 +90,7 @@ get_node_names_impl(
 
   for (CORBA::ULong i = 1; i < length; ++i) {
     DDS::ParticipantBuiltinTopicData pbtd;
-    auto dds_ret = participant->get_discovered_participant_data(pbtd, handles[i - 1]);
+    auto dds_ret = dds_node->dp_->get_discovered_participant_data(pbtd, handles[i - 1]);
     std::string name;
     std::string namespace_;
     std::string enclave;

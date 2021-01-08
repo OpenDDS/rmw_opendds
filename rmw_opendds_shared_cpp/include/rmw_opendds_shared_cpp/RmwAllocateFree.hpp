@@ -41,7 +41,6 @@ private:
     }
   };
 
-public:
   static void* allocate()
   {
     try {
@@ -52,6 +51,7 @@ public:
     return nullptr;
   }
 
+public:
   // for default constructor
   static T* create()
   {
@@ -130,6 +130,10 @@ struct RmwStr
       rmw_free(str);
       str = nullptr;
     }
+  }
+  static void del(const char *& str)
+  {
+    del(const_cast<char *&>(str));
   }
 };
 

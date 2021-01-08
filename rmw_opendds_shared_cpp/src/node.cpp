@@ -242,8 +242,8 @@ void clean_node(rmw_node_t * node)
   if (!node) {
     return;
   }
-  node->namespace_ = nullptr;
-  node->name = nullptr;
+  RmwStr::del(node->namespace_);
+  RmwStr::del(node->name);
   auto dds_node = static_cast<OpenDDSNode*>(node->data);
   if (dds_node) {
     OpenDDSNode::Raf::destroy(dds_node);
@@ -254,11 +254,11 @@ void clean_node(rmw_node_t * node)
   rmw_node_free(node);
 }
 
-// caller checks implementation_identifier
+// caller checks context (implementation_identifier, impl), name, name_space
 rmw_node_t *
 create_node(rmw_context_t & context, const char * name, const char * name_space)
 {
-  if (set_default_participant_qos(context, name, name_space)) {
+  if (!set_default_participant_qos(context, name, name_space)) {
     return nullptr;
   }
   rmw_node_t * node = nullptr;
@@ -273,8 +273,14 @@ create_node(rmw_context_t & context, const char * name, const char * name_space)
     if (!node->data) {
       throw std::runtime_error("OpenDDSNode failed");
     }
-    node->name = name;
-    node->namespace_ = name_space;
+    node->name = RmwStr::cpy(name);
+    if (!node->name) {
+      throw std::runtime_error("node->name failed");
+    }
+    node->namespace_ = RmwStr::cpy(name_space);
+    if (!node->namespace_) {
+      throw std::runtime_error("node->namespace_ failed");
+    }
     return node;
 
   } catch (const std::exception& e) {
