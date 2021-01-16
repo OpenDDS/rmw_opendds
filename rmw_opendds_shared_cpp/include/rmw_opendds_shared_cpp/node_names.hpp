@@ -37,24 +37,4 @@ get_node_names_with_enclaves(
   rcutils_string_array_t* node_namespaces,
   rcutils_string_array_t* enclaves);
 
-RMW_OPENDDS_SHARED_CPP_PUBLIC
-rmw_ret_t
-count_publishers(
-  const char * implementation_identifier,
-  const rmw_node_t * node,
-  const char * topic_name,
-  size_t * count);
-
-RMW_OPENDDS_SHARED_CPP_PUBLIC
-rmw_ret_t
-count_subscribers(
-  const char * implementation_identifier,
-  const rmw_node_t * node,
-  const char * topic_name,
-  size_t * count);
-
-RMW_OPENDDS_SHARED_CPP_PUBLIC
-const rmw_guard_condition_t *
-node_get_graph_guard_condition(const rmw_node_t * node);
-
 #endif  // RMW_OPENDDS_SHARED_CPP__NODE_NAMES_HPP_

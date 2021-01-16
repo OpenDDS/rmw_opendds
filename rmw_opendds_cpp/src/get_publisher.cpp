@@ -23,14 +23,8 @@ namespace rmw_opendds_cpp
 DDS::DataWriter_var
 get_data_writer(rmw_publisher_t * publisher)
 {
-  if (!publisher) {
-    return NULL;
-  }
-  if (publisher->implementation_identifier != opendds_identifier) {
-    return NULL;
-  }
-  OpenDDSStaticPublisherInfo * impl = static_cast<OpenDDSStaticPublisherInfo *>(publisher->data);
-  return impl->topic_writer_;
+  OpenDDSStaticPublisherInfo * impl = OpenDDSStaticPublisherInfo::get_from(publisher);
+  return impl ? impl->writer_ : nullptr;
 }
 
 }  // namespace rmw_opendds_cpp

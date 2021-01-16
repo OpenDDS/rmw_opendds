@@ -24,28 +24,15 @@ extern "C"
 rmw_ret_t
 rmw_get_gid_for_publisher(const rmw_publisher_t * publisher, rmw_gid_t * gid)
 {
-  if (!publisher) {
-    RMW_SET_ERROR_MSG("publisher is null");
+  auto publisher_info = OpenDDSStaticPublisherInfo::get_from(publisher);
+  if (!publisher_info) {
     return RMW_RET_ERROR;
   }
-  RMW_CHECK_TYPE_IDENTIFIERS_MATCH(
-    publisher handle,
-    publisher->implementation_identifier,
-    opendds_identifier,
-    return RMW_RET_ERROR)
   if (!gid) {
     RMW_SET_ERROR_MSG("gid is null");
     return RMW_RET_ERROR;
   }
-
-  const OpenDDSStaticPublisherInfo * publisher_info =
-    static_cast<const OpenDDSStaticPublisherInfo *>(publisher->data);
-  if (!publisher_info) {
-    RMW_SET_ERROR_MSG("publisher info handle is null");
-    return RMW_RET_ERROR;
-  }
-
-  *gid = publisher_info->publisher_gid;
+  *gid = publisher_info->publisher_gid_;
   return RMW_RET_OK;
 }
 }  // extern "C"

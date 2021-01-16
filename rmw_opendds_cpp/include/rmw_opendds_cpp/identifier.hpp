@@ -17,4 +17,6 @@
 
 extern const char * const opendds_identifier;
 
+bool check_impl_id(const char * implementation_identifier);
+
 #endif  // RMW_OPENDDS_CPP__IDENTIFIER_HPP_

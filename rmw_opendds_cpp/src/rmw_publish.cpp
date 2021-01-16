@@ -56,31 +56,20 @@ rmw_publish(
   const void * ros_message,
   rmw_publisher_allocation_t * allocation)
 {
-  if (!publisher) {
-    RMW_SET_ERROR_MSG("publisher is null");
+  auto info = OpenDDSStaticPublisherInfo::get_from(publisher);
+  if (!info) {
+    return RMW_RET_ERROR; // error set in get_from
+  }
+  if (!info->callbacks_) {
+    RMW_SET_ERROR_MSG("publisher info callbacks is null");
     return RMW_RET_ERROR;
   }
-  if (publisher->implementation_identifier != opendds_identifier) {
-    RMW_SET_ERROR_MSG("publisher is not from this rmw implementation");
+  if (!info->writer_) {
+    RMW_SET_ERROR_MSG("topic writer is null");
     return RMW_RET_ERROR;
   }
   if (!ros_message) {
     RMW_SET_ERROR_MSG("ros message is null");
-    return RMW_RET_ERROR;
-  }
-  OpenDDSStaticPublisherInfo * info = static_cast<OpenDDSStaticPublisherInfo *>(publisher->data);
-  if (!info) {
-    RMW_SET_ERROR_MSG("publisher info is null");
-    return RMW_RET_ERROR;
-  }
-  const message_type_support_callbacks_t * callbacks = info->callbacks_;
-  if (!callbacks) {
-    RMW_SET_ERROR_MSG("publisher info callbacks is null");
-    return RMW_RET_ERROR;
-  }
-  DDS::DataWriter_var writer = info->topic_writer_;
-  if (!writer) {
-    RMW_SET_ERROR_MSG("topic writer is null");
     return RMW_RET_ERROR;
   }
 
@@ -88,7 +77,7 @@ rmw_publish(
   rcutils_uint8_array_t cdr_stream = rcutils_get_zero_initialized_uint8_array();
   cdr_stream.allocator = rcutils_get_default_allocator();
   try {
-    if (!callbacks->to_cdr_stream(ros_message, &cdr_stream)) {
+    if (!info->callbacks_->to_cdr_stream(ros_message, &cdr_stream)) {
       throw std::string("failed to convert ros_message to cdr stream");
     }
     if (cdr_stream.buffer_length == 0) {
@@ -97,7 +86,7 @@ rmw_publish(
     if (!cdr_stream.buffer) {
       throw std::string("no serialized message attached");
     }
-    if (!publish(writer, &cdr_stream)) {
+    if (!publish(info->writer_, &cdr_stream)) {
       throw std::string("failed to publish message");
     }
     ret = RMW_RET_OK;
@@ -114,38 +103,21 @@ rmw_ret_t
 rmw_publish_serialized_message(
   const rmw_publisher_t * publisher,
   const rmw_serialized_message_t * serialized_message,
-  rmw_publisher_allocation_t * allocation)
+  rmw_publisher_allocation_t *)
 {
-  if (!publisher) {
-    RMW_SET_ERROR_MSG("publisher is null");
+  auto info = OpenDDSStaticPublisherInfo::get_from(publisher);
+  if (!info) {
     return RMW_RET_ERROR;
   }
-  if (publisher->implementation_identifier != opendds_identifier) {
-    RMW_SET_ERROR_MSG("publisher is not from this rmw implementation");
+  if (!info->writer_) {
+    RMW_SET_ERROR_MSG("topic writer is null");
     return RMW_RET_ERROR;
   }
   if (!serialized_message) {
     RMW_SET_ERROR_MSG("serialized message is null");
     return RMW_RET_ERROR;
   }
-
-  OpenDDSStaticPublisherInfo * info = static_cast<OpenDDSStaticPublisherInfo *>(publisher->data);
-  if (!info) {
-    RMW_SET_ERROR_MSG("publisher info is null");
-    return RMW_RET_ERROR;
-  }
-  const message_type_support_callbacks_t * callbacks = info->callbacks_;
-  if (!callbacks) {
-    RMW_SET_ERROR_MSG("publisher info callbacks is null");
-    return RMW_RET_ERROR;
-  }
-  DDS::DataWriter_var writer = info->topic_writer_;
-  if (!writer) {
-    RMW_SET_ERROR_MSG("topic writer is null");
-    return RMW_RET_ERROR;
-  }
-
-  if (!publish(writer, serialized_message)) {
+  if (!publish(info->writer_, serialized_message)) {
     RMW_SET_ERROR_MSG("failed to publish message");
     return RMW_RET_ERROR;
   }
