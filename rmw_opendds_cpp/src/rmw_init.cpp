@@ -13,10 +13,10 @@
 // limitations under the License.
 
 #include "rmw/init.h"
+#include "rmw/init_options.h"
 
 #include "rmw/impl/cpp/macros.hpp"
 #include "rmw_opendds_shared_cpp/init.hpp"
-#include <rmw_opendds_shared_cpp/shutdown.hpp>
 
 #include "rmw_opendds_cpp/identifier.hpp"
 
@@ -25,14 +25,15 @@ extern "C"
 rmw_ret_t
 rmw_init_options_init(rmw_init_options_t * init_options, rcutils_allocator_t allocator)
 {
-  RMW_CHECK_ARGUMENT_FOR_NULL(init_options, RMW_RET_INVALID_ARGUMENT);
-  RCUTILS_CHECK_ALLOCATOR(&allocator, return RMW_RET_INVALID_ARGUMENT);
-  if (NULL != init_options->implementation_identifier) {
+  if (!is_zero_initialized(init_options)) {
     RMW_SET_ERROR_MSG("expected zero-initialized init_options");
     return RMW_RET_INVALID_ARGUMENT;
   }
+  RCUTILS_CHECK_ALLOCATOR(&allocator, return RMW_RET_INVALID_ARGUMENT);
   init_options->instance_id = 0;
   init_options->implementation_identifier = opendds_identifier;
+  init_options->domain_id = 123; //?? RMW_DEFAULT_DOMAIN_ID //??added
+  init_options->security_options = rmw_get_default_security_options();
   init_options->allocator = allocator;
   init_options->impl = nullptr;
   return RMW_RET_OK;
@@ -42,13 +43,12 @@ rmw_ret_t
 rmw_init_options_copy(const rmw_init_options_t * src, rmw_init_options_t * dst)
 {
   RMW_CHECK_ARGUMENT_FOR_NULL(src, RMW_RET_INVALID_ARGUMENT);
-  RMW_CHECK_ARGUMENT_FOR_NULL(dst, RMW_RET_INVALID_ARGUMENT);
   RMW_CHECK_TYPE_IDENTIFIERS_MATCH(
     src,
     src->implementation_identifier,
     opendds_identifier,
     return RMW_RET_INCORRECT_RMW_IMPLEMENTATION);
-  if (NULL != dst->implementation_identifier) {
+  if (!is_zero_initialized(dst)) {
     RMW_SET_ERROR_MSG("expected zero-initialized dst");
     return RMW_RET_INVALID_ARGUMENT;
   }
@@ -80,8 +80,10 @@ rmw_context_fini(rmw_context_t * context)
     context->implementation_identifier,
     opendds_identifier,
     return RMW_RET_INCORRECT_RMW_IMPLEMENTATION);
-  // context impl is explicitly supposed to be nullptr for now, see rmw_init's code
-  // RCUTILS_CHECK_ARGUMENT_FOR_NULL(context->impl, RMW_RET_INVALID_ARGUMENT);
+  if (context->impl) {
+    RMW_SET_ERROR_MSG("non-null context->impl: rmw_shutdown() not called");
+    return RMW_RET_INVALID_ARGUMENT;
+  }
   *context = rmw_get_zero_initialized_context();
   return RMW_RET_OK;
 }
@@ -96,10 +98,14 @@ rmw_init(const rmw_init_options_t * options, rmw_context_t * context)
     options->implementation_identifier,
     opendds_identifier,
     return RMW_RET_INCORRECT_RMW_IMPLEMENTATION);
+  if (context->implementation_identifier) {
+    RMW_SET_ERROR_MSG("expected zero-initialized context");
+    return RMW_RET_INVALID_ARGUMENT;
+  }
   context->instance_id = options->instance_id;
   context->implementation_identifier = opendds_identifier;
-  context->impl = nullptr;
-  return init();
+  context->options = *options;
+  return init(*context);
 }
 
 rmw_ret_t
@@ -111,8 +117,7 @@ rmw_shutdown(rmw_context_t * context)
     context->implementation_identifier,
     opendds_identifier,
     return RMW_RET_INCORRECT_RMW_IMPLEMENTATION);
-  rmw_ret_t r = shutdown();
-  return (r != RMW_RET_OK) ? r : rmw_context_fini(context);
+  return shutdown(*context);
 }
 
 }  // extern "C"
