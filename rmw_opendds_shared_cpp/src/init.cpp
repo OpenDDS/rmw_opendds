@@ -63,7 +63,7 @@ shutdown(rmw_context_t& context)
 bool is_zero_initialized(const rmw_init_options_t * opt)
 {
   return opt && opt->instance_id == 0
-    && !(opt->implementatioptn_identifier)
+    && !(opt->implementation_identifier)
     && opt->domain_id == RMW_DEFAULT_DOMAIN_ID
     && opt->security_options.enforce_security == 0 && !(opt->security_options.security_root_path)
     && opt->localhost_only == RMW_LOCALHOST_ONLY_DEFAULT
