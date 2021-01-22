@@ -19,7 +19,7 @@ jobs:
   timeoutInMinutes: 90
   pool:
     vmImage: 'ubuntu-20.04'
-  container: objectcomputing/opendds_ros2:latest
+  container: objectcomputing/opendds_ros2:DDS-3.15
   steps:
   - script: |
       printenv
