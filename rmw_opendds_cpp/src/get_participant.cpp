@@ -13,8 +13,7 @@
 // limitations under the License.
 
 #include "rmw_opendds_cpp/get_participant.hpp"
-
-#include "rmw_opendds_cpp/identifier.hpp"
+#include "rmw_opendds_shared_cpp/identifier.hpp"
 
 namespace rmw_opendds_cpp
 {

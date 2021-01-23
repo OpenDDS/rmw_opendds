@@ -21,7 +21,7 @@
 #include "rmw_opendds_shared_cpp/types.hpp"
 
 #include "rmw_opendds_cpp/opendds_static_subscriber_info.hpp"
-#include "rmw_opendds_cpp/identifier.hpp"
+#include "rmw_opendds_shared_cpp/identifier.hpp"
 
 // include patched generated code from the build folder
 #include "opendds_static_serialized_dataTypeSupportC.h"

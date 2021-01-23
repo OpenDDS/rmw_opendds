@@ -13,9 +13,8 @@
 // limitations under the License.
 
 #include "rmw_opendds_cpp/get_service.hpp"
-
 #include "rmw_opendds_cpp/opendds_static_service_info.hpp"
-#include "rmw_opendds_cpp/identifier.hpp"
+#include "rmw_opendds_shared_cpp/identifier.hpp"
 
 namespace rmw_opendds_cpp
 {

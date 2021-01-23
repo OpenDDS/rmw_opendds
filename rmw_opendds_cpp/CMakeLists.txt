@@ -76,7 +76,6 @@ add_library(
   src/get_publisher.cpp
   src/get_service.cpp
   src/get_subscriber.cpp
-  src/identifier.cpp
   src/process_topic_and_service_names.cpp
   src/rmw_client.cpp
   src/rmw_compare_gid_equals.cpp

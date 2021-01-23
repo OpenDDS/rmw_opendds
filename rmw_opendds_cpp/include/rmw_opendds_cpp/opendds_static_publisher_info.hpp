@@ -17,8 +17,10 @@
 
 #include <atomic>
 
+#include "rmw_opendds_shared_cpp/OpenDDSNode.hpp"
 #include "rmw_opendds_shared_cpp/types.hpp"
 #include "rmw_opendds_shared_cpp/opendds_static_event_info.hpp"
+#include "rmw_opendds_shared_cpp/RmwAllocateFree.hpp"
 
 #include "rosidl_typesupport_opendds_cpp/message_type_support.h"
 
@@ -28,40 +30,37 @@ extern "C"
 {
 struct OpenDDSStaticPublisherInfo : OpenDDSCustomEventInfo
 {
-  DDS::Publisher_var dds_publisher_;
-  OpenDDSPublisherListener * listener_;
-  DDS::DataWriter_var topic_writer_;
   const message_type_support_callbacks_t * callbacks_;
-  rmw_gid_t publisher_gid;
-  OpenDDSStaticPublisherInfo() :
-    dds_publisher_(),
-    listener_(nullptr),
-    topic_writer_(),
-    callbacks_(nullptr),
-    publisher_gid() {}
+  const std::string topic_name_;
+  const std::string type_name_;
+  OpenDDSPublisherListener * listener_;
+  DDS::Publisher_var publisher_;
+  DDS::DataWriter_var writer_;
+  rmw_gid_t publisher_gid_;
 
-  /**
-   * Remap the OpenDDS DataWriter Status to a generic RMW status type.
-   *
-   * \param mask input status mask
-   * \param event
-   */
+  typedef RmwAllocateFree<OpenDDSStaticPublisherInfo> Raf;
+  static OpenDDSStaticPublisherInfo* get_from(const rmw_publisher_t * publisher);
+
+  // Remap the OpenDDS DataWriter Status to a generic RMW status type
   rmw_ret_t get_status(DDS::StatusMask mask, void* event) override;
 
-  /// Return the topic writer entity for this publisher.
-  /**
-   * \return the topic writer associated with this publisher
-   */
+  // return the topic writer associated with this publisher
   DDS::Entity* get_entity() override;
+private:
+  friend Raf;
+  OpenDDSStaticPublisherInfo(DDS::DomainParticipant_var dp, const rosidl_message_type_support_t& ros_ts,
+                             const char * topic_name, const rmw_qos_profile_t& rmw_qos);
+  ~OpenDDSStaticPublisherInfo(){ cleanup(); }
+  void cleanup();
 };
 }  // extern "C"
 
 class OpenDDSPublisherListener : public DDS::PublisherListener
 {
 public:
-  virtual void on_publication_matched(
-    DDS::DataWriter *,
-    const DDS::PublicationMatchedStatus & status)
+  typedef RmwAllocateFree<OpenDDSPublisherListener> Raf;
+
+  virtual void on_publication_matched(DDS::DataWriter *, const DDS::PublicationMatchedStatus & status)
   {
     current_count_ = status.current_count;
   }
@@ -71,37 +70,14 @@ public:
     return current_count_;
   }
 
-  void on_offered_deadline_missed(
-    DDS::DataWriter_ptr writer,
-    const DDS::OfferedDeadlineMissedStatus& status
-  )
-  {
-    ACE_UNUSED_ARG(writer);
-    ACE_UNUSED_ARG(status);
-    // Add your implementation here
-  }
-
-  void on_offered_incompatible_qos(
-    DDS::DataWriter_ptr writer,
-    const DDS::OfferedIncompatibleQosStatus& status
-  )
-  {
-    ACE_UNUSED_ARG(writer);
-    ACE_UNUSED_ARG(status);
-    // Add your implementation here
-  }
-
-  void on_liveliness_lost(
-    DDS::DataWriter_ptr writer,
-    const DDS::LivelinessLostStatus& status
-  )
-  {
-    ACE_UNUSED_ARG(writer);
-    ACE_UNUSED_ARG(status);
-    // Add your implementation here
-  }
+  void on_offered_deadline_missed(DDS::DataWriter_ptr, const DDS::OfferedDeadlineMissedStatus&) {}
+  void on_offered_incompatible_qos(DDS::DataWriter_ptr, const DDS::OfferedIncompatibleQosStatus&) {}
+  void on_liveliness_lost(DDS::DataWriter_ptr, const DDS::LivelinessLostStatus&) {}
 
 private:
+  friend Raf;
+  OpenDDSPublisherListener(){ current_count_ = 0; }
+  ~OpenDDSPublisherListener(){}
   std::atomic<std::size_t> current_count_;
 };
 

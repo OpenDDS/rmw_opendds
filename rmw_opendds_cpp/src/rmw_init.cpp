@@ -17,8 +17,7 @@
 
 #include "rmw/impl/cpp/macros.hpp"
 #include "rmw_opendds_shared_cpp/init.hpp"
-
-#include "rmw_opendds_cpp/identifier.hpp"
+#include "rmw_opendds_shared_cpp/identifier.hpp"
 
 extern "C"
 {
@@ -32,7 +31,7 @@ rmw_init_options_init(rmw_init_options_t * init_options, rcutils_allocator_t all
   RCUTILS_CHECK_ALLOCATOR(&allocator, return RMW_RET_INVALID_ARGUMENT);
   init_options->instance_id = 0;
   init_options->implementation_identifier = opendds_identifier;
-  init_options->domain_id = 123; //?? RMW_DEFAULT_DOMAIN_ID //??added
+  init_options->domain_id = 0;
   init_options->security_options = rmw_get_default_security_options();
   init_options->allocator = allocator;
   init_options->impl = nullptr;

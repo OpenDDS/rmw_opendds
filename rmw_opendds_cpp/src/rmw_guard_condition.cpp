@@ -16,8 +16,7 @@
 #include "rmw/rmw.h"
 
 #include "rmw_opendds_shared_cpp/guard_condition.hpp"
-
-#include "rmw_opendds_cpp/identifier.hpp"
+#include "rmw_opendds_shared_cpp/identifier.hpp"
 
 extern "C"
 {
@@ -37,6 +36,6 @@ rmw_create_guard_condition(rmw_context_t * context)
 rmw_ret_t
 rmw_destroy_guard_condition(rmw_guard_condition_t * guard_condition)
 {
-  return destroy_guard_condition(opendds_identifier, guard_condition);
+  return destroy_guard_condition(guard_condition);
 }
 }  // extern "C"

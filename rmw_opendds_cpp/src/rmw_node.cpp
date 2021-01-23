@@ -17,8 +17,8 @@
 #include "rmw/rmw.h"
 
 #include "rmw_opendds_shared_cpp/node.hpp"
-
-#include "rmw_opendds_cpp/identifier.hpp"
+#include "rmw_opendds_shared_cpp/identifier.hpp"
+#include "rmw_opendds_shared_cpp/OpenDDSNode.hpp"
 
 extern "C"
 {
@@ -30,47 +30,39 @@ rmw_create_node(
   size_t domain_id,
   bool localhost_only)
 {
-  RCUTILS_CHECK_ARGUMENT_FOR_NULL(context, NULL);
-  RMW_CHECK_TYPE_IDENTIFIERS_MATCH(
-    init context,
-    context->implementation_identifier,
-    opendds_identifier,
-    // TODO(wjwwood): replace this with RMW_RET_INCORRECT_RMW_IMPLEMENTATION when refactored
-    return NULL);
-  return create_node(opendds_identifier, name, namespace_, domain_id);
+  (void)domain_id;
+  (void)localhost_only;
+  RMW_CHECK_FOR_NULL_WITH_MSG(context, "context is null", NULL);
+  if (!check_impl_id(context->implementation_identifier)) {
+    return NULL;
+  }
+  RMW_CHECK_FOR_NULL_WITH_MSG(context->impl, "context->impl is null", NULL);
+  RMW_CHECK_FOR_NULL_WITH_MSG(name, "node name is null", NULL);
+  RMW_CHECK_FOR_NULL_WITH_MSG(namespace_, "node namespace_ is null", NULL);
+  return create_node(*context, name, namespace_);
 }
 
 rmw_ret_t
 rmw_destroy_node(rmw_node_t * node)
 {
-  return destroy_node(opendds_identifier, node);
+  RMW_CHECK_FOR_NULL_WITH_MSG(node, "node is null", RMW_RET_INVALID_ARGUMENT);
+  if (!check_impl_id(node->implementation_identifier)) {
+    return RMW_RET_INCORRECT_RMW_IMPLEMENTATION;
+  }
+  return destroy_node(node);
 }
 
 rmw_ret_t
 rmw_node_assert_liveliness(const rmw_node_t * node)
 {
-  RMW_CHECK_ARGUMENT_FOR_NULL(node, RMW_RET_INVALID_ARGUMENT);
-  RMW_CHECK_ARGUMENT_FOR_NULL(node->implementation_identifier, RMW_RET_INVALID_ARGUMENT);
-  RMW_CHECK_TYPE_IDENTIFIERS_MATCH(
-    node handle,
-    node->implementation_identifier,
-    opendds_identifier,
-    return RMW_RET_INCORRECT_RMW_IMPLEMENTATION)
-  return node_assert_liveliness(node);
+  auto dds_node = OpenDDSNode::get_from(node);
+  return dds_node && dds_node->assert_liveliness() ? RMW_RET_OK : RMW_RET_ERROR;
 }
 
 const rmw_guard_condition_t *
 rmw_node_get_graph_guard_condition(const rmw_node_t * node)
 {
-  if (!node) {
-    RMW_SET_ERROR_MSG("node handle is null");
-    return nullptr;
-  }
-  RMW_CHECK_TYPE_IDENTIFIERS_MATCH(
-    node handle,
-    node->implementation_identifier, opendds_identifier,
-    return nullptr)
-
-  return node_get_graph_guard_condition(node);
+  auto dds_node = OpenDDSNode::get_from(node);
+  return dds_node ? dds_node->get_guard_condition() : nullptr;
 }
 }  // extern "C"

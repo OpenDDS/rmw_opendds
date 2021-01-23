@@ -20,8 +20,8 @@
 
 #include "rmw_opendds_shared_cpp/qos.hpp"
 #include "rmw_opendds_shared_cpp/types.hpp"
-
-#include "rmw_opendds_cpp/identifier.hpp"
+#include "rmw_opendds_shared_cpp/identifier.hpp"
+#include "rmw_opendds_shared_cpp/OpenDDSNode.hpp"
 #include "process_topic_and_service_names.hpp"
 #include "type_support_common.hpp"
 #include "rmw_opendds_cpp/opendds_static_service_info.hpp"
@@ -40,6 +40,7 @@ extern "C"
 rmw_ret_t clean_service(OpenDDSNodeInfo & node_info, rmw_service_t * service)
 {
   auto ret = RMW_RET_OK;
+  return ret; //?? temp
   if (!service) {
     return ret;
   }
@@ -97,30 +98,24 @@ rmw_create_service(
   const char * service_name,
   const rmw_qos_profile_t * qos_profile)
 {
-  RMW_CHECK_FOR_NULL_WITH_MSG(node, "node is null", return nullptr);
-  RMW_CHECK_TYPE_IDENTIFIERS_MATCH(node, node->implementation_identifier, opendds_identifier, return nullptr)
-
-  auto node_info = static_cast<OpenDDSNodeInfo *>(node->data);
-  RMW_CHECK_FOR_NULL_WITH_MSG(node_info, "node_info is null", return nullptr);
-  RMW_CHECK_FOR_NULL_WITH_MSG(node_info->participant.in(), "participant is null", return nullptr);
-  RMW_CHECK_FOR_NULL_WITH_MSG(node_info->publisher_listener, "publisher_listener is null", return nullptr);
-  RMW_CHECK_FOR_NULL_WITH_MSG(node_info->subscriber_listener, "subscriber_listener is null", return nullptr);
-
+  auto dds_node = OpenDDSNode::get_from(node);
+  if (!dds_node) {
+    return nullptr; // error set in get_from
+  }
   const rosidl_service_type_support_t * type_support = rmw_get_service_type_support(type_supports);
   if (!type_support) {
     return nullptr;
   }
 
   RMW_CHECK_FOR_NULL_WITH_MSG(service_name, "service_name is null", return nullptr);
+  RMW_CHECK_FOR_NULL_WITH_MSG(qos_profile, "qos_profile is null", return nullptr);
   std::string request_topic;
   std::string response_topic;
   get_service_topic_names(service_name, qos_profile->avoid_ros_namespace_conventions, request_topic, response_topic);
 
-  RMW_CHECK_FOR_NULL_WITH_MSG(qos_profile, "qos_profile is null", return nullptr);
-
+  DDS::DomainParticipant_var dp = dds_node->dp();
   // create publisher
-  DDS::Publisher_var publisher = node_info->participant->create_publisher(
-    PUBLISHER_QOS_DEFAULT, NULL, OpenDDS::DCPS::NO_STATUS_MASK);
+  DDS::Publisher_var publisher = dp->create_publisher(PUBLISHER_QOS_DEFAULT, NULL, OpenDDS::DCPS::NO_STATUS_MASK);
   if (!publisher) {
     RMW_SET_ERROR_MSG("failed to create_publisher");
     return nullptr;
@@ -136,8 +131,7 @@ rmw_create_service(
   }
 
   // create subscriber
-  DDS::Subscriber_var subscriber = node_info->participant->create_subscriber(
-    SUBSCRIBER_QOS_DEFAULT, NULL, OpenDDS::DCPS::NO_STATUS_MASK);
+  DDS::Subscriber_var subscriber = dp->create_subscriber(SUBSCRIBER_QOS_DEFAULT, NULL, OpenDDS::DCPS::NO_STATUS_MASK);
   if (!subscriber) {
     RMW_SET_ERROR_MSG("failed to create_subscriber");
     return nullptr;
@@ -181,7 +175,7 @@ rmw_create_service(
     }
 
     // create replier
-    info->replier_ = info->callbacks_->create_replier(node_info->participant,
+    info->replier_ = info->callbacks_->create_replier(dp,
       request_topic.c_str(), response_topic.c_str(), publisher, subscriber, &rmw_allocate, &rmw_free);
     if (!info->replier_) {
       throw std::string("failed to create_replier");
@@ -199,7 +193,7 @@ rmw_create_service(
       throw std::string("failed to create_readcondition");
     }
 
-    // update node_info subscriber_listener
+    // update dds_node sub_listener_
     DDS::TopicDescription_ptr rtopic_des = info->request_reader_->get_topicdescription();
     if (!rtopic_des) {
       throw std::string("failed to get_topicdescription");
@@ -209,7 +203,7 @@ rmw_create_service(
     if (!name || !type_name) {
       throw std::string("topicdescription name or type_name is null");
     }
-
+/*
     OpenDDS::DCPS::DomainParticipantImpl* dpi = dynamic_cast<OpenDDS::DCPS::DomainParticipantImpl*>(node_info->participant.in());
     DDS::GUID_t part_guid = dpi->get_repoid(node_info->participant->get_instance_handle());
     DDS::GUID_t r_guid = dpi->get_repoid(info->request_reader_->get_instance_handle());
@@ -237,7 +231,7 @@ rmw_create_service(
 
     node_info->publisher_listener->add_information(part_guid, w_guid, name.in(), type_name.in(), EntityType::Publisher);
     node_info->publisher_listener->trigger_graph_guard_condition();
-
+*/
     return service;
 
   } catch (const std::string& e) {
@@ -245,10 +239,12 @@ rmw_create_service(
   } catch (...) {
     RMW_SET_ERROR_MSG("rmw_create_service failed");
   }
+/*
   clean_service(*node_info, service);
   if (buf) {
     rmw_free(buf);
   }
+*/
   return nullptr;
 }
 

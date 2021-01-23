@@ -20,7 +20,7 @@
 #include "rmw/rmw.h"
 
 #include "rmw_opendds_shared_cpp/node_info_and_types.hpp"
-#include "rmw_opendds_cpp/identifier.hpp"
+#include "rmw_opendds_shared_cpp/identifier.hpp"
 
 // The extern "C" here enforces that overloading is not used.
 extern "C"

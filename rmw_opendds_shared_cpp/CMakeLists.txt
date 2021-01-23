@@ -47,10 +47,12 @@ add_library(
   src/event.cpp
   src/event_converter.cpp
   src/guard_condition.cpp
+  src/identifier.cpp
   src/init.cpp
   src/namespace_prefix.cpp
   src/node.cpp
   src/node_names.cpp
+  src/OpenDDSNode.cpp
   src/qos.cpp
   src/names_and_types_helpers.cpp
   src/node_info_and_types.cpp

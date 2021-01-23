@@ -14,6 +14,7 @@
 
 #include "rmw_opendds_shared_cpp/guard_condition.hpp"
 #include "rmw_opendds_shared_cpp/opendds_include.hpp"
+#include "rmw_opendds_shared_cpp/identifier.hpp"
 
 #include "rmw/allocators.h"
 #include "rmw/error_handling.h"
@@ -53,19 +54,15 @@ fail:
 }
 
 rmw_ret_t
-destroy_guard_condition(
-  const char * implementation_identifier,
-  rmw_guard_condition_t * guard_condition)
+destroy_guard_condition(rmw_guard_condition_t * guard_condition)
 {
   if (!guard_condition) {
-    RMW_SET_ERROR_MSG("guard condition handle is null");
-    return RMW_RET_ERROR;
+    RMW_SET_ERROR_MSG("guard condition is null");
+    return RMW_RET_INVALID_ARGUMENT;
   }
-  RMW_CHECK_TYPE_IDENTIFIERS_MATCH(
-    guard condition handle,
-    guard_condition->implementation_identifier, implementation_identifier,
-    return RMW_RET_ERROR)
-
+  if (!check_impl_id(guard_condition->implementation_identifier)) {
+    return RMW_RET_INCORRECT_RMW_IMPLEMENTATION;
+  }
   auto result = RMW_RET_OK;
   RMW_TRY_DESTRUCTOR(
     static_cast<DDS::GuardCondition *>(guard_condition->data)->~GuardCondition(),

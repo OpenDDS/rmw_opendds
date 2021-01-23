@@ -13,9 +13,8 @@
 // limitations under the License.
 
 #include "rmw_opendds_cpp/get_publisher.hpp"
-
 #include "rmw_opendds_cpp/opendds_static_publisher_info.hpp"
-#include "rmw_opendds_cpp/identifier.hpp"
+#include "rmw_opendds_shared_cpp/identifier.hpp"
 
 namespace rmw_opendds_cpp
 {
@@ -23,14 +22,8 @@ namespace rmw_opendds_cpp
 DDS::DataWriter_var
 get_data_writer(rmw_publisher_t * publisher)
 {
-  if (!publisher) {
-    return NULL;
-  }
-  if (publisher->implementation_identifier != opendds_identifier) {
-    return NULL;
-  }
-  OpenDDSStaticPublisherInfo * impl = static_cast<OpenDDSStaticPublisherInfo *>(publisher->data);
-  return impl->topic_writer_;
+  OpenDDSStaticPublisherInfo * impl = OpenDDSStaticPublisherInfo::get_from(publisher);
+  return impl ? impl->writer_ : nullptr;
 }
 
 }  // namespace rmw_opendds_cpp
