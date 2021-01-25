@@ -22,7 +22,7 @@
 #include "rmw_opendds_shared_cpp/qos.hpp"
 #include "opendds_static_serialized_dataTypeSupportImpl.h"
 
-#include "dds/DCPS/DataWriterImpl_T.h"
+#include <dds/DCPS/DataWriterImpl_T.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
 
 #include "rmw/visibility_control.h"
@@ -129,7 +129,7 @@ OpenDDSStaticPublisherInfo::OpenDDSStaticPublisherInfo(DDS::DomainParticipant_va
   , const rosidl_message_type_support_t & ros_ts
   , const char * topic_name
   , const rmw_qos_profile_t & rmw_qos
-  )
+)
   : callbacks_(static_cast<const message_type_support_callbacks_t*>(ros_ts.data))
   , topic_name_(get_topic_str(topic_name, rmw_qos.avoid_ros_namespace_conventions))
   , type_name_(callbacks_ ? _create_type_name(callbacks_) : "")

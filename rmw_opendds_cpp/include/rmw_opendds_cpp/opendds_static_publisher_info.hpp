@@ -50,7 +50,7 @@ private:
   friend Raf;
   OpenDDSStaticPublisherInfo(DDS::DomainParticipant_var dp, const rosidl_message_type_support_t& ros_ts,
                              const char * topic_name, const rmw_qos_profile_t& rmw_qos);
-  ~OpenDDSStaticPublisherInfo(){ cleanup(); }
+  ~OpenDDSStaticPublisherInfo() { cleanup(); }
   void cleanup();
 };
 }  // extern "C"
@@ -76,8 +76,8 @@ public:
 
 private:
   friend Raf;
-  OpenDDSPublisherListener(){ current_count_ = 0; }
-  ~OpenDDSPublisherListener(){}
+  OpenDDSPublisherListener() { current_count_ = 0; }
+  ~OpenDDSPublisherListener() {}
   std::atomic<std::size_t> current_count_;
 };
 

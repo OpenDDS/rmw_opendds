@@ -29,7 +29,7 @@
 #include "rmw_opendds_cpp/opendds_static_publisher_info.hpp"
 
 #include "opendds_static_serialized_dataTypeSupportImpl.h"
-#include "dds/DCPS/DataWriterImpl_T.h"
+#include <dds/DCPS/DataWriterImpl_T.h>
 
 // Uncomment this to get extra console output about discovery.
 // This affects code in this file, but there is a similar variable in:

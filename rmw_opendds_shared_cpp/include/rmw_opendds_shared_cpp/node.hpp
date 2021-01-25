@@ -21,7 +21,7 @@
 
 RMW_OPENDDS_SHARED_CPP_PUBLIC
 rmw_node_t *
-create_node(rmw_context_t & context, const char * name, const char * namespace_);
+create_node(rmw_context_t & context, const char * name, const char * name_space);
 
 RMW_OPENDDS_SHARED_CPP_PUBLIC
 rmw_ret_t

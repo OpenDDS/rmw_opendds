@@ -24,21 +24,21 @@ class OpenDDSNode
 {
 public:
   typedef RmwAllocateFree<OpenDDSNode> Raf;
-  static OpenDDSNode* get_from(const rmw_node_t * node);
+  static OpenDDSNode * get_from(const rmw_node_t * node);
   const rmw_guard_condition_t * get_guard_condition() const { return gc_; }
-  bool assert_liveliness() const { return dp_->assert_liveliness() != DDS::RETCODE_OK; }
+  bool assert_liveliness() const { return dp_->assert_liveliness() == DDS::RETCODE_OK; }
   DDS::DomainParticipant_var dp() { return dp_; }
-  void add_pub(const DDS::InstanceHandle_t& pub, const std::string& topic_name, const std::string& type_name);
-  void add_sub(const DDS::InstanceHandle_t& sub, const std::string& topic_name, const std::string& type_name);
-  bool remove_pub(const DDS::InstanceHandle_t& pub);
-  bool remove_sub(const DDS::InstanceHandle_t& sub);
+  void add_pub(const DDS::InstanceHandle_t & pub, const std::string & topic_name, const std::string & type_name);
+  void add_sub(const DDS::InstanceHandle_t & sub, const std::string & topic_name, const std::string & type_name);
+  bool remove_pub(const DDS::InstanceHandle_t & pub);
+  bool remove_sub(const DDS::InstanceHandle_t & sub);
   rmw_ret_t count_publishers(const char * topic_name, size_t * count);
   rmw_ret_t count_subscribers(const char * topic_name, size_t * count);
 
 private:
   friend Raf;
   OpenDDSNode(rmw_context_t & context);
-  ~OpenDDSNode(){ cleanup(); }
+  ~OpenDDSNode() { cleanup(); }
   void cleanup();
   bool configureTransport();
 
@@ -47,7 +47,7 @@ private:
   CustomPublisherListener * pub_listener_;
   CustomSubscriberListener * sub_listener_;
   DDS::DomainParticipant_var dp_;
-  OpenDDS::DCPS::DomainParticipantImpl* dpi_;
+  OpenDDS::DCPS::DomainParticipantImpl * dpi_;
 
   typedef std::mutex Lock;
   typedef std::lock_guard<Lock> Guard;

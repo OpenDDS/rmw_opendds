@@ -27,10 +27,10 @@
 #include "rmw/error_handling.h"
 #include "rmw/impl/cpp/macros.hpp"
 
-#include "dds/DdsDcpsCoreTypeSupportC.h"
+#include <dds/DdsDcpsCoreTypeSupportC.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
-#include "dds/DCPS/Service_Participant.h"
-#include "dds/DCPS/BuiltInTopicUtils.h"
+#include <dds/DCPS/Service_Participant.h>
+#include <dds/DCPS/BuiltInTopicUtils.h>
 #include <dds/DCPS/transport/framework/TransportRegistry.h>
 #include <dds/DCPS/transport/framework/TransportConfig.h>
 #include <dds/DCPS/transport/framework/TransportInst.h>
@@ -179,7 +179,7 @@ OpenDDSNode::OpenDDSNode(rmw_context_t & context)
     cleanup();
     throw;
   } catch (...) {
-    RMW_SET_ERROR_MSG("OpenDDSNode construtor failed");
+    RMW_SET_ERROR_MSG("OpenDDSNode constructor failed");
     cleanup();
     throw;
   }
