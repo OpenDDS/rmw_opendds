@@ -74,7 +74,7 @@ clean_subscription(rmw_subscription_t * subscription, OpenDDSNodeInfo & node_inf
 
   auto info = static_cast<OpenDDSStaticSubscriberInfo*>(subscription->data);
   if (info) {
-/*
+/* //temporarily commented out for testing OpenDDSNode and publisher
     if (info->dds_subscriber_) {
       OpenDDS::DCPS::DomainParticipantImpl* dpi = dynamic_cast<OpenDDS::DCPS::DomainParticipantImpl*>(node_info.participant.in());
       DDS::GUID_t guid = dpi->get_repoid(info->dds_subscriber_->get_instance_handle());
@@ -276,6 +276,7 @@ rmw_create_subscription(
   } catch (...) {
     RMW_SET_ERROR_MSG("rmw_create_subscription failed");
   }
+//temporarily commented out for testing OpenDDSNode and publisher
 //  clean_subscription(subscription, *node_info, *node_info->participant);
   if (buf) {
     rmw_free(buf);

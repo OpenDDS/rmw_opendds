@@ -149,7 +149,7 @@ OpenDDSStaticPublisherInfo::OpenDDSStaticPublisherInfo(DDS::DomainParticipant_va
       throw std::runtime_error("type_name_ is empty");
     }
     if (!listener_) {
-      throw std::runtime_error("OpenDDSPublisherListener failed");
+      throw std::runtime_error("OpenDDSPublisherListener failed to contstruct");
     }
     if (!dp) {
       throw std::runtime_error("DomainParticipant is null");

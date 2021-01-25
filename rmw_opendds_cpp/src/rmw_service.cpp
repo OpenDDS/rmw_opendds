@@ -203,7 +203,7 @@ rmw_create_service(
     if (!name || !type_name) {
       throw std::string("topicdescription name or type_name is null");
     }
-/*
+/* //temporarily commented out for testing OpenDDSNode and publisher
     OpenDDS::DCPS::DomainParticipantImpl* dpi = dynamic_cast<OpenDDS::DCPS::DomainParticipantImpl*>(node_info->participant.in());
     DDS::GUID_t part_guid = dpi->get_repoid(node_info->participant->get_instance_handle());
     DDS::GUID_t r_guid = dpi->get_repoid(info->request_reader_->get_instance_handle());
@@ -239,7 +239,7 @@ rmw_create_service(
   } catch (...) {
     RMW_SET_ERROR_MSG("rmw_create_service failed");
   }
-/*
+/* //temporarily commented out for testing OpenDDSNode and publisher
   clean_service(*node_info, service);
   if (buf) {
     rmw_free(buf);
