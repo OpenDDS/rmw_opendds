@@ -12,11 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "rmw_opendds_shared_cpp/OpenDDSNode.hpp"
+
 #include "rmw/rmw.h"
-
-#include "rmw_opendds_shared_cpp/count.hpp"
-
-#include "rmw_opendds_cpp/identifier.hpp"
 
 extern "C"
 {
@@ -26,7 +24,8 @@ rmw_count_publishers(
   const char * topic_name,
   size_t * count)
 {
-  return count_publishers(opendds_identifier, node, topic_name, count);
+  OpenDDSNode* dds_node = OpenDDSNode::get_from(node);
+  return dds_node ? dds_node->count_publishers(topic_name, count) : RMW_RET_ERROR;
 }
 
 rmw_ret_t
@@ -35,6 +34,7 @@ rmw_count_subscribers(
   const char * topic_name,
   size_t * count)
 {
-  return count_subscribers(opendds_identifier, node, topic_name, count);
+  OpenDDSNode* dds_node = OpenDDSNode::get_from(node);
+  return dds_node ? dds_node->count_subscribers(topic_name, count) : RMW_RET_ERROR;
 }
 }  // extern "C"

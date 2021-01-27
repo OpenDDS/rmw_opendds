@@ -15,8 +15,7 @@
 #include "rmw/rmw.h"
 
 #include "rmw_opendds_shared_cpp/wait.hpp"
-
-#include "rmw_opendds_cpp/identifier.hpp"
+#include "rmw_opendds_shared_cpp/identifier.hpp"
 #include "rmw_opendds_cpp/opendds_static_client_info.hpp"
 #include "rmw_opendds_cpp/opendds_static_service_info.hpp"
 #include "rmw_opendds_cpp/opendds_static_subscriber_info.hpp"

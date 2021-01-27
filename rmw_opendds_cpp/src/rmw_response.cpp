@@ -16,9 +16,9 @@
 #include "rmw/impl/cpp/macros.hpp"
 #include "rmw/rmw.h"
 
-#include "rmw_opendds_cpp/identifier.hpp"
 #include "rmw_opendds_cpp/opendds_static_client_info.hpp"
 #include "rmw_opendds_cpp/opendds_static_service_info.hpp"
+#include "rmw_opendds_shared_cpp/identifier.hpp"
 
 extern "C"
 {

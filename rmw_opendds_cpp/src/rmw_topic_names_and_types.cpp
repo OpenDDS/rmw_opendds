@@ -16,8 +16,7 @@
 #include "rmw/get_topic_names_and_types.h"
 
 #include "rmw_opendds_shared_cpp/topic_names_and_types.hpp"
-
-#include "rmw_opendds_cpp/identifier.hpp"
+#include "rmw_opendds_shared_cpp/identifier.hpp"
 
 extern "C"
 {

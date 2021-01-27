@@ -56,10 +56,10 @@ jobs:
         cd $(Agent.BuildDirectory)
         ./rmw_build/run_ci_test.sh
     displayName:  run tests (run_ci_test.sh)
-  - script: |
-        cd $(Agent.BuildDirectory)
-        ./rmw_build/run_ci_test_rpc.sh
-    displayName:  run tests (run_ci_test_rpc.sh)
+#  - script: |
+#        cd $(Agent.BuildDirectory)
+#        ./rmw_build/run_ci_test_rpc.sh
+#    displayName:  run tests (run_ci_test_rpc.sh)
   - script: |
         rm -rf build
         rm -rf install

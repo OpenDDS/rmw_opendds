@@ -19,7 +19,7 @@
 #include "rmw/types.h"
 
 #include "rmw_opendds_cpp/opendds_static_publisher_info.hpp"
-#include "rmw_opendds_cpp/identifier.hpp"
+#include "rmw_opendds_shared_cpp/identifier.hpp"
 
 #include "dds/DCPS/DataWriterImpl.h"
 #include "opendds_static_serialized_dataTypeSupportC.h"
@@ -78,7 +78,7 @@ rmw_publish(
     RMW_SET_ERROR_MSG("publisher info callbacks is null");
     return RMW_RET_ERROR;
   }
-  DDS::DataWriter_var writer = info->topic_writer_;
+  DDS::DataWriter_var writer = info->writer_;
   if (!writer) {
     RMW_SET_ERROR_MSG("topic writer is null");
     return RMW_RET_ERROR;
@@ -139,7 +139,7 @@ rmw_publish_serialized_message(
     RMW_SET_ERROR_MSG("publisher info callbacks is null");
     return RMW_RET_ERROR;
   }
-  DDS::DataWriter_var writer = info->topic_writer_;
+  DDS::DataWriter_var writer = info->writer_;
   if (!writer) {
     RMW_SET_ERROR_MSG("topic writer is null");
     return RMW_RET_ERROR;
