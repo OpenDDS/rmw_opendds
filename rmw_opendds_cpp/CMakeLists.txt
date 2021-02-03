@@ -79,7 +79,6 @@ add_library(
   src/rmw_compare_gid_equals.cpp
   src/rmw_count.cpp
   src/rmw_event.cpp
-  src/rmw_get_gid_for_publisher.cpp
   src/rmw_get_implementation_identifier.cpp
   src/rmw_get_serialization_format.cpp
   src/rmw_guard_condition.cpp

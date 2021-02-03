@@ -233,4 +233,19 @@ rmw_destroy_publisher(rmw_node_t * node, rmw_publisher_t * publisher)
   }
   return ret ? RMW_RET_OK : RMW_RET_ERROR;
 }
+
+rmw_ret_t
+rmw_get_gid_for_publisher(const rmw_publisher_t * publisher, rmw_gid_t * gid)
+{
+  auto dds_pub = DDSPublisher::from(publisher);
+  if (!dds_pub) {
+    return RMW_RET_ERROR; // error set
+  }
+  if (!gid) {
+    RMW_SET_ERROR_MSG("gid is null");
+    return RMW_RET_ERROR;
+  }
+  *gid = dds_pub->gid();
+  return RMW_RET_OK;
+}
 }  // extern "C"
