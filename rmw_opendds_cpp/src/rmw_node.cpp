@@ -26,20 +26,18 @@ rmw_node_t *
 rmw_create_node(
   rmw_context_t * context,
   const char * name,
-  const char * namespace_,
-  size_t domain_id,
-  bool localhost_only)
+  const char * name_space,
+  size_t /* domain_id */,
+  bool /* localhost_only */)
 {
-  (void)domain_id;
-  (void)localhost_only;
   RMW_CHECK_FOR_NULL_WITH_MSG(context, "context is null", NULL);
   if (!check_impl_id(context->implementation_identifier)) {
     return NULL;
   }
   RMW_CHECK_FOR_NULL_WITH_MSG(context->impl, "context->impl is null", NULL);
   RMW_CHECK_FOR_NULL_WITH_MSG(name, "node name is null", NULL);
-  RMW_CHECK_FOR_NULL_WITH_MSG(namespace_, "node namespace_ is null", NULL);
-  return create_node(*context, name, namespace_);
+  RMW_CHECK_FOR_NULL_WITH_MSG(name_space, "node name_space is null", NULL);
+  return create_node(*context, name, name_space);
 }
 
 rmw_ret_t
@@ -55,14 +53,14 @@ rmw_destroy_node(rmw_node_t * node)
 rmw_ret_t
 rmw_node_assert_liveliness(const rmw_node_t * node)
 {
-  auto dds_node = OpenDDSNode::get_from(node);
+  auto dds_node = OpenDDSNode::from(node);
   return dds_node && dds_node->assert_liveliness() ? RMW_RET_OK : RMW_RET_ERROR;
 }
 
 const rmw_guard_condition_t *
 rmw_node_get_graph_guard_condition(const rmw_node_t * node)
 {
-  auto dds_node = OpenDDSNode::get_from(node);
+  auto dds_node = OpenDDSNode::from(node);
   return dds_node ? dds_node->get_guard_condition() : nullptr;
 }
 }  // extern "C"

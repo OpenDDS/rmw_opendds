@@ -40,7 +40,7 @@
 #endif
 #include <string>
 
-OpenDDSNode* OpenDDSNode::get_from(const rmw_node_t * node)
+OpenDDSNode* OpenDDSNode::from(const rmw_node_t * node)
 {
   RMW_CHECK_FOR_NULL_WITH_MSG(node, "node is null", return nullptr);
   if (!check_impl_id(node->implementation_identifier)) {
@@ -128,15 +128,15 @@ OpenDDSNode::OpenDDSNode(rmw_context_t & context)
   , dpi_(nullptr)
 {
   try {
-    gc_ = create_guard_condition(context_.implementation_identifier);
+    gc_ = create_guard_condition();
     if (!gc_) {
       throw std::runtime_error("create_guard_condition failed");
     }
-    pub_listener_ = CustomPublisherListener::Raf::create(context_.implementation_identifier, gc_);
+    pub_listener_ = CustomPublisherListener::Raf::create(gc_);
     if (!pub_listener_) {
       throw std::runtime_error("CustomPublisherListener failed");
     }
-    sub_listener_ = CustomSubscriberListener::Raf::create(context_.implementation_identifier, gc_);
+    sub_listener_ = CustomSubscriberListener::Raf::create(gc_);
     if (!sub_listener_) {
       throw std::runtime_error("CustomSubscriberListener failed");
     }

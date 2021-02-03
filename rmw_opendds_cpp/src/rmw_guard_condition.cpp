@@ -30,7 +30,7 @@ rmw_create_guard_condition(rmw_context_t * context)
     opendds_identifier,
     // TODO(wjwwood): replace this with RMW_RET_INCORRECT_RMW_IMPLEMENTATION when refactored
     return NULL);
-  return create_guard_condition(opendds_identifier);
+  return create_guard_condition();
 }
 
 rmw_ret_t

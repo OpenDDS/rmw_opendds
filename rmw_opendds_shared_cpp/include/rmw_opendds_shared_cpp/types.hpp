@@ -43,8 +43,7 @@ using DDSTopicEndpointInfo = TopicCache<DDS::GUID_t>::TopicInfo;
 class CustomDataReaderListener : public DDS::DataReaderListener
 {
 public:
-  CustomDataReaderListener(const char * implementation_identifier, rmw_guard_condition_t * gc)
-    : implementation_identifier_(implementation_identifier), graph_guard_condition_(gc) {}
+  CustomDataReaderListener(rmw_guard_condition_t * gc) : graph_guard_condition_(gc) {}
 
   virtual bool add_information(
     const DDS::GUID_t& participant_guid,
@@ -111,7 +110,6 @@ protected:
   TopicCache<DDS::GUID_t> topic_cache;
 
 private:
-  const char * implementation_identifier_;
   rmw_guard_condition_t * graph_guard_condition_;
 };
 
@@ -120,8 +118,7 @@ class CustomPublisherListener : public CustomDataReaderListener
 public:
   typedef RmwAllocateFree<CustomPublisherListener> Raf;
 
-  CustomPublisherListener(const char * implementation_identifier, rmw_guard_condition_t * gc)
-    : CustomDataReaderListener(implementation_identifier, gc) {}
+  CustomPublisherListener(rmw_guard_condition_t * gc) : CustomDataReaderListener(gc) {}
   ~CustomPublisherListener() {}
 
   virtual void on_data_available(DDS::DataReader * reader);
@@ -132,8 +129,7 @@ class CustomSubscriberListener : public CustomDataReaderListener
 public:
   typedef RmwAllocateFree<CustomSubscriberListener> Raf;
 
-  CustomSubscriberListener(const char * implementation_identifier, rmw_guard_condition_t * gc)
-    : CustomDataReaderListener(implementation_identifier, gc) {}
+  CustomSubscriberListener(rmw_guard_condition_t * gc) : CustomDataReaderListener(gc) {}
   ~CustomSubscriberListener() {}
 
   virtual void on_data_available(DDS::DataReader * reader);

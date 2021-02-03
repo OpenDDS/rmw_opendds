@@ -69,13 +69,11 @@ register_rmw_implementation(
 add_library(
   rmw_opendds_cpp
   SHARED
-  src/opendds_static_publisher_info.cpp
-  src/opendds_static_subscriber_info.cpp
+  src/DDSPublisher.cpp
+  src/DDSSubscriber.cpp
   src/get_client.cpp
   src/get_participant.cpp
-  src/get_publisher.cpp
   src/get_service.cpp
-  src/get_subscriber.cpp
   src/process_topic_and_service_names.cpp
   src/rmw_client.cpp
   src/rmw_compare_gid_equals.cpp

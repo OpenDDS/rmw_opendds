@@ -24,7 +24,7 @@ rmw_count_publishers(
   const char * topic_name,
   size_t * count)
 {
-  OpenDDSNode* dds_node = OpenDDSNode::get_from(node);
+  auto dds_node = OpenDDSNode::from(node);
   return dds_node ? dds_node->count_publishers(topic_name, count) : RMW_RET_ERROR;
 }
 
@@ -34,7 +34,7 @@ rmw_count_subscribers(
   const char * topic_name,
   size_t * count)
 {
-  OpenDDSNode* dds_node = OpenDDSNode::get_from(node);
+  auto dds_node = OpenDDSNode::from(node);
   return dds_node ? dds_node->count_subscribers(topic_name, count) : RMW_RET_ERROR;
 }
 }  // extern "C"

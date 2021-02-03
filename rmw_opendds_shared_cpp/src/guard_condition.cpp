@@ -22,25 +22,24 @@
 
 #include "dds/DCPS/GuardCondition.h"
 
-rmw_guard_condition_t *
-create_guard_condition(const char * implementation_identifier)
+rmw_guard_condition_t * create_guard_condition()
 {
   rmw_guard_condition_t * guard_condition = rmw_guard_condition_allocate();
   if (!guard_condition) {
-    RMW_SET_ERROR_MSG("failed to allocate guard condition");
+    RMW_SET_ERROR_MSG("rmw_guard_condition_allocate failed");
     return NULL;
   }
   // Allocate memory for the DDSGuardCondition object.
   DDS::GuardCondition * dds_guard_condition = nullptr;
   void * buf = rmw_allocate(sizeof(DDS::GuardCondition));
   if (!buf) {
-    RMW_SET_ERROR_MSG("failed to allocate memory");
+    RMW_SET_ERROR_MSG("rmw_allocate failed for DDS::GuardCondition");
     goto fail;
   }
   // Use a placement new to construct the DDSGuardCondition in the preallocated buffer.
   RMW_TRY_PLACEMENT_NEW(dds_guard_condition, buf, goto fail, DDS::GuardCondition, )
   buf = nullptr;  // Only free the dds_guard_condition pointer; don't need the buf pointer anymore.
-  guard_condition->implementation_identifier = implementation_identifier;
+  guard_condition->implementation_identifier = opendds_identifier;
   guard_condition->data = dds_guard_condition;
   return guard_condition;
 fail:

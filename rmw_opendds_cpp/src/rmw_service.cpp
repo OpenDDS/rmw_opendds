@@ -98,9 +98,9 @@ rmw_create_service(
   const char * service_name,
   const rmw_qos_profile_t * qos_profile)
 {
-  auto dds_node = OpenDDSNode::get_from(node);
+  auto dds_node = OpenDDSNode::from(node);
   if (!dds_node) {
-    return nullptr; // error set in get_from
+    return nullptr; // error set
   }
   const rosidl_service_type_support_t * type_support = rmw_get_service_type_support(type_supports);
   if (!type_support) {

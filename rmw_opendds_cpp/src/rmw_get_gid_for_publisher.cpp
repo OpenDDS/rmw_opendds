@@ -12,27 +12,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "rmw_opendds_cpp/DDSPublisher.hpp"
+
 #include "rmw/error_handling.h"
 #include "rmw/impl/cpp/macros.hpp"
 #include "rmw/rmw.h"
-
-#include "rmw_opendds_cpp/opendds_static_publisher_info.hpp"
-#include "rmw_opendds_shared_cpp/identifier.hpp"
 
 extern "C"
 {
 rmw_ret_t
 rmw_get_gid_for_publisher(const rmw_publisher_t * publisher, rmw_gid_t * gid)
 {
-  auto publisher_info = OpenDDSStaticPublisherInfo::get_from(publisher);
-  if (!publisher_info) {
-    return RMW_RET_ERROR;
+  auto dds_pub = DDSPublisher::from(publisher);
+  if (!dds_pub) {
+    return RMW_RET_ERROR; // error set
   }
   if (!gid) {
     RMW_SET_ERROR_MSG("gid is null");
     return RMW_RET_ERROR;
   }
-  *gid = publisher_info->publisher_gid_;
+  *gid = dds_pub->gid();
   return RMW_RET_OK;
 }
 }  // extern "C"

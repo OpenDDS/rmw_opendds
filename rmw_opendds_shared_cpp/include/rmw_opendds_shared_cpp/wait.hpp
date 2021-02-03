@@ -15,21 +15,22 @@
 #ifndef RMW_OPENDDS_SHARED_CPP__WAIT_HPP_
 #define RMW_OPENDDS_SHARED_CPP__WAIT_HPP_
 
-#include <unordered_map>
-#include <unordered_set>
-#include <utility>
-
 #include "opendds_include.hpp"
+
+#include "rmw_opendds_shared_cpp/condition_error.hpp"
+#include "rmw_opendds_shared_cpp/event_converter.hpp"
+#include "rmw_opendds_shared_cpp/identifier.hpp"
+#include "rmw_opendds_shared_cpp/types.hpp"
+#include "rmw_opendds_shared_cpp/visibility_control.h"
+#include "rmw_opendds_shared_cpp/opendds_static_event_info.hpp"
 
 #include "rmw/error_handling.h"
 #include "rmw/impl/cpp/macros.hpp"
 #include "rmw/types.h"
 
-#include "rmw_opendds_shared_cpp/condition_error.hpp"
-#include "rmw_opendds_shared_cpp/event_converter.hpp"
-#include "rmw_opendds_shared_cpp/types.hpp"
-#include "rmw_opendds_shared_cpp/visibility_control.h"
-#include "rmw_opendds_shared_cpp/opendds_static_event_info.hpp"
+#include <unordered_map>
+#include <unordered_set>
+#include <utility>
 
 rmw_ret_t __handle_active_event_conditions(rmw_events_t* events)
 {
@@ -65,7 +66,6 @@ rmw_ret_t __handle_active_event_conditions(rmw_events_t* events)
 template<typename SubscriberInfo, typename ServiceInfo, typename ClientInfo>
 rmw_ret_t
 wait(
-  const char * implementation_identifier,
   rmw_subscriptions_t * subscriptions,
   rmw_guard_conditions_t * guard_conditions,
   rmw_services_t * services,
@@ -76,7 +76,7 @@ wait(
 {
   RMW_CHECK_ARGUMENT_FOR_NULL(wait_set, RMW_RET_ERROR);
   RMW_CHECK_TYPE_IDENTIFIERS_MATCH(wait_set, wait_set->implementation_identifier,
-    implementation_identifier, return RMW_RET_ERROR);
+    opendds_identifier, return RMW_RET_ERROR);
 
   auto wait_set_info = static_cast<OpenDDSWaitSetInfo *>(wait_set->data);
   RMW_CHECK_FOR_NULL_WITH_MSG(wait_set_info, "wait_set_info is null", return RMW_RET_ERROR);
@@ -115,11 +115,12 @@ wait(
         RMW_SET_ERROR_MSG("subscriber info is null");
         return RMW_RET_ERROR;
       }
-      if (!info->read_condition_) {
+      DDS::ReadCondition_var read_condition = info->read_condition();
+      if (!read_condition) {
         RMW_SET_ERROR_MSG("read condition is null");
         return RMW_RET_ERROR;
       }
-      rmw_ret_t ret = check_attach_condition_error(dds_wait_set.attach_condition(info->read_condition_));
+      rmw_ret_t ret = check_attach_condition_error(dds_wait_set.attach_condition(read_condition));
       if (ret != RMW_RET_OK) {
         return ret;
       }
@@ -198,14 +199,15 @@ wait(
         RMW_SET_ERROR_MSG("subscriber info is null");
         return RMW_RET_ERROR;
       }
-      if (!info->read_condition_) {
+      DDS::ReadCondition_var read_condition = info->read_condition();
+      if (!read_condition) {
         RMW_SET_ERROR_MSG("read condition is null");
         return RMW_RET_ERROR;
       }
 
       // reset the subscriber if its read_condition is not in the active set
       ::CORBA::ULong j = 0;
-      while (j < active_conditions.length() && active_conditions[j] != info->read_condition_) { ++j; }
+      while (j < active_conditions.length() && active_conditions[j] != read_condition) { ++j; }
       if (!(j < active_conditions.length())) {
         subscriptions->subscribers[i] = nullptr;
       }
