@@ -101,7 +101,7 @@ bool enable_security(const char * root, DDS::PropertySeq& props) {
 }
 #endif
 
-bool set_default_participant_qos(rmw_context_t & context, const char * name, const char * name_space)
+bool set_default_participant_qos(rmw_context_t & context, const char * name, const char * namespace_)
 {
   DDS::DomainParticipantQos qos;
   if (context.impl->dpf_->get_default_participant_qos(qos) != DDS::RETCODE_OK) {
@@ -109,10 +109,10 @@ bool set_default_participant_qos(rmw_context_t & context, const char * name, con
     return false;
   }
   // since participant name is not part of DDS spec, set node name in user_data
-  size_t length = strlen(name) + strlen("name=;") + strlen(name_space) + strlen("namespace=;") + 1;
+  size_t length = strlen(name) + strlen("name=;") + strlen(namespace_) + strlen("namespace=;") + 1;
   qos.user_data.value.length(static_cast<CORBA::Long>(length));
   int written = snprintf(reinterpret_cast<char *>(qos.user_data.value.get_buffer()),
-                         length, "name=%s;namespace=%s;", name, name_space);
+                         length, "name=%s;namespace=%s;", name, namespace_);
   if (written < 0 || written > static_cast<int>(length) - 1) {
     RMW_SET_ERROR_MSG("failed to populate user_data buffer");
     return false;
@@ -142,9 +142,9 @@ void clean_node(rmw_node_t * node)
 }
 
 rmw_node_t *
-create_node(rmw_context_t & context, const char * name, const char * name_space)
+create_node(rmw_context_t & context, const char * name, const char * namespace_)
 {
-  if (!set_default_participant_qos(context, name, name_space)) {
+  if (!set_default_participant_qos(context, name, namespace_)) {
     return nullptr;
   }
   rmw_node_t * node = nullptr;
@@ -163,7 +163,7 @@ create_node(rmw_context_t & context, const char * name, const char * name_space)
     if (!node->name) {
       throw std::runtime_error("node->name failed");
     }
-    node->namespace_ = RmwStr::cpy(name_space);
+    node->namespace_ = RmwStr::cpy(namespace_);
     if (!node->namespace_) {
       throw std::runtime_error("node->namespace_ failed");
     }

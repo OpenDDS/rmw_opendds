@@ -55,8 +55,9 @@ rmw_ret_t
 rmw_publish(
   const rmw_publisher_t * publisher,
   const void * ros_message,
-  rmw_publisher_allocation_t *)
+  rmw_publisher_allocation_t * allocation)
 {
+  ACE_UNUSED_ARG(allocation);
   auto dds_pub = DDSPublisher::from(publisher);
   if (!dds_pub) {
     return RMW_RET_ERROR; // error set
@@ -93,8 +94,9 @@ rmw_ret_t
 rmw_publish_serialized_message(
   const rmw_publisher_t * publisher,
   const rmw_serialized_message_t * serialized_message,
-  rmw_publisher_allocation_t *)
+  rmw_publisher_allocation_t * allocation)
 {
+  ACE_UNUSED_ARG(allocation);
   auto dds_pub = DDSPublisher::from(publisher);
   if (!dds_pub) {
     return RMW_RET_ERROR;

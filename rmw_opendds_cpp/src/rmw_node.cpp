@@ -26,18 +26,20 @@ rmw_node_t *
 rmw_create_node(
   rmw_context_t * context,
   const char * name,
-  const char * name_space,
-  size_t /* domain_id */,
-  bool /* localhost_only */)
+  const char * namespace_,
+  size_t domain_id,
+  bool localhost_only)
 {
+  ACE_UNUSED_ARG(domain_id);
+  ACE_UNUSED_ARG(localhost_only);
   RMW_CHECK_FOR_NULL_WITH_MSG(context, "context is null", NULL);
   if (!check_impl_id(context->implementation_identifier)) {
     return NULL;
   }
   RMW_CHECK_FOR_NULL_WITH_MSG(context->impl, "context->impl is null", NULL);
   RMW_CHECK_FOR_NULL_WITH_MSG(name, "node name is null", NULL);
-  RMW_CHECK_FOR_NULL_WITH_MSG(name_space, "node name_space is null", NULL);
-  return create_node(*context, name, name_space);
+  RMW_CHECK_FOR_NULL_WITH_MSG(namespace_, "node namespace_ is null", NULL);
+  return create_node(*context, name, namespace_);
 }
 
 rmw_ret_t

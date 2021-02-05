@@ -104,7 +104,7 @@ rmw_create_publisher(
 {
   auto dds_node = OpenDDSNode::from(node);
   if (!dds_node) {
-    return nullptr; // error set
+    return nullptr;
   }
   const rosidl_message_type_support_t * ts = rmw_get_message_type_support(type_supports);
   if (!ts) {
