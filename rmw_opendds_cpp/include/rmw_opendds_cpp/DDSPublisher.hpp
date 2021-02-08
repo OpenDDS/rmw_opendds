@@ -56,12 +56,12 @@ public:
 
   // Remap the OpenDDS DataWriter status to a generic RMW status
   rmw_ret_t get_status(const DDS::StatusMask mask, void * rmw_status) override;
-  // Return the reader associated with this publisher
+  // Return the writer associated with this publisher
   DDS::Entity * get() override { return writer_; }
 private:
   friend Raf;
   DDSPublisher(DDS::DomainParticipant_var dp, const rosidl_message_type_support_t & ros_ts,
-                const char * topic_name, const rmw_qos_profile_t & rmw_qos);
+               const char * topic_name, const rmw_qos_profile_t & rmw_qos);
   ~DDSPublisher() { cleanup(); }
   void cleanup();
 
