@@ -16,6 +16,7 @@
 #include "rmw/impl/cpp/macros.hpp"
 #include "rmw/types.h"
 
+#include "rmw_opendds_shared_cpp/identifier.hpp"
 #include "rmw_opendds_shared_cpp/opendds_include.hpp"
 #include "rmw_opendds_shared_cpp/trigger_guard_condition.hpp"
 #include "rmw_opendds_shared_cpp/types.hpp"
@@ -23,9 +24,7 @@
 #include "dds/DCPS/GuardCondition.h"
 
 rmw_ret_t
-trigger_guard_condition(
-  const char * implementation_identifier,
-  const rmw_guard_condition_t * guard_condition_handle)
+trigger_guard_condition(const rmw_guard_condition_t * guard_condition_handle)
 {
   if (!guard_condition_handle) {
     RMW_SET_ERROR_MSG("guard condition handle is null");
@@ -33,7 +32,7 @@ trigger_guard_condition(
   }
   RMW_CHECK_TYPE_IDENTIFIERS_MATCH(
     guard condition handle,
-    guard_condition_handle->implementation_identifier, implementation_identifier,
+    guard_condition_handle->implementation_identifier, opendds_identifier,
     return RMW_RET_ERROR)
 
   DDS::GuardCondition * guard_condition =

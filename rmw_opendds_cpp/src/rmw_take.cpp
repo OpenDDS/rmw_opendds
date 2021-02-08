@@ -12,63 +12,49 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <limits>
+// include patched generated code from the build folder
+#include "opendds_static_serialized_dataTypeSupportC.h"
+#include "rmw_opendds_cpp/DDSSubscriber.hpp"
+#include "rmw_opendds_shared_cpp/identifier.hpp"
+#include "rmw_opendds_shared_cpp/types.hpp"
 
 #include "rmw/error_handling.h"
 #include "rmw/impl/cpp/macros.hpp"
 #include "rmw/types.h"
 
-#include "rmw_opendds_shared_cpp/types.hpp"
+#include <limits>
 
-#include "rmw_opendds_cpp/opendds_static_subscriber_info.hpp"
-#include "rmw_opendds_shared_cpp/identifier.hpp"
-
-// include patched generated code from the build folder
-#include "opendds_static_serialized_dataTypeSupportC.h"
+static const size_t buffer_max = (std::numeric_limits<CORBA::ULong>::max)();
 
 static rmw_ret_t
 take(
-  const rmw_subscription_t * subscription,
+  DDSSubscriber & dds_sub,
   rmw_serialized_message_t * cdr_stream,
-  bool * taken,
+  bool & taken,
   rmw_message_info_t * message_info)
 {
-  RMW_CHECK_FOR_NULL_WITH_MSG(subscription, "subscription is null", return RMW_RET_ERROR);
-  RMW_CHECK_TYPE_IDENTIFIERS_MATCH(subscription handle,
-    subscription->implementation_identifier, opendds_identifier, return RMW_RET_ERROR)
-
-  auto info = static_cast<OpenDDSStaticSubscriberInfo *>(subscription->data);
-  RMW_CHECK_FOR_NULL_WITH_MSG(info, "subscriber info is null", return RMW_RET_ERROR);
-  RMW_CHECK_FOR_NULL_WITH_MSG(info->topic_reader_, "topic_reader_ is null", return RMW_RET_ERROR);
-  RMW_CHECK_FOR_NULL_WITH_MSG(info->callbacks_, "callbacks_ is null", return RMW_RET_ERROR);
-
   RMW_CHECK_FOR_NULL_WITH_MSG(cdr_stream, "cdr_stream is null", return RMW_RET_ERROR);
-  RMW_CHECK_FOR_NULL_WITH_MSG(taken, "taken is null", return RMW_RET_ERROR);
-  *taken = false;
-
-  OpenDDSStaticSerializedDataDataReader_var reader =
-    OpenDDSStaticSerializedDataDataReader::_narrow(info->topic_reader_);
+  taken = false;
+  OpenDDSStaticSerializedDataDataReader_var reader = OpenDDSStaticSerializedDataDataReader::_narrow(dds_sub.get());
   if (!reader) {
     RMW_SET_ERROR_MSG("failed to narrow data reader");
     return RMW_RET_ERROR;
   }
 
-  OpenDDSStaticSerializedDataSeq dds_messages;
-  DDS::SampleInfoSeq sample_infos;
-  DDS::ReturnCode_t status = reader->take(dds_messages, sample_infos, 1,
-    DDS::ANY_SAMPLE_STATE, DDS::ANY_VIEW_STATE, DDS::ANY_INSTANCE_STATE);
-
-  if (DDS::RETCODE_OK == status) {
-    DDS::SampleInfo & info = sample_infos[0];
+  OpenDDSStaticSerializedDataSeq msgs;
+  DDS::SampleInfoSeq infos;
+  DDS::ReturnCode_t rc = reader->take(msgs, infos, 1, DDS::ANY_SAMPLE_STATE, DDS::ANY_VIEW_STATE, DDS::ANY_INSTANCE_STATE);
+  if (DDS::RETCODE_OK == rc) {
+    DDS::SampleInfo & info = infos[0];
     if (info.valid_data) {
-      const size_t length = dds_messages[0].serialized_data.length();
-      if (length <= (std::numeric_limits<unsigned int>::max)()) {
+      const size_t length = msgs[0].serialized_data.length();
+      if (length <= buffer_max) {
         cdr_stream->buffer_length = length;
         cdr_stream->buffer_capacity = length;
         cdr_stream->buffer = (uint8_t *)cdr_stream->allocator.allocate(length, cdr_stream->allocator.state);
         if (cdr_stream->buffer) {
-          std::memcpy(cdr_stream->buffer, dds_messages[0].serialized_data.get_buffer(), length);
-          *taken = true;
+          std::memcpy(cdr_stream->buffer, msgs[0].serialized_data.get_buffer(), length);
+          taken = true;
 
           if (message_info) {
             message_info->publisher_gid.implementation_identifier = opendds_identifier;
@@ -80,15 +66,15 @@ take(
           RMW_SET_ERROR_MSG("failed to allocate memory for uint8 array");
         }
       } else {
-        RMW_SET_ERROR_MSG("dds message length > max unsigned int");
+        RMW_SET_ERROR_MSG("dds message length > buffer_max");
       }
     }
-  } else if (DDS::RETCODE_NO_DATA != status) {
+  } else if (DDS::RETCODE_NO_DATA != rc) {
     RMW_SET_ERROR_MSG("take failed");
   }
 
-  reader->return_loan(dds_messages, sample_infos);
-  return (*taken || DDS::RETCODE_NO_DATA == status) ? RMW_RET_OK : RMW_RET_ERROR;
+  reader->return_loan(msgs, infos);
+  return (taken || DDS::RETCODE_NO_DATA == rc) ? RMW_RET_OK : RMW_RET_ERROR;
 }
 
 rmw_ret_t
@@ -99,16 +85,16 @@ take(
   rmw_message_info_t * message_info)
 {
   RMW_CHECK_FOR_NULL_WITH_MSG(ros_message, "ros_message is null", return RMW_RET_ERROR);
+  auto dds_sub = DDSSubscriber::from(subscription);
+  if (!dds_sub) {
+    return RMW_RET_ERROR;
+  }
+  RMW_CHECK_FOR_NULL_WITH_MSG(taken, "taken is null", return RMW_RET_ERROR);
   rcutils_uint8_array_t cdr_stream = {nullptr, 0lu, 0lu, rcutils_get_default_allocator()};
-  rmw_ret_t ret = take(subscription, &cdr_stream, taken, message_info);
+  rmw_ret_t ret = take(*dds_sub, &cdr_stream, *taken, message_info);
   if (RMW_RET_OK == ret) {
-    if (*taken) {
-      auto info = static_cast<OpenDDSStaticSubscriberInfo *>(subscription->data);
-      // convert the cdr stream to the message
-      if (!info->callbacks_->to_message(&cdr_stream, ros_message)) {
-        RMW_SET_ERROR_MSG("can't convert cdr stream to ros message");
-        ret = RMW_RET_ERROR;
-      }
+    if (taken) {
+      ret = dds_sub->to_ros_message(cdr_stream, ros_message);
       cdr_stream.allocator.deallocate(cdr_stream.buffer, cdr_stream.allocator.state);
     }
   }
@@ -122,7 +108,7 @@ rmw_take(
   const rmw_subscription_t * subscription,
   void * ros_message,
   bool * taken,
-  rmw_subscription_allocation_t * allocation)
+  rmw_subscription_allocation_t *)
 {
   return take(ros_message, subscription, taken, nullptr);
 }
@@ -133,7 +119,7 @@ rmw_take_with_info(
   void * ros_message,
   bool * taken,
   rmw_message_info_t * message_info,
-  rmw_subscription_allocation_t* allocation)
+  rmw_subscription_allocation_t *)
 {
   RMW_CHECK_FOR_NULL_WITH_MSG(message_info, "message info is null", return RMW_RET_ERROR);
   return take(ros_message, subscription, taken, message_info);
@@ -144,9 +130,13 @@ rmw_take_serialized_message(
   const rmw_subscription_t * subscription,
   rmw_serialized_message_t * serialized_msg,
   bool * taken,
-  rmw_subscription_allocation_t * allocation)
+  rmw_subscription_allocation_t *)
 {
-  return take(subscription, serialized_msg, taken, nullptr);
+  auto dds_sub = DDSSubscriber::from(subscription);
+  if (!dds_sub) {
+    return RMW_RET_ERROR;
+  }
+  return take(*dds_sub, serialized_msg, *taken, nullptr);
 }
 
 rmw_ret_t
@@ -155,10 +145,14 @@ rmw_take_serialized_message_with_info(
   rmw_serialized_message_t * serialized_msg,
   bool * taken,
   rmw_message_info_t * message_info,
-  rmw_subscription_allocation_t * allocation)
+  rmw_subscription_allocation_t *)
 {
+  auto dds_sub = DDSSubscriber::from(subscription);
+  if (!dds_sub) {
+    return RMW_RET_ERROR;
+  }
   RMW_CHECK_FOR_NULL_WITH_MSG(message_info, "message info is null", return RMW_RET_ERROR);
-  return take(subscription, serialized_msg, taken, message_info);
+  return take(*dds_sub, serialized_msg, *taken, message_info);
 }
 
 rmw_ret_t

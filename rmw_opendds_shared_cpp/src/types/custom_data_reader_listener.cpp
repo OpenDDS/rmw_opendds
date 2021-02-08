@@ -82,7 +82,7 @@ void CustomDataReaderListener::trigger_graph_guard_condition()
 #ifdef DISCOVERY_DEBUG_LOGGING
   printf("graph guard condition triggered...\n");
 #endif
-  rmw_ret_t ret = trigger_guard_condition(implementation_identifier_, graph_guard_condition_);
+  rmw_ret_t ret = trigger_guard_condition(graph_guard_condition_);
   if (ret != RMW_RET_OK) {
     fprintf(stderr, "failed to trigger graph guard condition: %s\n", rmw_get_error_string().str);
   }

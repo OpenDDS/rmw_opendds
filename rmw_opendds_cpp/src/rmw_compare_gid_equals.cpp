@@ -26,39 +26,33 @@ rmw_compare_gids_equal(const rmw_gid_t * gid1, const rmw_gid_t * gid2, bool * re
 {
   if (!gid1) {
     RMW_SET_ERROR_MSG("gid1 is null");
-    return RMW_RET_ERROR;
+    return RMW_RET_INVALID_ARGUMENT;
   }
-  RMW_CHECK_TYPE_IDENTIFIERS_MATCH(
-    gid1,
-    gid1->implementation_identifier,
-    opendds_identifier,
-    return RMW_RET_ERROR)
   if (!gid2) {
     RMW_SET_ERROR_MSG("gid2 is null");
-    return RMW_RET_ERROR;
+    return RMW_RET_INVALID_ARGUMENT;
   }
-  RMW_CHECK_TYPE_IDENTIFIERS_MATCH(
-    gid2,
-    gid2->implementation_identifier,
-    opendds_identifier,
-    return RMW_RET_ERROR)
   if (!result) {
     RMW_SET_ERROR_MSG("result is null");
-    return RMW_RET_ERROR;
+    return RMW_RET_INVALID_ARGUMENT;
+  }
+  if (!check_impl_id(gid1->implementation_identifier)) {
+    return RMW_RET_INCORRECT_RMW_IMPLEMENTATION;
+  }
+  if (!check_impl_id(gid2->implementation_identifier)) {
+    return RMW_RET_INCORRECT_RMW_IMPLEMENTATION;
   }
   auto detail1 = reinterpret_cast<const OpenDDSPublisherGID *>(gid1->data);
   if (!detail1) {
     RMW_SET_ERROR_MSG("gid1 is invalid");
-    return RMW_RET_ERROR;
+    return RMW_RET_INVALID_ARGUMENT;
   }
   auto detail2 = reinterpret_cast<const OpenDDSPublisherGID *>(gid2->data);
   if (!detail2) {
     RMW_SET_ERROR_MSG("gid2 is invalid");
-    return RMW_RET_ERROR;
+    return RMW_RET_INVALID_ARGUMENT;
   }
-  auto matches =
-    detail1->publication_handle == detail2->publication_handle;
-  *result = (matches == true);
+  *result = (detail1->publication_handle == detail2->publication_handle);
   return RMW_RET_OK;
 }
 }  // extern "C"

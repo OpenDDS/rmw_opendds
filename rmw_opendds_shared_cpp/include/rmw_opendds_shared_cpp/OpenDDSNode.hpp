@@ -24,7 +24,7 @@ class OpenDDSNode
 {
 public:
   typedef RmwAllocateFree<OpenDDSNode> Raf;
-  static OpenDDSNode * get_from(const rmw_node_t * node);
+  static OpenDDSNode * from(const rmw_node_t * node);
   const rmw_guard_condition_t * get_guard_condition() const { return gc_; }
   bool assert_liveliness() const { return dp_->assert_liveliness() == DDS::RETCODE_OK; }
   DDS::DomainParticipant_var dp() { return dp_; }

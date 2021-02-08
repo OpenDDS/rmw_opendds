@@ -15,13 +15,12 @@
 #include "rmw/rmw.h"
 
 #include "rmw_opendds_shared_cpp/trigger_guard_condition.hpp"
-#include "rmw_opendds_shared_cpp/identifier.hpp"
 
 extern "C"
 {
 rmw_ret_t
 rmw_trigger_guard_condition(const rmw_guard_condition_t * guard_condition_handle)
 {
-  return trigger_guard_condition(opendds_identifier, guard_condition_handle);
+  return trigger_guard_condition(guard_condition_handle);
 }
 }  // extern "C"

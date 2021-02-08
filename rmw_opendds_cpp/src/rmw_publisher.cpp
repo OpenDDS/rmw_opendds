@@ -12,7 +12,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <string>
+#include "rmw_opendds_cpp/DDSPublisher.hpp"
+#include "process_topic_and_service_names.hpp"
+#include "type_support_common.hpp"
+#include "opendds_static_serialized_dataTypeSupportImpl.h"
+
+#include "rmw_opendds_shared_cpp/identifier.hpp"
+#include "rmw_opendds_shared_cpp/OpenDDSNode.hpp"
+#include "rmw_opendds_shared_cpp/qos.hpp"
+#include "rmw_opendds_shared_cpp/types.hpp"
+
+// Uncomment this to get extra console output about discovery.
+// This affects code in this file, but there is a similar variable in:
+//   rmw_opendds_shared_cpp/shared_functions.cpp
+// #define DISCOVERY_DEBUG_LOGGING 1
+
+#include <dds/DCPS/DataWriterImpl_T.h>
+#include <dds/DCPS/DomainParticipantImpl.h>
+#include <dds/DCPS/Marked_Default_Qos.h>
 
 #include "rmw/allocators.h"
 #include "rmw/error_handling.h"
@@ -20,24 +37,7 @@
 #include "rmw/rmw.h"
 #include "rmw/types.h"
 
-#include "rmw_opendds_shared_cpp/qos.hpp"
-#include "rmw_opendds_shared_cpp/types.hpp"
-#include "rmw_opendds_shared_cpp/identifier.hpp"
-
-#include "process_topic_and_service_names.hpp"
-#include "type_support_common.hpp"
-#include "rmw_opendds_cpp/opendds_static_publisher_info.hpp"
-
-#include "opendds_static_serialized_dataTypeSupportImpl.h"
-#include <dds/DCPS/DataWriterImpl_T.h>
-
-// Uncomment this to get extra console output about discovery.
-// This affects code in this file, but there is a similar variable in:
-//   rmw_opendds_shared_cpp/shared_functions.cpp
-// #define DISCOVERY_DEBUG_LOGGING 1
-
-#include <dds/DCPS/Marked_Default_Qos.h>
-#include <dds/DCPS/DomainParticipantImpl.h>
+#include <string>
 
 extern "C"
 {
@@ -67,9 +67,9 @@ rmw_fini_publisher_allocation(rmw_publisher_allocation_t * allocation)
 void clean_publisher(rmw_publisher_t * publisher)
 {
   if (publisher) {
-    auto info = static_cast<OpenDDSStaticPublisherInfo*>(publisher->data);
-    if (info) {
-      OpenDDSStaticPublisherInfo::Raf::destroy(info);
+    auto dds_pub = static_cast<DDSPublisher*>(publisher->data);
+    if (dds_pub) {
+      DDSPublisher::Raf::destroy(dds_pub);
       publisher->data = nullptr;
     }
     rmw_publisher_free(publisher);
@@ -102,9 +102,9 @@ rmw_create_publisher(
   const rmw_qos_profile_t * rmw_qos,
   const rmw_publisher_options_t * publisher_options)
 {
-  auto dds_node = OpenDDSNode::get_from(node);
+  auto dds_node = OpenDDSNode::from(node);
   if (!dds_node) {
-    return nullptr; // error set in get_from
+    return nullptr;
   }
   const rosidl_message_type_support_t * ts = rmw_get_message_type_support(type_supports);
   if (!ts) {
@@ -118,14 +118,14 @@ rmw_create_publisher(
   rmw_publisher_t * publisher = nullptr;
   try {
     publisher = create_initial_publisher(publisher_options);
-    auto pub_i = OpenDDSStaticPublisherInfo::Raf::create(dds_node->dp(), *ts, topic_name, *rmw_qos);
+    auto pub_i = DDSPublisher::Raf::create(dds_node->dp(), *ts, topic_name, *rmw_qos);
     if (!pub_i) {
-      throw std::runtime_error("OpenDDSStaticPublisherInfo failed");
+      throw std::runtime_error("DDSPublisher failed");
     }
     publisher->data = pub_i;
     publisher->topic_name = pub_i->topic_name_.c_str();
 
-    dds_node->add_pub(pub_i->publisher_->get_instance_handle(), pub_i->topic_name_, pub_i->type_name_);
+    dds_node->add_pub(pub_i->instance_handle(), pub_i->topic_name_, pub_i->type_name_);
     return publisher;
   } catch (const std::exception& e) {
     RMW_SET_ERROR_MSG(e.what());
@@ -141,29 +141,16 @@ rmw_publisher_count_matched_subscriptions(
   const rmw_publisher_t * publisher,
   size_t * subscription_count)
 {
-  if (!publisher) {
-    RMW_SET_ERROR_MSG("publisher is null");
-    return RMW_RET_INVALID_ARGUMENT;
-  }
-
   if (!subscription_count) {
     RMW_SET_ERROR_MSG("subscription_count is null");
     return RMW_RET_INVALID_ARGUMENT;
   }
-
-  auto info = static_cast<OpenDDSStaticPublisherInfo *>(publisher->data);
-  if (!info) {
-    RMW_SET_ERROR_MSG("publisher info is null");
-    return RMW_RET_ERROR;
+  auto dds_pub = DDSPublisher::from(publisher);
+  if (dds_pub) {
+    *subscription_count = dds_pub->matched_subscribers();
+    return RMW_RET_OK;
   }
-  if (!info->listener_) {
-    RMW_SET_ERROR_MSG("publisher listener is null");
-    return RMW_RET_ERROR;
-  }
-
-  *subscription_count = info->listener_->current_count();
-
-  return RMW_RET_OK;
+  return RMW_RET_ERROR;
 }
 
 rmw_ret_t
@@ -171,27 +158,12 @@ rmw_publisher_get_actual_qos(
   const rmw_publisher_t * publisher,
   rmw_qos_profile_t * qos)
 {
-  RMW_CHECK_ARGUMENT_FOR_NULL(publisher, RMW_RET_INVALID_ARGUMENT);
-  RMW_CHECK_ARGUMENT_FOR_NULL(qos, RMW_RET_INVALID_ARGUMENT);
-
-  auto info = static_cast<OpenDDSStaticPublisherInfo*>(publisher->data);
-  if (!info) {
-    RMW_SET_ERROR_MSG("publisher info is null");
-    return RMW_RET_ERROR;
+  if (!qos) {
+    RMW_SET_ERROR_MSG("qos is null");
+    return RMW_RET_INVALID_ARGUMENT;
   }
-  if (!info->writer_) {
-    RMW_SET_ERROR_MSG("publisher writer is null");
-    return RMW_RET_ERROR;
-  }
-  DDS::DataWriterQos dds_qos;
-  DDS::ReturnCode_t status = info->writer_->get_qos(dds_qos);
-  if (DDS::RETCODE_OK != status) {
-    RMW_SET_ERROR_MSG("publisher writer get_qos failed");
-    return RMW_RET_ERROR;
-  }
-  dds_qos_to_rmw_qos(dds_qos, *qos);
-
-  return RMW_RET_OK;
+  auto dds_pub = DDSPublisher::from(publisher);
+  return dds_pub ? dds_pub->get_rmw_qos(*qos) : RMW_RET_ERROR;
 }
 
 rmw_ret_t
@@ -247,19 +219,33 @@ rmw_return_loaned_message_from_publisher(
 rmw_ret_t
 rmw_destroy_publisher(rmw_node_t * node, rmw_publisher_t * publisher)
 {
-  OpenDDSNode* dds_node = OpenDDSNode::get_from(node);
+  auto dds_node = OpenDDSNode::from(node);
   if (!dds_node) {
-    return RMW_RET_ERROR; // error set in get_from
+    return RMW_RET_ERROR; // error set
   }
-  auto publisher_info = OpenDDSStaticPublisherInfo::get_from(publisher);
-  if (!publisher_info) {
-    return RMW_RET_ERROR; // error set in get_from
+  auto dds_pub = DDSPublisher::from(publisher);
+  if (!dds_pub) {
+    return RMW_RET_ERROR; // error set
   }
-
-  bool ret = dds_node->remove_pub(publisher_info->publisher_->get_instance_handle());
+  bool ret = dds_node->remove_pub(dds_pub->instance_handle());
   if (ret) {
     clean_publisher(publisher);
   }
   return ret ? RMW_RET_OK : RMW_RET_ERROR;
+}
+
+rmw_ret_t
+rmw_get_gid_for_publisher(const rmw_publisher_t * publisher, rmw_gid_t * gid)
+{
+  auto dds_pub = DDSPublisher::from(publisher);
+  if (!dds_pub) {
+    return RMW_RET_ERROR; // error set
+  }
+  if (!gid) {
+    RMW_SET_ERROR_MSG("gid is null");
+    return RMW_RET_ERROR;
+  }
+  *gid = dds_pub->gid();
+  return RMW_RET_OK;
 }
 }  // extern "C"
