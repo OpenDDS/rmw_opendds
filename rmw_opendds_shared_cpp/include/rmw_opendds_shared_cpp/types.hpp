@@ -135,20 +135,6 @@ public:
   virtual void on_data_available(DDS::DataReader * reader);
 };
 
-// to be removed
-struct OpenDDSNodeInfo
-{
-  DDS::DomainParticipant_var participant;
-  CustomPublisherListener * publisher_listener;
-  CustomSubscriberListener * subscriber_listener;
-  rmw_guard_condition_t * graph_guard_condition;
-  OpenDDSNodeInfo() :
-    participant(nullptr),
-    publisher_listener(nullptr),
-    subscriber_listener(nullptr),
-    graph_guard_condition(nullptr) {}
-};
-
 struct OpenDDSPublisherGID
 {
   DDS::InstanceHandle_t publication_handle;

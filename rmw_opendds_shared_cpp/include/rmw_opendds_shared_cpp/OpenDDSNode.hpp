@@ -27,6 +27,8 @@ public:
   static OpenDDSNode * from(const rmw_node_t * node);
   const rmw_guard_condition_t * get_guard_condition() const { return gc_; }
   bool assert_liveliness() const { return dp_->assert_liveliness() == DDS::RETCODE_OK; }
+  CustomPublisherListener * pub_listener() const { return pub_listener_; }
+  CustomSubscriberListener * sub_listener() const { return sub_listener_; }
   DDS::DomainParticipant_var dp() { return dp_; }
   void add_pub(const DDS::InstanceHandle_t & pub, const std::string & topic_name, const std::string & type_name);
   void add_sub(const DDS::InstanceHandle_t & sub, const std::string & topic_name, const std::string & type_name);

@@ -17,7 +17,6 @@
 #include "rmw/rmw.h"
 
 #include "rmw_opendds_shared_cpp/service_names_and_types.hpp"
-#include "rmw_opendds_shared_cpp/identifier.hpp"
 
 extern "C"
 {
@@ -28,7 +27,6 @@ rmw_get_service_names_and_types(
   rmw_names_and_types_t * service_names_and_types)
 {
   return get_service_names_and_types(
-    opendds_identifier,
     node,
     allocator,
     service_names_and_types);

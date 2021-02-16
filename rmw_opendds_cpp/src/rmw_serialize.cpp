@@ -30,7 +30,7 @@ rmw_serialize(
 {
   const rosidl_message_type_support_t * ts = rmw_get_message_type_support(type_support);
   if (!ts) {
-    return NULL;
+    return RMW_RET_ERROR;
   }
 
   const message_type_support_callbacks_t * callbacks =
@@ -56,7 +56,7 @@ rmw_deserialize(
 {
   const rosidl_message_type_support_t * ts = rmw_get_message_type_support(type_support);
   if (!ts) {
-    return NULL;
+    return RMW_RET_ERROR;
   }
 
   const message_type_support_callbacks_t * callbacks =

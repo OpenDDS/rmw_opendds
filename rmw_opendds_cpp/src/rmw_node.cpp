@@ -12,16 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "rmw_opendds_shared_cpp/OpenDDSNode.hpp"
+#include "rmw_opendds_shared_cpp/node.hpp"
+#include "rmw_opendds_shared_cpp/identifier.hpp"
+
 #include "rmw/error_handling.h"
 #include "rmw/impl/cpp/macros.hpp"
 #include "rmw/rmw.h"
 
-#include "rmw_opendds_shared_cpp/node.hpp"
-#include "rmw_opendds_shared_cpp/identifier.hpp"
-#include "rmw_opendds_shared_cpp/OpenDDSNode.hpp"
-
 extern "C"
 {
+
 rmw_node_t *
 rmw_create_node(
   rmw_context_t * context,
@@ -65,4 +66,25 @@ rmw_node_get_graph_guard_condition(const rmw_node_t * node)
   auto dds_node = OpenDDSNode::from(node);
   return dds_node ? dds_node->get_guard_condition() : nullptr;
 }
+
+rmw_ret_t
+rmw_count_publishers(
+  const rmw_node_t * node,
+  const char * topic_name,
+  size_t * count)
+{
+  auto dds_node = OpenDDSNode::from(node);
+  return dds_node ? dds_node->count_publishers(topic_name, count) : RMW_RET_ERROR;
+}
+
+rmw_ret_t
+rmw_count_subscribers(
+  const rmw_node_t * node,
+  const char * topic_name,
+  size_t * count)
+{
+  auto dds_node = OpenDDSNode::from(node);
+  return dds_node ? dds_node->count_subscribers(topic_name, count) : RMW_RET_ERROR;
+}
+
 }  // extern "C"

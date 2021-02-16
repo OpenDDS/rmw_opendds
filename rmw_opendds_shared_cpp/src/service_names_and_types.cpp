@@ -28,50 +28,31 @@
 #include "rmw_opendds_shared_cpp/names_and_types_helpers.hpp"
 #include "rmw_opendds_shared_cpp/opendds_include.hpp"
 #include "rmw_opendds_shared_cpp/service_names_and_types.hpp"
-#include "rmw_opendds_shared_cpp/types.hpp"
+#include <rmw_opendds_shared_cpp/OpenDDSNode.hpp>
 
 rmw_ret_t
 get_service_names_and_types(
-  const char * implementation_identifier,
   const rmw_node_t * node,
   rcutils_allocator_t * allocator,
   rmw_names_and_types_t * service_names_and_types)
 {
+  auto dds_node = OpenDDSNode::from(node);
+  if (!dds_node) {
+    return RMW_RET_ERROR;
+  }
   if (!allocator) {
     RMW_SET_ERROR_MSG("allocator is null");
     return RMW_RET_INVALID_ARGUMENT;
-  }
-  if (!node) {
-    RMW_SET_ERROR_MSG("null node handle");
-    return RMW_RET_INVALID_ARGUMENT;
-  }
-  if (node->implementation_identifier != implementation_identifier) {
-    RMW_SET_ERROR_MSG("node handle is not from this rmw implementation");
-    return RMW_RET_ERROR;
   }
   rmw_ret_t ret = rmw_names_and_types_check_zero(service_names_and_types);
   if (ret != RMW_RET_OK) {
     return ret;
   }
 
-  auto node_info = static_cast<OpenDDSNodeInfo *>(node->data);
-  if (!node_info) {
-    RMW_SET_ERROR_MSG("node info handle is null");
-    return RMW_RET_ERROR;
-  }
-  if (!node_info->publisher_listener) {
-    RMW_SET_ERROR_MSG("publisher listener handle is null");
-    return RMW_RET_ERROR;
-  }
-  if (!node_info->subscriber_listener) {
-    RMW_SET_ERROR_MSG("subscriber listener handle is null");
-    return RMW_RET_ERROR;
-  }
-
   // combine publisher and subscriber information
   std::map<std::string, std::set<std::string>> services;
-  node_info->publisher_listener->fill_service_names_and_types(services);
-  node_info->subscriber_listener->fill_service_names_and_types(services);
+  dds_node->pub_listener()->fill_service_names_and_types(services);
+  dds_node->sub_listener()->fill_service_names_and_types(services);
 
   // Fill out service_names_and_types
   if (!services.empty()) {

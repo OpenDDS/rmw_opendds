@@ -12,15 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// include patched generated code from the build folder
-#include "opendds_static_serialized_dataTypeSupportC.h"
-#include "rmw_opendds_cpp/DDSSubscriber.hpp"
-#include "rmw_opendds_shared_cpp/identifier.hpp"
-#include "rmw_opendds_shared_cpp/types.hpp"
+#include <rmw_opendds_shared_cpp/DDSSubscriber.hpp>
+#include <rmw_opendds_shared_cpp/identifier.hpp>
+#include <rmw_opendds_shared_cpp/types.hpp>
 
-#include "rmw/error_handling.h"
-#include "rmw/impl/cpp/macros.hpp"
-#include "rmw/types.h"
+#include <rmw/error_handling.h>
+#include <rmw/impl/cpp/macros.hpp>
+#include <rmw/types.h>
 
 #include <limits>
 
@@ -35,7 +33,7 @@ take(
 {
   RMW_CHECK_FOR_NULL_WITH_MSG(cdr_stream, "cdr_stream is null", return RMW_RET_ERROR);
   taken = false;
-  OpenDDSStaticSerializedDataDataReader_var reader = OpenDDSStaticSerializedDataDataReader::_narrow(dds_sub.get());
+  OpenDDSStaticSerializedDataDataReader_var reader = OpenDDSStaticSerializedDataDataReader::_narrow(dds_sub.get_entity());
   if (!reader) {
     RMW_SET_ERROR_MSG("failed to narrow data reader");
     return RMW_RET_ERROR;

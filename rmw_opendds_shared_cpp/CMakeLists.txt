@@ -13,7 +13,6 @@ endif()
 
 find_package(ament_cmake REQUIRED)
 find_package(opendds_cmake_module REQUIRED)
-
 find_package(OpenDDS QUIET)
 
 if(NOT OpenDDS_FOUND)
@@ -21,6 +20,7 @@ if(NOT OpenDDS_FOUND)
   message(WARNING "Could not find OpenDDS - skipping '${PROJECT_NAME}'")
   return()
 endif()
+
 find_package(rcutils REQUIRED)
 
 # rcutils package changes CXX standard to 11
@@ -28,7 +28,23 @@ if(${CMAKE_CXX_STANDARD} LESS 14)
   set(CMAKE_CXX_STANDARD 14)
 endif()
 
+find_package(rosidl_typesupport_opendds_c)
+if(NOT rosidl_typesupport_opendds_c_FOUND)
+  ament_package()
+  message(WARNING "Could not find ROSIDL TypeSupport for OpenDDS (rosidl_typesupport_opendds_c) - skipping '${PROJECT_NAME}'")
+  return()
+endif()
+
+find_package(rosidl_typesupport_opendds_cpp)
+if(NOT rosidl_typesupport_opendds_cpp_FOUND)
+  ament_package()
+  message(WARNING "Could not find ROSIDL TypeSupport for OpenDDS (rosidl_typesupport_opendds_cpp) - skipping '${PROJECT_NAME}'")
+  return()
+endif()
+
 find_package(rmw REQUIRED)
+find_package(rosidl_generator_c REQUIRED)
+find_package(rosidl_generator_cpp REQUIRED)
 
 set(opendds_libs_1
   OpenDDS::Rtps_Udp
@@ -36,13 +52,26 @@ set(opendds_libs_1
 
 include_directories(include)
 ament_export_include_directories(include)
-ament_export_dependencies(rmw)
+ament_export_dependencies(
+  rmw
+  rosidl_generator_c
+  rosidl_generator_cpp
+  rosidl_typesupport_opendds_c
+  rosidl_typesupport_opendds_cpp)
+
+register_rmw_implementation(
+  "c:rosidl_typesupport_c:rosidl_typesupport_opendds_c"
+  "cpp:rosidl_typesupport_cpp:rosidl_typesupport_opendds_cpp"
+)
 
 add_library(
   rmw_opendds_shared_cpp
   SHARED
+  src/DDSPublisher.cpp
+  src/DDSSubscriber.cpp
+  src/DDSServer.cpp
+  src/DDSClient.cpp
   src/condition_error.cpp
-  src/count.cpp
   src/demangle.cpp
   src/event.cpp
   src/event_converter.cpp
@@ -57,6 +86,8 @@ add_library(
   src/names_and_types_helpers.cpp
   src/node_info_and_types.cpp
   src/service_names_and_types.cpp
+  src/Service.cpp
+  src/DDSTopic.cpp
   src/topic_names_and_types.cpp
   src/trigger_guard_condition.cpp
   src/wait_set.cpp
@@ -65,11 +96,17 @@ add_library(
   src/types/custom_subscriber_listener.cpp
   src/topic_endpoint_info.cpp)
 
+OPENDDS_TARGET_SOURCES(rmw_opendds_shared_cpp resources/opendds_static_serialized_data.idl TAO_IDL_OPTIONS "-Sa -St")
 target_link_libraries(rmw_opendds_shared_cpp ${opendds_libs_1})
 
 ament_target_dependencies(rmw_opendds_shared_cpp
   "rcutils"
-  "rmw")
+  "rmw"
+  "rosidl_generator_c"
+  "rosidl_generator_cpp"
+  "rosidl_typesupport_opendds_c"
+  "rosidl_typesupport_opendds_cpp")
+
 ament_export_libraries(rmw_opendds_shared_cpp ${opendds_libs_1})
 
 if(WIN32)

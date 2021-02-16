@@ -24,6 +24,7 @@
 #include "rmw_opendds_shared_cpp/namespace_prefix.hpp"
 #include "rmw_opendds_shared_cpp/topic_endpoint_info.hpp"
 #include "rmw_opendds_shared_cpp/types.hpp"
+#include <rmw_opendds_shared_cpp/OpenDDSNode.hpp>
 
 #include <dds/DCPS/DomainParticipantImpl.h>
 
@@ -35,19 +36,12 @@ struct ParticipantNameInfo
 
 rmw_ret_t
 _validate_params(
-  const char * identifier,
   const rmw_node_t * node,
   rcutils_allocator_t * allocator,
   const char * topic_name,
   rmw_topic_endpoint_info_array_t * participants_info)
 {
-  RMW_CHECK_ARGUMENT_FOR_NULL(identifier, RMW_RET_ERROR);
   RMW_CHECK_ARGUMENT_FOR_NULL(node, RMW_RET_ERROR);
-  // Get participant pointer from node
-  if (node->implementation_identifier != identifier) {
-    RMW_SET_ERROR_MSG("node handle not from this rmw implementation");
-    return RMW_RET_ERROR;
-  }
   RMW_CHECK_ARGUMENT_FOR_NULL(topic_name, RMW_RET_ERROR);
   RMW_CHECK_ARGUMENT_FOR_NULL(allocator, RMW_RET_ERROR);
   RMW_CHECK_ARGUMENT_FOR_NULL(participants_info, RMW_RET_ERROR);
@@ -162,7 +156,6 @@ _set_rmw_topic_endpoint_info(
 
 rmw_ret_t
 _get_info_by_topic(
-  const char * identifier,
   const rmw_node_t * node,
   rcutils_allocator_t * allocator,
   const char * topic_name,
@@ -171,7 +164,6 @@ _get_info_by_topic(
   rmw_topic_endpoint_info_array_t * participants_info)
 {
   rmw_ret_t rmw_ret = _validate_params(
-    identifier,
     node,
     allocator,
     topic_name,
@@ -182,13 +174,15 @@ _get_info_by_topic(
 
   const char * node_name = node->name;
   const char * node_namespace = node->namespace_;
-  const OpenDDSNodeInfo* opendds_node_info = static_cast<OpenDDSNodeInfo*>(node->data);
-  RMW_CHECK_ARGUMENT_FOR_NULL(opendds_node_info, RMW_RET_ERROR);
-  DDS::DomainParticipant * participant = opendds_node_info->participant;
+  auto dds_node = OpenDDSNode::from(node);
+  if (!dds_node) {
+    return RMW_RET_ERROR;
+  }
+  DDS::DomainParticipant_var participant = dds_node->dp();
   const std::vector<std::string> topic_fqdns = _get_topic_fqdns(topic_name, no_mangle);
 
   DDS::GUID_t participant_guid;
-  OpenDDS::DCPS::DomainParticipantImpl* dpi = dynamic_cast<OpenDDS::DCPS::DomainParticipantImpl*>(opendds_node_info->participant.in());
+  OpenDDS::DCPS::DomainParticipantImpl* dpi = dynamic_cast<OpenDDS::DCPS::DomainParticipantImpl*>(participant.in());
   participant_guid = dpi->get_repoid(participant->get_instance_handle());
 
   DDS::InstanceHandleSeq handles;
@@ -228,8 +222,8 @@ _get_info_by_topic(
   }
 
   CustomDataReaderListener * slave_target = is_publisher ?
-    static_cast<CustomDataReaderListener *>(opendds_node_info->publisher_listener) :
-    static_cast<CustomDataReaderListener *>(opendds_node_info->subscriber_listener);
+    static_cast<CustomDataReaderListener *>(dds_node->pub_listener()) :
+    static_cast<CustomDataReaderListener *>(dds_node->sub_listener());
 
   std::vector<const DDSTopicEndpointInfo *> dds_topic_endpoint_infos;
   for (const auto & topic_fqdn : topic_fqdns) {
@@ -269,7 +263,6 @@ _get_info_by_topic(
 
 rmw_ret_t
 get_publishers_info_by_topic(
-  const char * identifier,
   const rmw_node_t * node,
   rcutils_allocator_t * allocator,
   const char * topic_name,
@@ -277,7 +270,6 @@ get_publishers_info_by_topic(
   rmw_topic_endpoint_info_array_t * publishers_info)
 {
   return _get_info_by_topic(
-    identifier,
     node,
     allocator,
     topic_name,
@@ -288,7 +280,6 @@ get_publishers_info_by_topic(
 
 rmw_ret_t
 get_subscriptions_info_by_topic(
-  const char * identifier,
   const rmw_node_t * node,
   rcutils_allocator_t * allocator,
   const char * topic_name,
@@ -296,7 +287,6 @@ get_subscriptions_info_by_topic(
   rmw_topic_endpoint_info_array_t * subscriptions_info)
 {
   return _get_info_by_topic(
-    identifier,
     node,
     allocator,
     topic_name,

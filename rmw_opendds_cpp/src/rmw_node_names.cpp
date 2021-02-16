@@ -17,7 +17,6 @@
 #include "rmw/rmw.h"
 
 #include "rmw_opendds_shared_cpp/node_names.hpp"
-#include "rmw_opendds_shared_cpp/identifier.hpp"
 
 extern "C"
 {
@@ -27,7 +26,7 @@ rmw_get_node_names(
   rcutils_string_array_t * node_names,
   rcutils_string_array_t * node_namespaces)
 {
-  return get_node_names(opendds_identifier, node, node_names, node_namespaces);
+  return get_node_names(node, node_names, node_namespaces);
 }
 
 rmw_ret_t
@@ -37,7 +36,6 @@ rmw_get_node_names_with_enclaves(
   rcutils_string_array_t* node_namespaces,
   rcutils_string_array_t* enclaves)
 {
-  return get_node_names_with_enclaves(
-    opendds_identifier, node, node_names, node_namespaces, enclaves);
+  return get_node_names_with_enclaves(node, node_names, node_namespaces, enclaves);
 }
 }  // extern "C"

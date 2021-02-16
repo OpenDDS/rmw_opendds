@@ -18,7 +18,7 @@
 #include "rmw_opendds_shared_cpp/event.hpp"
 #include "rmw_opendds_shared_cpp/event_converter.hpp"
 #include "rmw_opendds_shared_cpp/types.hpp"
-#include "rmw_opendds_shared_cpp/opendds_static_event_info.hpp"
+#include "rmw_opendds_shared_cpp/DDSEntity.hpp"
 
 rmw_ret_t
 __rmw_init_event(
@@ -74,15 +74,11 @@ __rmw_take_event(
     // lookup status mask from rmw_event_type
     CORBA::ULong status_kind = get_status_kind_from_rmw(event_handle->event_type);
 
-    // cast the event_handle to the appropriate type to get the appropriate
-    // status from the handle
-    // CustomOpenDDSPublisher and CustomOpenDDSSubscriber should implement this interface
-    OpenDDSCustomEventInfo* custom_event_info =
-      static_cast<OpenDDSCustomEventInfo*>(event_handle->data);
+    auto dds_entity = static_cast<DDSEntity*>(event_handle->data);
 
     // call get status with the appropriate mask
     // get_status should fill the event with the appropriate status information
-    ret_code = custom_event_info->get_status(status_kind, event_info);
+    ret_code = dds_entity->get_status(status_kind, event_info);
   }
   else {
     RMW_SET_ERROR_MSG_WITH_FORMAT_STRING("event %d not supported", event_handle->event_type);

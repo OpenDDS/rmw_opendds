@@ -16,13 +16,11 @@
 #define RMW_OPENDDS_SHARED_CPP__SHARED_FUNCTIONS_HPP_
 
 #include "condition_error.hpp"
-#include "count.hpp"
 #include "demangle.hpp"
 #include "guard_condition.hpp"
 #include "init.hpp"
 #include "namespace_prefix.hpp"
 #include "opendds_include.hpp"
-#include "node.hpp"
 #include "node_info_and_types.hpp"
 #include "node_names.hpp"
 #include "qos.hpp"

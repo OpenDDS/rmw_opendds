@@ -12,7 +12,6 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 endif()
 
 find_package(ament_cmake REQUIRED)
-
 find_package(opendds_cmake_module REQUIRED)
 find_package(OpenDDS QUIET)
 
@@ -69,15 +68,8 @@ register_rmw_implementation(
 add_library(
   rmw_opendds_cpp
   SHARED
-  src/DDSPublisher.cpp
-  src/DDSSubscriber.cpp
-  src/get_client.cpp
-  src/get_participant.cpp
-  src/get_service.cpp
-  src/process_topic_and_service_names.cpp
   src/rmw_client.cpp
   src/rmw_compare_gid_equals.cpp
-  src/rmw_count.cpp
   src/rmw_event.cpp
   src/rmw_get_implementation_identifier.cpp
   src/rmw_get_serialization_format.cpp
@@ -89,12 +81,9 @@ add_library(
   src/rmw_node_names.cpp
   src/rmw_publish.cpp
   src/rmw_publisher.cpp
-  src/rmw_request.cpp
-  src/rmw_response.cpp
   src/rmw_serialize.cpp
-  src/rmw_service.cpp
+  src/rmw_server.cpp
   src/rmw_service_names_and_types.cpp
-  src/rmw_service_server_is_available.cpp
   src/rmw_subscription.cpp
   src/rmw_take.cpp
   src/rmw_topic_names_and_types.cpp

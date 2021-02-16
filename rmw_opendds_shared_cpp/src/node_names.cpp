@@ -25,31 +25,25 @@
 
 #include "rmw_opendds_shared_cpp/opendds_include.hpp"
 #include "rmw_opendds_shared_cpp/node_names.hpp"
-#include "rmw_opendds_shared_cpp/types.hpp"
+#include <rmw_opendds_shared_cpp/OpenDDSNode.hpp>
 
 rmw_ret_t
 get_node_names_impl(
-  const char * implementation_identifier,
   const rmw_node_t * node,
   rcutils_string_array_t * node_names,
   rcutils_string_array_t * node_namespaces,
   rcutils_string_array_t * enclaves)
 {
-  if (!node) {
-    RMW_SET_ERROR_MSG("node handle is null");
-    return RMW_RET_ERROR;
-  }
-  if (node->implementation_identifier != implementation_identifier) {
-    RMW_SET_ERROR_MSG("node handle is not from this rmw implementation");
+  auto dds_node = OpenDDSNode::from(node);
+  if (!dds_node) {
     return RMW_RET_ERROR;
   }
   if (rmw_check_zero_rmw_string_array(node_names) != RMW_RET_OK) {
     return RMW_RET_ERROR;
   }
-
-  DDS::DomainParticipant * participant = static_cast<OpenDDSNodeInfo *>(node->data)->participant;
+  DDS::DomainParticipant_var dp = dds_node->dp();
   DDS::InstanceHandleSeq handles;
-  if (participant->get_discovered_participants(handles) != DDS::RETCODE_OK) {
+  if (dp->get_discovered_participants(handles) != DDS::RETCODE_OK) {
     RMW_SET_ERROR_MSG("unable to fetch discovered participants.");
     return RMW_RET_ERROR;
   }
@@ -74,8 +68,7 @@ get_node_names_impl(
   }
 
   DDS::DomainParticipantQos participant_qos;
-  DDS::ReturnCode_t status = participant->get_qos(participant_qos);
-  if (status != DDS::RETCODE_OK) {
+  if (dp->get_qos(participant_qos) != DDS::RETCODE_OK) {
     RMW_SET_ERROR_MSG("failed to get default participant qos");
     return RMW_RET_ERROR;
   }
@@ -95,7 +88,7 @@ get_node_names_impl(
 
   for (CORBA::ULong i = 1; i < length; ++i) {
     DDS::ParticipantBuiltinTopicData pbtd;
-    auto dds_ret = participant->get_discovered_participant_data(pbtd, handles[i - 1]);
+    auto dds_ret = dp->get_discovered_participant_data(pbtd, handles[i - 1]);
     std::string name;
     std::string namespace_;
     std::string enclave;
@@ -183,17 +176,15 @@ fail:
 
 rmw_ret_t
 get_node_names(
-  const char* implementation_identifier,
   const rmw_node_t* node,
   rcutils_string_array_t* node_names,
   rcutils_string_array_t* node_namespaces)
 {
-  return get_node_names_impl(implementation_identifier, node, node_names, node_namespaces, nullptr);
+  return get_node_names_impl(node, node_names, node_namespaces, nullptr);
 }
 
 rmw_ret_t
 get_node_names_with_enclaves(
-  const char* implementation_identifier,
   const rmw_node_t* node,
   rcutils_string_array_t* node_names,
   rcutils_string_array_t* node_namespaces,
@@ -202,6 +193,6 @@ get_node_names_with_enclaves(
   if (rmw_check_zero_rmw_string_array(enclaves) != RMW_RET_OK) {
     return RMW_RET_ERROR;
   }
-  return get_node_names_impl(implementation_identifier, node, node_names, node_namespaces, enclaves);
+  return get_node_names_impl(node, node_names, node_namespaces, enclaves);
 }
 

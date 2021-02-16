@@ -20,7 +20,6 @@
 #include "rmw/rmw.h"
 
 #include "rmw_opendds_shared_cpp/node_info_and_types.hpp"
-#include "rmw_opendds_shared_cpp/identifier.hpp"
 
 // The extern "C" here enforces that overloading is not used.
 extern "C"
@@ -35,8 +34,7 @@ rmw_get_subscriber_names_and_types_by_node(
   rmw_names_and_types_t * topic_names_and_types)
 {
   return get_subscriber_names_and_types_by_node(
-    opendds_identifier, node, allocator, node_name, node_namespace, no_demangle,
-    topic_names_and_types);
+    node, allocator, node_name, node_namespace, no_demangle, topic_names_and_types);
 }
 
 rmw_ret_t
@@ -49,8 +47,7 @@ rmw_get_publisher_names_and_types_by_node(
   rmw_names_and_types_t * topic_names_and_types)
 {
   return get_publisher_names_and_types_by_node(
-    opendds_identifier, node, allocator, node_name, node_namespace, no_demangle,
-    topic_names_and_types);
+    node, allocator, node_name, node_namespace, no_demangle, topic_names_and_types);
 }
 
 rmw_ret_t
@@ -62,7 +59,7 @@ rmw_get_service_names_and_types_by_node(
   rmw_names_and_types_t * service_names_and_types)
 {
   return get_service_names_and_types_by_node(
-    opendds_identifier, node, allocator, node_name, node_namespace, service_names_and_types);
+    node, allocator, node_name, node_namespace, service_names_and_types);
 }
 
 rmw_ret_t
@@ -74,6 +71,6 @@ rmw_get_client_names_and_types_by_node(
   rmw_names_and_types_t * service_names_and_types)
 {
   return get_client_names_and_types_by_node(
-    opendds_identifier, node, allocator, node_name, node_namespace, service_names_and_types);
+    node, allocator, node_name, node_namespace, service_names_and_types);
 }
 }  // extern "C"

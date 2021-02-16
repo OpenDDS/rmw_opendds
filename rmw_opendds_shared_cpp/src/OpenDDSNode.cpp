@@ -12,20 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "rmw_opendds_shared_cpp/OpenDDSNode.hpp"
-
-#include "rcutils/filesystem.h"
-
-#include "rmw_opendds_shared_cpp/guard_condition.hpp"
-#include "rmw_opendds_shared_cpp/opendds_include.hpp"
-#include "rmw_opendds_shared_cpp/init.hpp"
-#include "rmw_opendds_shared_cpp/node.hpp"
-#include "rmw_opendds_shared_cpp/types.hpp"
-#include "rmw_opendds_shared_cpp/identifier.hpp"
-
-#include "rmw/allocators.h"
-#include "rmw/error_handling.h"
-#include "rmw/impl/cpp/macros.hpp"
+#include <rmw_opendds_shared_cpp/OpenDDSNode.hpp>
+#include <rmw_opendds_shared_cpp/guard_condition.hpp>
+#include <rmw_opendds_shared_cpp/init.hpp>
+#include <rmw_opendds_shared_cpp/types.hpp>
+#include <rmw_opendds_shared_cpp/identifier.hpp>
+#include <rmw_opendds_shared_cpp/opendds_include.hpp>
 
 #include <dds/DdsDcpsCoreTypeSupportC.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
@@ -38,6 +30,13 @@
 #ifdef OPENDDS_SECURITY
 #include <dds/DCPS/security/framework/Properties.h>
 #endif
+
+#include <rcutils/filesystem.h>
+
+#include <rmw/allocators.h>
+#include <rmw/error_handling.h>
+#include <rmw/impl/cpp/macros.hpp>
+
 #include <string>
 
 OpenDDSNode* OpenDDSNode::from(const rmw_node_t * node)

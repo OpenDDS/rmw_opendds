@@ -16,7 +16,6 @@
 #include "rmw/get_topic_names_and_types.h"
 
 #include "rmw_opendds_shared_cpp/topic_names_and_types.hpp"
-#include "rmw_opendds_shared_cpp/identifier.hpp"
 
 extern "C"
 {
@@ -28,7 +27,6 @@ rmw_get_topic_names_and_types(
   rmw_names_and_types_t * topic_names_and_types)
 {
   return get_topic_names_and_types(
-    opendds_identifier,
     node,
     allocator,
     no_demangle,

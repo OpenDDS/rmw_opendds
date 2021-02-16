@@ -25,7 +25,6 @@
 RMW_OPENDDS_SHARED_CPP_PUBLIC
 rmw_ret_t
 get_client_names_and_types_by_node(
-  const char* implementation_identifier,
   const rmw_node_t* node,
   rcutils_allocator_t* allocator,
   const char* node_name,
@@ -35,7 +34,6 @@ get_client_names_and_types_by_node(
 RMW_OPENDDS_SHARED_CPP_PUBLIC
 rmw_ret_t
 get_publisher_names_and_types_by_node(
-  const char * implementation_identifier,
   const rmw_node_t * node,
   rcutils_allocator_t * allocator,
   const char * node_name,
@@ -46,7 +44,6 @@ get_publisher_names_and_types_by_node(
 RMW_OPENDDS_SHARED_CPP_PUBLIC
 rmw_ret_t
 get_service_names_and_types_by_node(
-  const char * implementation_identifier,
   const rmw_node_t * node,
   rcutils_allocator_t * allocator,
   const char * node_name,
@@ -56,7 +53,6 @@ get_service_names_and_types_by_node(
 RMW_OPENDDS_SHARED_CPP_PUBLIC
 rmw_ret_t
 get_subscriber_names_and_types_by_node(
-  const char * implementation_identifier,
   const rmw_node_t * node,
   rcutils_allocator_t * allocator,
   const char * node_name,
