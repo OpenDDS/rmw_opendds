@@ -85,10 +85,8 @@ add_library(
   src/qos.cpp
   src/names_and_types_helpers.cpp
   src/node_info_and_types.cpp
-  src/service_names_and_types.cpp
   src/Service.cpp
   src/DDSTopic.cpp
-  src/topic_names_and_types.cpp
   src/trigger_guard_condition.cpp
   src/wait_set.cpp
   src/types/custom_data_reader_listener.cpp

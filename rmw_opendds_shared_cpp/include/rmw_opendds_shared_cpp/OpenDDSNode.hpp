@@ -20,6 +20,8 @@
 
 #include <dds/DCPS/DomainParticipantImpl.h>
 
+#include <rmw/names_and_types.h>
+
 class OpenDDSNode
 {
 public:
@@ -36,6 +38,8 @@ public:
   bool remove_sub(const DDS::InstanceHandle_t & sub);
   rmw_ret_t count_publishers(const char * topic_name, size_t * count);
   rmw_ret_t count_subscribers(const char * topic_name, size_t * count);
+  rmw_ret_t get_topic_names_types(rmw_names_and_types_t * names_types, bool no_demangle, rcutils_allocator_t * allocator) const;
+  rmw_ret_t get_service_names_types(rmw_names_and_types_t * names_types, rcutils_allocator_t * allocator) const;
 
 private:
   friend Raf;

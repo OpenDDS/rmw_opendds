@@ -83,10 +83,8 @@ add_library(
   src/rmw_publisher.cpp
   src/rmw_serialize.cpp
   src/rmw_server.cpp
-  src/rmw_service_names_and_types.cpp
   src/rmw_subscription.cpp
   src/rmw_take.cpp
-  src/rmw_topic_names_and_types.cpp
   src/rmw_trigger_guard_condition.cpp
   src/rmw_wait.cpp
   src/rmw_wait_set.cpp

@@ -24,8 +24,6 @@
 #include "node_info_and_types.hpp"
 #include "node_names.hpp"
 #include "qos.hpp"
-#include "service_names_and_types.hpp"
-#include "topic_names_and_types.hpp"
 #include "trigger_guard_condition.hpp"
 #include "types.hpp"
 #include "wait.hpp"

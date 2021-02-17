@@ -87,4 +87,25 @@ rmw_count_subscribers(
   return dds_node ? dds_node->count_subscribers(topic_name, count) : RMW_RET_ERROR;
 }
 
+rmw_ret_t
+rmw_get_topic_names_and_types(
+  const rmw_node_t * node,
+  rcutils_allocator_t * allocator,
+  bool no_demangle,
+  rmw_names_and_types_t * topic_names_and_types)
+{
+  auto dds_node = OpenDDSNode::from(node);
+  return dds_node ? dds_node->get_topic_names_types(topic_names_and_types, no_demangle, allocator) : RMW_RET_ERROR;
+}
+
+rmw_ret_t
+rmw_get_service_names_and_types(
+  const rmw_node_t * node,
+  rcutils_allocator_t * allocator,
+  rmw_names_and_types_t * service_names_and_types)
+{
+  auto dds_node = OpenDDSNode::from(node);
+  return dds_node ? dds_node->get_service_names_types(service_names_and_types, allocator) : RMW_RET_ERROR;
+}
+
 }  // extern "C"

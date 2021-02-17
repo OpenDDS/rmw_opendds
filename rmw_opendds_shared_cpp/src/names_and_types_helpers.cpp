@@ -24,7 +24,6 @@
 #include "rmw_opendds_shared_cpp/demangle.hpp"
 #include "rmw_opendds_shared_cpp/names_and_types_helpers.hpp"
 #include "rmw_opendds_shared_cpp/opendds_include.hpp"
-#include "rmw_opendds_shared_cpp/service_names_and_types.hpp"
 #include "rmw_opendds_shared_cpp/types.hpp"
 
 constexpr char SAMPLE_PREFIX[] = "/Sample_";

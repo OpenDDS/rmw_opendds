@@ -18,6 +18,7 @@
 #include <rmw_opendds_shared_cpp/types.hpp>
 #include <rmw_opendds_shared_cpp/identifier.hpp>
 #include <rmw_opendds_shared_cpp/opendds_include.hpp>
+#include "rmw_opendds_shared_cpp/names_and_types_helpers.hpp" //??
 
 #include <dds/DdsDcpsCoreTypeSupportC.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
@@ -116,6 +117,37 @@ rmw_ret_t OpenDDSNode::count_subscribers(const char * topic_name, size_t * count
   }
   *count = sub_listener_->count_topic(topic_name);
   return RMW_RET_OK;
+}
+
+rmw_ret_t
+OpenDDSNode::get_topic_names_types(rmw_names_and_types_t * names_types, bool no_demangle, rcutils_allocator_t * allocator) const
+{
+  rmw_ret_t ret = rmw_names_and_types_check_zero(names_types);
+  if (ret != RMW_RET_OK) {
+    return ret;
+  }
+  // combine publisher and subscriber information
+  std::map<std::string, std::set<std::string>> topics;
+  pub_listener_->fill_topic_names_and_types(no_demangle, topics);
+  sub_listener_->fill_topic_names_and_types(no_demangle, topics);
+  return !topics.empty() ? copy_topics_names_and_types(topics, allocator, no_demangle, names_types) : RMW_RET_OK;
+}
+
+rmw_ret_t OpenDDSNode::get_service_names_types(rmw_names_and_types_t * names_types, rcutils_allocator_t * allocator) const
+{
+  rmw_ret_t ret = rmw_names_and_types_check_zero(names_types);
+  if (ret != RMW_RET_OK) {
+    return ret;
+  }
+  if (!allocator) {
+    RMW_SET_ERROR_MSG("allocator is null");
+    return RMW_RET_INVALID_ARGUMENT;
+  }
+  // combine publisher and subscriber information
+  std::map<std::string, std::set<std::string>> services;
+  pub_listener_->fill_service_names_and_types(services);
+  sub_listener_->fill_service_names_and_types(services);
+  return !services.empty() ? copy_services_to_names_and_types(services, allocator, names_types) : RMW_RET_OK;
 }
 
 OpenDDSNode::OpenDDSNode(rmw_context_t & context)
