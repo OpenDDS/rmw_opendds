@@ -21,8 +21,6 @@
 #include "init.hpp"
 #include "namespace_prefix.hpp"
 #include "opendds_include.hpp"
-#include "node_info_and_types.hpp"
-#include "node_names.hpp"
 #include "qos.hpp"
 #include "trigger_guard_condition.hpp"
 #include "types.hpp"

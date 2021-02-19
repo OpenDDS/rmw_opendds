@@ -53,6 +53,7 @@ set(opendds_libs_1
 include_directories(include)
 ament_export_include_directories(include)
 ament_export_dependencies(
+  rcutils
   rmw
   rosidl_generator_c
   rosidl_generator_cpp
@@ -79,12 +80,9 @@ add_library(
   src/identifier.cpp
   src/init.cpp
   src/namespace_prefix.cpp
-  src/node.cpp
-  src/node_names.cpp
   src/OpenDDSNode.cpp
   src/qos.cpp
   src/names_and_types_helpers.cpp
-  src/node_info_and_types.cpp
   src/Service.cpp
   src/DDSTopic.cpp
   src/trigger_guard_condition.cpp

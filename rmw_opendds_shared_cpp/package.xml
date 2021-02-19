@@ -30,6 +30,9 @@
   <build_export_depend>rosidl_typesupport_opendds_c</build_export_depend>
   <build_export_depend>rosidl_typesupport_opendds_cpp</build_export_depend>
 
+  <exec_depend>rcutils</exec_depend>
+  <exec_depend>rmw</exec_depend>
+
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
 
