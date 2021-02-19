@@ -12,8 +12,8 @@
 
 #include "rmw/get_topic_endpoint_info.h"
 #include "rmw/topic_endpoint_info_array.h"
-#include "rmw_opendds_shared_cpp/topic_endpoint_info.hpp"
-#include "rmw_opendds_shared_cpp/identifier.hpp"
+#include "rmw_opendds_cpp/topic_endpoint_info.hpp"
+#include "rmw_opendds_cpp/identifier.hpp"
 
 extern "C"
 {

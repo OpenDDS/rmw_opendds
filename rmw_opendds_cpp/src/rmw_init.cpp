@@ -16,8 +16,8 @@
 #include "rmw/init_options.h"
 
 #include "rmw/impl/cpp/macros.hpp"
-#include "rmw_opendds_shared_cpp/init.hpp"
-#include "rmw_opendds_shared_cpp/identifier.hpp"
+#include "rmw_opendds_cpp/init.hpp"
+#include "rmw_opendds_cpp/identifier.hpp"
 
 extern "C"
 {

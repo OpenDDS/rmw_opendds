@@ -14,7 +14,7 @@
 
 #include "rmw_opendds_cpp/DDSPublisher.hpp"
 #include "opendds_static_serialized_dataTypeSupportC.h"
-#include "rmw_opendds_shared_cpp/identifier.hpp"
+#include "rmw_opendds_cpp/identifier.hpp"
 
 #include "dds/DCPS/DataWriterImpl.h"
 

@@ -16,7 +16,7 @@
   <build_depend>opendds_cmake_module</build_depend>
   <build_depend>rcutils</build_depend>
   <build_depend>rmw</build_depend>
-  <build_depend>rmw_opendds_shared_cpp</build_depend>
+  <build_depend>opendds</build_depend>
   <build_depend>rosidl_generator_c</build_depend>
   <build_depend>rosidl_generator_cpp</build_depend>
   <build_depend>rosidl_generator_dds_idl</build_depend>
@@ -28,10 +28,11 @@
   <build_export_depend>rosidl_generator_cpp</build_export_depend>
   <build_export_depend>rosidl_typesupport_opendds_c</build_export_depend>
   <build_export_depend>rosidl_typesupport_opendds_cpp</build_export_depend>
+  <build_export_depend>opendds</build_export_depend>
 
   <exec_depend>rcutils</exec_depend>
   <exec_depend>rmw</exec_depend>
-  <exec_depend>rmw_opendds_shared_cpp</exec_depend>
+  <!-- <exec_depend>rmw_opendds_shared_cpp</exec_depend> -->
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>

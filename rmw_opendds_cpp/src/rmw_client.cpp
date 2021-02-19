@@ -19,11 +19,11 @@
 #include "rmw/impl/cpp/macros.hpp"
 #include "rmw/rmw.h"
 
-#include "rmw_opendds_shared_cpp/types.hpp"
-#include "rmw_opendds_shared_cpp/qos.hpp"
+#include "rmw_opendds_cpp/types.hpp"
+#include "rmw_opendds_cpp/qos.hpp"
 
 #include "rmw_opendds_cpp/opendds_static_client_info.hpp"
-#include "rmw_opendds_shared_cpp/identifier.hpp"
+#include "rmw_opendds_cpp/identifier.hpp"
 #include "process_topic_and_service_names.hpp"
 #include "type_support_common.hpp"
 

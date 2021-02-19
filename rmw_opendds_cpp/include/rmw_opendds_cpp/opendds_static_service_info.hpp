@@ -15,7 +15,7 @@
 #ifndef RMW_OPENDDS_CPP__OPENDDS_STATIC_SERVICE_INFO_HPP_
 #define RMW_OPENDDS_CPP__OPENDDS_STATIC_SERVICE_INFO_HPP_
 
-#include "rmw_opendds_shared_cpp/opendds_include.hpp"
+#include "rmw_opendds_cpp/opendds_include.hpp"
 
 #include "rosidl_typesupport_opendds_cpp/service_type_support.h"
 

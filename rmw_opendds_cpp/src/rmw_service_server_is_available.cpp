@@ -17,9 +17,9 @@
 #include "rmw/rmw.h"
 #include "rmw/types.h"
 
-#include "rmw_opendds_shared_cpp/count.hpp"
-#include "rmw_opendds_shared_cpp/opendds_include.hpp"
-#include "rmw_opendds_shared_cpp/identifier.hpp"
+#include "rmw_opendds_cpp/count.hpp"
+#include "rmw_opendds_cpp/opendds_include.hpp"
+#include "rmw_opendds_cpp/identifier.hpp"
 #include "rmw_opendds_cpp/opendds_static_client_info.hpp"
 
 // Uncomment this to get extra console output about discovery.

@@ -1,4 +1,4 @@
-// Copyright 2017 Open Source Robotics Foundation, Inc.
+// Copyright 2015 Open Source Robotics Foundation, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef RMW_OPENDDS_CPP__VISIBILITY_CONTROL_H_
-#define RMW_OPENDDS_CPP__VISIBILITY_CONTROL_H_
+#ifndef RMW_OPENDDS_SHARED_CPP__VISIBILITY_CONTROL_H_
+#define RMW_OPENDDS_SHARED_CPP__VISIBILITY_CONTROL_H_
 
 #ifdef __cplusplus
 extern "C"
@@ -25,27 +25,27 @@ extern "C"
 
 #if defined _WIN32 || defined __CYGWIN__
   #ifdef __GNUC__
-    #define RMW_OPENDDS_CPP_EXPORT __attribute__ ((dllexport))
-    #define RMW_OPENDDS_CPP_IMPORT __attribute__ ((dllimport))
+    #define RMW_OPENDDS_SHARED_CPP_EXPORT __attribute__ ((dllexport))
+    #define RMW_OPENDDS_SHARED_CPP_IMPORT __attribute__ ((dllimport))
   #else
-    #define RMW_OPENDDS_CPP_EXPORT __declspec(dllexport)
-    #define RMW_OPENDDS_CPP_IMPORT __declspec(dllimport)
+    #define RMW_OPENDDS_SHARED_CPP_EXPORT __declspec(dllexport)
+    #define RMW_OPENDDS_SHARED_CPP_IMPORT __declspec(dllimport)
   #endif
-  #ifdef RMW_OPENDDS_CPP_BUILDING_DLL
-    #define RMW_OPENDDS_CPP_PUBLIC RMW_OPENDDS_CPP_EXPORT
+  #ifdef RMW_OPENDDS_SHARED_CPP_BUILDING_DLL
+    #define RMW_OPENDDS_SHARED_CPP_PUBLIC RMW_OPENDDS_SHARED_CPP_EXPORT
   #else
-    #define RMW_OPENDDS_CPP_PUBLIC RMW_OPENDDS_CPP_IMPORT
+    #define RMW_OPENDDS_SHARED_CPP_PUBLIC RMW_OPENDDS_SHARED_CPP_IMPORT
   #endif
-  #define RMW_OPENDDS_CPP_LOCAL
+  #define RMW_OPENDDS_SHARED_CPP_LOCAL
 #else
-  #define RMW_OPENDDS_CPP_EXPORT __attribute__ ((visibility("default")))
-  #define RMW_OPENDDS_CPP_IMPORT
+  #define RMW_OPENDDS_SHARED_CPP_EXPORT __attribute__ ((visibility("default")))
+  #define RMW_OPENDDS_SHARED_CPP_IMPORT
   #if __GNUC__ >= 4
-    #define RMW_OPENDDS_CPP_PUBLIC __attribute__ ((visibility("default")))
-    #define RMW_OPENDDS_CPP_LOCAL  __attribute__ ((visibility("hidden")))
+    #define RMW_OPENDDS_SHARED_CPP_PUBLIC __attribute__ ((visibility("default")))
+    #define RMW_OPENDDS_SHARED_CPP_LOCAL  __attribute__ ((visibility("hidden")))
   #else
-    #define RMW_OPENDDS_CPP_PUBLIC
-    #define RMW_OPENDDS_CPP_LOCAL
+    #define RMW_OPENDDS_SHARED_CPP_PUBLIC
+    #define RMW_OPENDDS_SHARED_CPP_LOCAL
   #endif
 #endif
 
@@ -53,4 +53,4 @@ extern "C"
 }
 #endif
 
-#endif  // RMW_OPENDDS_CPP__VISIBILITY_CONTROL_H_
+#endif  // RMW_OPENDDS_SHARED_CPP__VISIBILITY_CONTROL_H_
