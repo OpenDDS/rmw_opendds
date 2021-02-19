@@ -12,9 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef RMW_OPENDDS_CPP__WAIT_HPP_
-#define RMW_OPENDDS_CPP__WAIT_HPP_
-
 #include "rmw_opendds_cpp/opendds_include.hpp"
 
 #include "rmw_opendds_cpp/condition_error.hpp"
@@ -62,5 +59,3 @@ rmw_ret_t __handle_active_event_conditions(rmw_events_t* events)
   }
   return RMW_RET_OK;
 }
-
-#endif  // RMW_OPENDDS_CPP__WAIT_HPP_

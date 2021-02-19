@@ -157,7 +157,7 @@ void CustomDataReaderListener::fill_topic_names_and_types_by_guid(
   const auto & map = topic_cache.get_topic_types_by_guid(participant_guid);
   if (map.empty()) {
     RCUTILS_LOG_DEBUG_NAMED(
-      "rmw_opendds_shared_cpp",
+      "rmw_opendds_cpp",
       "No topics for participant_guid");
     return;
   }
@@ -180,7 +180,7 @@ void CustomDataReaderListener::fill_service_names_and_types_by_guid(
   const auto & map = topic_cache.get_topic_types_by_guid(participant_guid);
   if (map.empty()) {
     RCUTILS_LOG_DEBUG_NAMED(
-      "rmw_opendds_shared_cpp",
+      "rmw_opendds_cpp",
       "No services for participant_guid");
     return;
   }
