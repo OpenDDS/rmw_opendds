@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef RMW_OPENDDS_SHARED_CPP__QOS_HPP_
-#define RMW_OPENDDS_SHARED_CPP__QOS_HPP_
+#ifndef RMW_OPENDDS_CPP__QOS_HPP_
+#define RMW_OPENDDS_CPP__QOS_HPP_
 
 #include <cassert>
 #include <limits>
@@ -26,18 +26,18 @@
 
 #include "rmw_opendds_cpp/visibility_control.h"
 
-RMW_OPENDDS_SHARED_CPP_PUBLIC
+RMW_OPENDDS_CPP_PUBLIC
 bool
 get_datareader_qos(
   DDS::Subscriber * subscriber,
   const rmw_qos_profile_t & qos_profile,
   DDS::DataReaderQos & datareader_qos);
 
-RMW_OPENDDS_SHARED_CPP_PUBLIC
+RMW_OPENDDS_CPP_PUBLIC
 rmw_qos_policy_kind_t
 dds_qos_policy_to_rmw_qos_policy(DDS::QosPolicyId_t policy_id);
 
-RMW_OPENDDS_SHARED_CPP_PUBLIC
+RMW_OPENDDS_CPP_PUBLIC
 bool
 get_datawriter_qos(
   DDS::Publisher * publisher,
@@ -216,4 +216,4 @@ dds_qos_to_rmw_qos(
   time_to_rmw(rmw_qos.liveliness_lease_duration, dds_qos.liveliness.lease_duration);
 }
 
-#endif  // RMW_OPENDDS_SHARED_CPP__QOS_HPP_
+#endif  // RMW_OPENDDS_CPP__QOS_HPP_

@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef RMW_OPENDDS_SHARED_CPP__RMWALLOCATEFREE_HPP_
-#define RMW_OPENDDS_SHARED_CPP__RMWALLOCATEFREE_HPP_
+#ifndef RMW_OPENDDS_CPP__RMWALLOCATEFREE_HPP_
+#define RMW_OPENDDS_CPP__RMWALLOCATEFREE_HPP_
 
 #include <rmw/allocators.h>
 #include <rmw/error_handling.h>
@@ -137,4 +137,4 @@ struct RmwStr
   }
 };
 
-#endif  // RMW_OPENDDS_SHARED_CPP__RMWALLOCATEFREE_HPP_
+#endif  // RMW_OPENDDS_CPP__RMWALLOCATEFREE_HPP_

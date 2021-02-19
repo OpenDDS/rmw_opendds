@@ -10,13 +10,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef RMW_OPENDDS_SHARED_CPP__TOPIC_ENDPOINT_INFO_HPP_
-#define RMW_OPENDDS_SHARED_CPP__TOPIC_ENDPOINT_INFO_HPP_
+#ifndef RMW_OPENDDS_CPP__TOPIC_ENDPOINT_INFO_HPP_
+#define RMW_OPENDDS_CPP__TOPIC_ENDPOINT_INFO_HPP_
 
 #include <rmw/topic_endpoint_info_array.h>
-#include <rmw_opendds_shared_cpp/visibility_control.h>
+#include <rmw_opendds_cpp/visibility_control.h>
 
-RMW_OPENDDS_SHARED_CPP_PUBLIC
+RMW_OPENDDS_CPP_PUBLIC
 rmw_ret_t
 get_publishers_info_by_topic(
   const char * identifier,
@@ -26,7 +26,7 @@ get_publishers_info_by_topic(
   bool no_mangle,
   rmw_topic_endpoint_info_array_t * publishers_info);
 
-RMW_OPENDDS_SHARED_CPP_PUBLIC
+RMW_OPENDDS_CPP_PUBLIC
 rmw_ret_t
 get_subscriptions_info_by_topic(
   const char * identifier,
@@ -36,4 +36,4 @@ get_subscriptions_info_by_topic(
   bool no_mangle,
   rmw_topic_endpoint_info_array_t * subscriptions_info);
 
-#endif  // RMW_OPENDDS_SHARED_CPP__TOPIC_ENDPOINT_INFO_HPP_
+#endif  // RMW_OPENDDS_CPP__TOPIC_ENDPOINT_INFO_HPP_

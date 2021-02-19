@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef RMW_OPENDDS_SHARED_CPP__EVENT_HPP_
-#define RMW_OPENDDS_SHARED_CPP__EVENT_HPP_
+#ifndef RMW_OPENDDS_CPP__EVENT_HPP_
+#define RMW_OPENDDS_CPP__EVENT_HPP_
 
 // #include "ndds_include.hpp"
 
@@ -33,7 +33,7 @@
  * \return `RMW_RET_UNSUPPORTED` if event_type is not supported, or
  * \return `RMW_RET_ERROR` if an unexpected error occurs.
  */
-RMW_OPENDDS_SHARED_CPP_PUBLIC
+RMW_OPENDDS_CPP_PUBLIC
 rmw_ret_t
 __rmw_init_event(
   const char* identifier,
@@ -52,7 +52,7 @@ __rmw_init_event(
  * \return `RMW_RET_BAD_ALLOC` if memory allocation failed, or
  * \return `RMW_RET_ERROR` if an unexpected error occurs.
  */
-RMW_OPENDDS_SHARED_CPP_PUBLIC
+RMW_OPENDDS_CPP_PUBLIC
 rmw_ret_t
 __rmw_take_event(
   const char * implementation_identifier,
@@ -60,4 +60,4 @@ __rmw_take_event(
   void * event_info,
   bool * taken);
 
-#endif  // RMW_OPENDDS_SHARED_CPP__EVENT_HPP_
+#endif  // RMW_OPENDDS_CPP__EVENT_HPP_

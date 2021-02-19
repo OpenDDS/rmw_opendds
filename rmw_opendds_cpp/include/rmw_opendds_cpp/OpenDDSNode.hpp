@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef RMW_OPENDDS_SHARED_CPP__OPENDDSNODE_HPP_
-#define RMW_OPENDDS_SHARED_CPP__OPENDDSNODE_HPP_
+#ifndef RMW_OPENDDS_CPP__OPENDDSNODE_HPP_
+#define RMW_OPENDDS_CPP__OPENDDSNODE_HPP_
 
 #include "rmw_opendds_cpp/RmwAllocateFree.hpp"
 #include "rmw_opendds_cpp/types.hpp"
@@ -54,4 +54,4 @@ private:
   mutable Lock lock_;
 };
 
-#endif  // RMW_OPENDDS_SHARED_CPP__OPENDDSNODE_HPP_
+#endif  // RMW_OPENDDS_CPP__OPENDDSNODE_HPP_

@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef RMW_OPENDDS_SHARED_CPP__TYPES_HPP_
-#define RMW_OPENDDS_SHARED_CPP__TYPES_HPP_
+#ifndef RMW_OPENDDS_CPP__TYPES_HPP_
+#define RMW_OPENDDS_CPP__TYPES_HPP_
 
 #include "topic_cache.hpp"
 #include "rmw_opendds_cpp/RmwAllocateFree.hpp"
@@ -54,17 +54,17 @@ public:
     // const rmw_qos_profile_t& qos_profile,
     EntityType entity_type);
 
-  RMW_OPENDDS_SHARED_CPP_PUBLIC
+  RMW_OPENDDS_CPP_PUBLIC
   virtual bool remove_information(
     const DDS::GUID_t& guid,
     EntityType entity_type);
 
-  RMW_OPENDDS_SHARED_CPP_PUBLIC
+  RMW_OPENDDS_CPP_PUBLIC
   virtual void trigger_graph_guard_condition();
 
   size_t count_topic(const char * topic_name);
 
-  RMW_OPENDDS_SHARED_CPP_PUBLIC
+  RMW_OPENDDS_CPP_PUBLIC
   virtual void fill_topic_endpoint_infos(
     const std::string& topic_name,
     bool no_mangle,
@@ -161,4 +161,4 @@ struct OpenDDSWaitSetInfo
   DDS::ConditionSeq * attached_conditions;
 };
 
-#endif  // RMW_OPENDDS_SHARED_CPP__TYPES_HPP_
+#endif  // RMW_OPENDDS_CPP__TYPES_HPP_

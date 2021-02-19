@@ -12,12 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef RMW_OPENDDS_SHARED_CPP__NDDS_INCLUDE_HPP_
-#define RMW_OPENDDS_SHARED_CPP__NDDS_INCLUDE_HPP_
+#ifndef RMW_OPENDDS_CPP__NDDS_INCLUDE_HPP_
+#define RMW_OPENDDS_CPP__NDDS_INCLUDE_HPP_
 
 #include <dds/DdsDcpsInfrastructureC.h>
 #include <dds/DdsDcpsDomainC.h>
 #include <dds/DCPS/WaitSet.h>
 #include <dds/DCPS/GuardCondition.h>
 
-#endif  // RMW_OPENDDS_SHARED_CPP__NDDS_INCLUDE_HPP_
+#endif  // RMW_OPENDDS_CPP__NDDS_INCLUDE_HPP_

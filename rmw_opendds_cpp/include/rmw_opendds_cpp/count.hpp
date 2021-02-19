@@ -12,14 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef RMW_OPENDDS_SHARED_CPP__COUNT_HPP_
-#define RMW_OPENDDS_SHARED_CPP__COUNT_HPP_
+#ifndef RMW_OPENDDS_CPP__COUNT_HPP_
+#define RMW_OPENDDS_CPP__COUNT_HPP_
 
 #include "rmw/types.h"
 
 #include "rmw_opendds_cpp/visibility_control.h"
 
-RMW_OPENDDS_SHARED_CPP_PUBLIC
+RMW_OPENDDS_CPP_PUBLIC
 rmw_ret_t
 count_publishers(
   const char * implementation_identifier,
@@ -27,7 +27,7 @@ count_publishers(
   const char * topic_name,
   size_t * count);
 
-RMW_OPENDDS_SHARED_CPP_PUBLIC
+RMW_OPENDDS_CPP_PUBLIC
 rmw_ret_t
 count_subscribers(
   const char * implementation_identifier,
@@ -35,4 +35,4 @@ count_subscribers(
   const char * topic_name,
   size_t * count);
 
-#endif  // RMW_OPENDDS_SHARED_CPP__COUNT_HPP_
+#endif  // RMW_OPENDDS_CPP__COUNT_HPP_

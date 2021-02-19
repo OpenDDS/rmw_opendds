@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef RMW_OPENDDS_SHARED_CPP__WAIT_HPP_
-#define RMW_OPENDDS_SHARED_CPP__WAIT_HPP_
+#ifndef RMW_OPENDDS_CPP__WAIT_HPP_
+#define RMW_OPENDDS_CPP__WAIT_HPP_
 
 #include "opendds_include.hpp"
 
@@ -292,4 +292,4 @@ wait(
   return (status == DDS::RETCODE_TIMEOUT) ? RMW_RET_TIMEOUT : RMW_RET_OK;
 }
 
-#endif  // RMW_OPENDDS_SHARED_CPP__WAIT_HPP_
+#endif  // RMW_OPENDDS_CPP__WAIT_HPP_

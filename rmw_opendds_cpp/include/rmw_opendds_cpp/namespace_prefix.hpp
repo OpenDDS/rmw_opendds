@@ -12,19 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef RMW_OPENDDS_SHARED_CPP__NAMESPACE_PREFIX_HPP_
-#define RMW_OPENDDS_SHARED_CPP__NAMESPACE_PREFIX_HPP_
+#ifndef RMW_OPENDDS_CPP__NAMESPACE_PREFIX_HPP_
+#define RMW_OPENDDS_CPP__NAMESPACE_PREFIX_HPP_
 
 #include <string>
 #include <vector>
 
 #include "rmw_opendds_cpp/visibility_control.h"
 
-RMW_OPENDDS_SHARED_CPP_PUBLIC extern const char * const ros_topic_prefix;
-RMW_OPENDDS_SHARED_CPP_PUBLIC extern const char * const ros_service_requester_prefix;
-RMW_OPENDDS_SHARED_CPP_PUBLIC extern const char * const ros_service_response_prefix;
+RMW_OPENDDS_CPP_PUBLIC extern const char * const ros_topic_prefix;
+RMW_OPENDDS_CPP_PUBLIC extern const char * const ros_service_requester_prefix;
+RMW_OPENDDS_CPP_PUBLIC extern const char * const ros_service_response_prefix;
 
-RMW_OPENDDS_SHARED_CPP_PUBLIC extern std::vector<std::string> _ros_prefixes;
+RMW_OPENDDS_CPP_PUBLIC extern std::vector<std::string> _ros_prefixes;
 
 /// Return the ROS specific prefix if it exists, otherwise "".
 std::string
@@ -38,4 +38,4 @@ _strip_ros_prefix_if_exists(const std::string & topic_name);
 const std::vector<std::string> &
 _get_all_ros_prefixes();
 
-#endif  // RMW_OPENDDS_SHARED_CPP__NAMESPACE_PREFIX_HPP_
+#endif  // RMW_OPENDDS_CPP__NAMESPACE_PREFIX_HPP_

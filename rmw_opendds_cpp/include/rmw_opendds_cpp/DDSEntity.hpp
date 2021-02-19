@@ -10,8 +10,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef RMW_OPENDDS_SHARED_CPP__DDSENTITY_HPP_
-#define RMW_OPENDDS_SHARED_CPP__DDSENTITY_HPP_
+#ifndef RMW_OPENDDS_CPP__DDSENTITY_HPP_
+#define RMW_OPENDDS_CPP__DDSENTITY_HPP_
 
 #include "rmw_opendds_cpp/namespace_prefix.hpp"
 #include "rmw_opendds_cpp/opendds_include.hpp"
@@ -92,4 +92,4 @@ public:
   virtual DDS::Entity * get() = 0;
 };
 
-#endif  // RMW_OPENDDS_SHARED_CPP__DDSENTITY_HPP_
+#endif  // RMW_OPENDDS_CPP__DDSENTITY_HPP_

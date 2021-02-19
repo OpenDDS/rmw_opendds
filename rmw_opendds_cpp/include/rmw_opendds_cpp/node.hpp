@@ -12,19 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef RMW_OPENDDS_SHARED_CPP__NODE_HPP_
-#define RMW_OPENDDS_SHARED_CPP__NODE_HPP_
+#ifndef RMW_OPENDDS_CPP__NODE_HPP_
+#define RMW_OPENDDS_CPP__NODE_HPP_
 
 #include "rmw_opendds_cpp/visibility_control.h"
 
 #include "rmw/types.h"
 
-RMW_OPENDDS_SHARED_CPP_PUBLIC
+RMW_OPENDDS_CPP_PUBLIC
 rmw_node_t *
 create_node(rmw_context_t & context, const char * name, const char * name_space);
 
-RMW_OPENDDS_SHARED_CPP_PUBLIC
+RMW_OPENDDS_CPP_PUBLIC
 rmw_ret_t
 destroy_node(rmw_node_t * node);
 
-#endif  // RMW_OPENDDS_SHARED_CPP__NODE_HPP_
+#endif  // RMW_OPENDDS_CPP__NODE_HPP_

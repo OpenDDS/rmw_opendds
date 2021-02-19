@@ -12,15 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef RMW_OPENDDS_SHARED_CPP__NODE_NAMES_HPP_
-#define RMW_OPENDDS_SHARED_CPP__NODE_NAMES_HPP_
+#ifndef RMW_OPENDDS_CPP__NODE_NAMES_HPP_
+#define RMW_OPENDDS_CPP__NODE_NAMES_HPP_
 
 #include "rmw/names_and_types.h"
 #include "rmw/types.h"
 
 #include "rmw_opendds_cpp/visibility_control.h"
 
-RMW_OPENDDS_SHARED_CPP_PUBLIC
+RMW_OPENDDS_CPP_PUBLIC
 rmw_ret_t
 get_node_names(
   const char * implementation_identifier,
@@ -28,7 +28,7 @@ get_node_names(
   rcutils_string_array_t * node_names,
   rcutils_string_array_t * node_namespaces);
 
-RMW_OPENDDS_SHARED_CPP_PUBLIC
+RMW_OPENDDS_CPP_PUBLIC
 rmw_ret_t
 get_node_names_with_enclaves(
   const char* implementation_identifier,
@@ -37,7 +37,7 @@ get_node_names_with_enclaves(
   rcutils_string_array_t* node_namespaces,
   rcutils_string_array_t* enclaves);
 
-RMW_OPENDDS_SHARED_CPP_PUBLIC
+RMW_OPENDDS_CPP_PUBLIC
 rmw_ret_t
 count_publishers(
   const char * implementation_identifier,
@@ -45,7 +45,7 @@ count_publishers(
   const char * topic_name,
   size_t * count);
 
-RMW_OPENDDS_SHARED_CPP_PUBLIC
+RMW_OPENDDS_CPP_PUBLIC
 rmw_ret_t
 count_subscribers(
   const char * implementation_identifier,
@@ -53,8 +53,8 @@ count_subscribers(
   const char * topic_name,
   size_t * count);
 
-RMW_OPENDDS_SHARED_CPP_PUBLIC
+RMW_OPENDDS_CPP_PUBLIC
 const rmw_guard_condition_t *
 node_get_graph_guard_condition(const rmw_node_t * node);
 
-#endif  // RMW_OPENDDS_SHARED_CPP__NODE_NAMES_HPP_
+#endif  // RMW_OPENDDS_CPP__NODE_NAMES_HPP_

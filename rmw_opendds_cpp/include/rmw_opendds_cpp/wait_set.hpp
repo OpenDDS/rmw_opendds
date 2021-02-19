@@ -12,19 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef RMW_OPENDDS_SHARED_CPP__WAIT_SET_HPP_
-#define RMW_OPENDDS_SHARED_CPP__WAIT_SET_HPP_
+#ifndef RMW_OPENDDS_CPP__WAIT_SET_HPP_
+#define RMW_OPENDDS_CPP__WAIT_SET_HPP_
 
 #include "rmw/types.h"
 
 #include "rmw_opendds_cpp/visibility_control.h"
 
-RMW_OPENDDS_SHARED_CPP_PUBLIC
+RMW_OPENDDS_CPP_PUBLIC
 rmw_wait_set_t *
 create_wait_set(const char * implementation_identifier, size_t max_conditions);
 
-RMW_OPENDDS_SHARED_CPP_PUBLIC
+RMW_OPENDDS_CPP_PUBLIC
 rmw_ret_t
 destroy_wait_set(const char * implementation_identifier, rmw_wait_set_t * wait_set);
 
-#endif  // RMW_OPENDDS_SHARED_CPP__WAIT_SET_HPP_
+#endif  // RMW_OPENDDS_CPP__WAIT_SET_HPP_

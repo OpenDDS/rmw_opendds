@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef RMW_OPENDDS_SHARED_CPP__GUARD_CONDITION_HPP_
-#define RMW_OPENDDS_SHARED_CPP__GUARD_CONDITION_HPP_
+#ifndef RMW_OPENDDS_CPP__GUARD_CONDITION_HPP_
+#define RMW_OPENDDS_CPP__GUARD_CONDITION_HPP_
 
 #include "rmw_opendds_cpp/opendds_include.hpp"
 
@@ -21,12 +21,12 @@
 
 #include "rmw_opendds_cpp/visibility_control.h"
 
-RMW_OPENDDS_SHARED_CPP_PUBLIC
+RMW_OPENDDS_CPP_PUBLIC
 rmw_guard_condition_t *
 create_guard_condition();
 
-RMW_OPENDDS_SHARED_CPP_PUBLIC
+RMW_OPENDDS_CPP_PUBLIC
 rmw_ret_t
 destroy_guard_condition(rmw_guard_condition_t * guard_condition);
 
-#endif  // RMW_OPENDDS_SHARED_CPP__GUARD_CONDITION_HPP_
+#endif  // RMW_OPENDDS_CPP__GUARD_CONDITION_HPP_

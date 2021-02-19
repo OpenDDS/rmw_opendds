@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef RMW_OPENDDS_SHARED_CPP__GUID_HELPER_HPP_
-#define RMW_OPENDDS_SHARED_CPP__GUID_HELPER_HPP_
+#ifndef RMW_OPENDDS_CPP__GUID_HELPER_HPP_
+#define RMW_OPENDDS_CPP__GUID_HELPER_HPP_
 
 #include <cstring>
 #include <iostream>
@@ -31,4 +31,4 @@ inline void DDS_BuiltinTopicKey_to_GUID(DDS::GUID_t* guid, DDS::BuiltinTopicKey_
   std::memcpy(guid, builtinTopicKey.value, sizeof(DDS::BuiltinTopicKey_t));
 }
 
-#endif  // RMW_OPENDDS_SHARED_CPP__GUID_HELPER_HPP_
+#endif  // RMW_OPENDDS_CPP__GUID_HELPER_HPP_

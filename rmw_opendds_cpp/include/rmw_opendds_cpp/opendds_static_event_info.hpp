@@ -10,8 +10,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef RMW_OPENDDS_SHARED_CPP__OPENDDS_STATIC_EVENT_INFO_HPP_
-#define RMW_OPENDDS_SHARED_CPP__OPENDDS_STATIC_EVENT_INFO_HPP_
+#ifndef RMW_OPENDDS_CPP__OPENDDS_STATIC_EVENT_INFO_HPP_
+#define RMW_OPENDDS_CPP__OPENDDS_STATIC_EVENT_INFO_HPP_
 
 #include "rmw/ret_types.h"
 
@@ -31,4 +31,4 @@ struct OpenDDSCustomEventInfo
   virtual DDS::Entity * get_entity() = 0;
 };
 
-#endif  // RMW_OPENDDS_SHARED_CPP__OPENDDS_STATIC_EVENT_INFO_HPP_
+#endif  // RMW_OPENDDS_CPP__OPENDDS_STATIC_EVENT_INFO_HPP_

@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef RMW_OPENDDS_SHARED_CPP__SHARED_FUNCTIONS_HPP_
-#define RMW_OPENDDS_SHARED_CPP__SHARED_FUNCTIONS_HPP_
+#ifndef RMW_OPENDDS_CPP__SHARED_FUNCTIONS_HPP_
+#define RMW_OPENDDS_CPP__SHARED_FUNCTIONS_HPP_
 
 #include "condition_error.hpp"
 #include "count.hpp"
@@ -33,4 +33,4 @@
 #include "wait.hpp"
 #include "wait_set.hpp"
 
-#endif  // RMW_OPENDDS_SHARED_CPP__SHARED_FUNCTIONS_HPP_
+#endif  // RMW_OPENDDS_CPP__SHARED_FUNCTIONS_HPP_

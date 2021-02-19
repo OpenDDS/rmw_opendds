@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef RMW_OPENDDS_SHARED_CPP__TOPIC_CACHE_HPP_
-#define RMW_OPENDDS_SHARED_CPP__TOPIC_CACHE_HPP_
+#ifndef RMW_OPENDDS_CPP__TOPIC_CACHE_HPP_
+#define RMW_OPENDDS_CPP__TOPIC_CACHE_HPP_
 
 #include <algorithm>
 #include <iterator>
@@ -97,19 +97,19 @@ public:
     initialize_participant_map(participant_to_endpoint_guids_, participant_guid);
     if (
       rcutils_logging_logger_is_enabled_for(
-        "rmw_opendds_shared_cpp", RCUTILS_LOG_SEVERITY_DEBUG))
+        "rmw_opendds_cpp", RCUTILS_LOG_SEVERITY_DEBUG))
     {
       std::stringstream guid_stream;
       guid_stream << participant_guid;
       RCUTILS_LOG_DEBUG_NAMED(
-        "rmw_opendds_shared_cpp",
+        "rmw_opendds_cpp",
         "Adding topic '%s' with type '%s' for node '%s'",
         topic_name.c_str(), type_name.c_str(), guid_stream.str().c_str());
     }
     auto topic_endpoint_info_it = endpoint_guid_to_info_.find(endpoint_guid);
     if (topic_endpoint_info_it != endpoint_guid_to_info_.end()) {
       RCUTILS_LOG_WARN_NAMED(
-        "rmw_opendds_shared_cpp",
+        "rmw_opendds_cpp",
         "unique topic attempted to be added twice, ignoring");
       return false;
     }
@@ -132,7 +132,7 @@ public:
     auto topic_endpoint_info_it = endpoint_guid_to_info_.find(endpoint_guid);
     if (topic_endpoint_info_it == endpoint_guid_to_info_.end()) {
       RCUTILS_LOG_WARN_NAMED(
-        "rmw_opendds_shared_cpp",
+        "rmw_opendds_cpp",
         "unexpected topic removal.");
       return false;
     }
@@ -144,7 +144,7 @@ public:
     auto participant_to_topic_guid = participant_to_endpoint_guids_.find(participant_guid);
     if (participant_to_topic_guid == participant_to_endpoint_guids_.end()) {
       RCUTILS_LOG_WARN_NAMED(
-        "rmw_opendds_shared_cpp",
+        "rmw_opendds_cpp",
         "Unable to remove topic,"
         " participant guid does not exist for topic name '%s' with type '%s'",
         topic_name.c_str(), type_name.c_str());
@@ -153,7 +153,7 @@ public:
     auto topic_guid_to_remove = participant_to_topic_guid->second.find(endpoint_guid);
     if (topic_guid_to_remove == participant_to_topic_guid->second.end()) {
       RCUTILS_LOG_WARN_NAMED(
-        "rmw_opendds_shared_cpp",
+        "rmw_opendds_cpp",
         "Unable to remove topic, "
         "topic guid does not exist in participant guid: topic name '%s' with type '%s'",
         topic_name.c_str(), type_name.c_str());
@@ -230,4 +230,4 @@ private:
   ParticipantToTopicEndpointGuids participant_to_endpoint_guids_;
 };
 
-#endif  // RMW_OPENDDS_SHARED_CPP__TOPIC_CACHE_HPP_
+#endif  // RMW_OPENDDS_CPP__TOPIC_CACHE_HPP_

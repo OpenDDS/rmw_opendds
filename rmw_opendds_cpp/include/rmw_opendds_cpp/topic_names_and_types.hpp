@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef RMW_OPENDDS_SHARED_CPP__TOPIC_NAMES_AND_TYPES_HPP_
-#define RMW_OPENDDS_SHARED_CPP__TOPIC_NAMES_AND_TYPES_HPP_
+#ifndef RMW_OPENDDS_CPP__TOPIC_NAMES_AND_TYPES_HPP_
+#define RMW_OPENDDS_CPP__TOPIC_NAMES_AND_TYPES_HPP_
 
 #include "rcutils/allocator.h"
 
@@ -21,7 +21,7 @@
 
 #include "rmw/get_topic_names_and_types.h"
 
-RMW_OPENDDS_SHARED_CPP_PUBLIC
+RMW_OPENDDS_CPP_PUBLIC
 rmw_ret_t
 get_topic_names_and_types(
   const char * implementation_identifier,
@@ -30,4 +30,4 @@ get_topic_names_and_types(
   bool no_demangle,
   rmw_names_and_types_t * topic_names_and_types);
 
-#endif  // RMW_OPENDDS_SHARED_CPP__TOPIC_NAMES_AND_TYPES_HPP_
+#endif  // RMW_OPENDDS_CPP__TOPIC_NAMES_AND_TYPES_HPP_

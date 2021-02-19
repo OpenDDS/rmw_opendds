@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef RMW_OPENDDS_SHARED_CPP__NODE_INFO_AND_TYPES_HPP_
-#define RMW_OPENDDS_SHARED_CPP__NODE_INFO_AND_TYPES_HPP_
+#ifndef RMW_OPENDDS_CPP__NODE_INFO_AND_TYPES_HPP_
+#define RMW_OPENDDS_CPP__NODE_INFO_AND_TYPES_HPP_
 
 #include "rcutils/allocator.h"
 
@@ -22,7 +22,7 @@
 
 #include "rmw_opendds_cpp/visibility_control.h"
 
-RMW_OPENDDS_SHARED_CPP_PUBLIC
+RMW_OPENDDS_CPP_PUBLIC
 rmw_ret_t
 get_client_names_and_types_by_node(
   const char* implementation_identifier,
@@ -32,7 +32,7 @@ get_client_names_and_types_by_node(
   const char* node_namespace,
   rmw_names_and_types_t* service_names_and_types);
 
-RMW_OPENDDS_SHARED_CPP_PUBLIC
+RMW_OPENDDS_CPP_PUBLIC
 rmw_ret_t
 get_publisher_names_and_types_by_node(
   const char * implementation_identifier,
@@ -43,7 +43,7 @@ get_publisher_names_and_types_by_node(
   bool no_demangle,
   rmw_names_and_types_t * topic_names_and_types);
 
-RMW_OPENDDS_SHARED_CPP_PUBLIC
+RMW_OPENDDS_CPP_PUBLIC
 rmw_ret_t
 get_service_names_and_types_by_node(
   const char * implementation_identifier,
@@ -53,7 +53,7 @@ get_service_names_and_types_by_node(
   const char * node_namespace,
   rmw_names_and_types_t * service_names_and_types);
 
-RMW_OPENDDS_SHARED_CPP_PUBLIC
+RMW_OPENDDS_CPP_PUBLIC
 rmw_ret_t
 get_subscriber_names_and_types_by_node(
   const char * implementation_identifier,
@@ -64,4 +64,4 @@ get_subscriber_names_and_types_by_node(
   bool no_demangle,
   rmw_names_and_types_t * topic_names_and_types);
 
-#endif  // RMW_OPENDDS_SHARED_CPP__NODE_INFO_AND_TYPES_HPP_
+#endif  // RMW_OPENDDS_CPP__NODE_INFO_AND_TYPES_HPP_

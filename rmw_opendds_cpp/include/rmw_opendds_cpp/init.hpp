@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef RMW_OPENDDS_SHARED_CPP__INIT_HPP_
-#define RMW_OPENDDS_SHARED_CPP__INIT_HPP_
+#ifndef RMW_OPENDDS_CPP__INIT_HPP_
+#define RMW_OPENDDS_CPP__INIT_HPP_
 
 #include "rmw/types.h"
 
@@ -28,14 +28,14 @@ struct rmw_context_impl_t
   DDS::DomainParticipantFactory_var dpf_;
 };
 
-RMW_OPENDDS_SHARED_CPP_PUBLIC
+RMW_OPENDDS_CPP_PUBLIC
 rmw_ret_t init(rmw_context_t& context);
 
-RMW_OPENDDS_SHARED_CPP_PUBLIC
+RMW_OPENDDS_CPP_PUBLIC
 rmw_ret_t shutdown(rmw_context_t& context);
 
 bool is_zero_initialized(const rmw_init_options_t * o);
 
 bool is_zero_initialized(const rmw_context_t * c);
 
-#endif  // RMW_OPENDDS_SHARED_CPP__INIT_HPP_
+#endif  // RMW_OPENDDS_CPP__INIT_HPP_
