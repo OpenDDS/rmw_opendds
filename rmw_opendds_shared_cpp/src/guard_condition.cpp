@@ -13,14 +13,13 @@
 // limitations under the License.
 
 #include "rmw_opendds_shared_cpp/guard_condition.hpp"
-#include "rmw_opendds_shared_cpp/opendds_include.hpp"
 #include "rmw_opendds_shared_cpp/identifier.hpp"
+
+#include <dds/DCPS/GuardCondition.h>
 
 #include "rmw/allocators.h"
 #include "rmw/error_handling.h"
 #include "rmw/impl/cpp/macros.hpp"
-
-#include "dds/DCPS/GuardCondition.h"
 
 rmw_guard_condition_t * create_guard_condition()
 {

@@ -17,12 +17,13 @@
 
 #include "topic_cache.hpp"
 #include "rmw_opendds_shared_cpp/RmwAllocateFree.hpp"
-#include "rmw_opendds_shared_cpp/opendds_include.hpp"
 #include "rmw_opendds_shared_cpp/visibility_control.h"
 
-#include "rmw/rmw.h"
+#include <dds/DdsDcpsInfrastructureC.h>
+#include <dds/DdsDcpsDomainC.h>
+#include <dds/DCPS/WaitSet.h>
 
-#include "dds/DCPS/WaitSet.h"
+#include "rmw/rmw.h"
 
 #include <cassert>
 #include <exception>

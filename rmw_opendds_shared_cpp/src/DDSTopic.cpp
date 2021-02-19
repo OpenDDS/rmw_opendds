@@ -12,11 +12,11 @@
 
 #include <rmw_opendds_shared_cpp/DDSTopic.hpp>
 #include <rmw_opendds_shared_cpp/namespace_prefix.hpp>
-#include <rmw_opendds_shared_cpp/opendds_include.hpp>
 
 #include <rosidl_typesupport_opendds_c/identifier.h>
 #include <rosidl_typesupport_opendds_cpp/identifier.hpp>
 
+#include <dds/DdsDcpsInfrastructureC.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
 
 #include <rmw/error_handling.h>

@@ -15,7 +15,7 @@
 #ifndef RMW_OPENDDS_SHARED_CPP__CONDITION_ERROR_HPP_
 #define RMW_OPENDDS_SHARED_CPP__CONDITION_ERROR_HPP_
 
-#include "opendds_include.hpp"
+#include <dds/DdsDcpsInfrastructureC.h>
 
 #include "rmw/types.h"
 

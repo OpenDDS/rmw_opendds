@@ -15,14 +15,17 @@
 #ifndef RMW_OPENDDS_SHARED_CPP__WAIT_HPP_
 #define RMW_OPENDDS_SHARED_CPP__WAIT_HPP_
 
-#include "opendds_include.hpp"
-
 #include "rmw_opendds_shared_cpp/condition_error.hpp"
 #include "rmw_opendds_shared_cpp/event_converter.hpp"
 #include "rmw_opendds_shared_cpp/identifier.hpp"
 #include "rmw_opendds_shared_cpp/types.hpp"
 #include "rmw_opendds_shared_cpp/visibility_control.h"
 #include "rmw_opendds_shared_cpp/DDSEntity.hpp"
+
+#include <dds/DdsDcpsInfrastructureC.h>
+#include <dds/DdsDcpsDomainC.h>
+#include <dds/DCPS/WaitSet.h>
+#include <dds/DCPS/GuardCondition.h>
 
 #include "rmw/error_handling.h"
 #include "rmw/impl/cpp/macros.hpp"

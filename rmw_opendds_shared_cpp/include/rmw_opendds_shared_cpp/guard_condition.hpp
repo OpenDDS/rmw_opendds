@@ -15,8 +15,6 @@
 #ifndef RMW_OPENDDS_SHARED_CPP__GUARD_CONDITION_HPP_
 #define RMW_OPENDDS_SHARED_CPP__GUARD_CONDITION_HPP_
 
-#include "rmw_opendds_shared_cpp/opendds_include.hpp"
-
 #include "rmw/types.h"
 
 #include "rmw_opendds_shared_cpp/visibility_control.h"

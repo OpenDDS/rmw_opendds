@@ -18,7 +18,6 @@
 #include <rmw_opendds_shared_cpp/init.hpp>
 #include <rmw_opendds_shared_cpp/types.hpp>
 #include <rmw_opendds_shared_cpp/identifier.hpp>
-#include <rmw_opendds_shared_cpp/opendds_include.hpp>
 
 #include <dds/DdsDcpsCoreTypeSupportC.h>
 #include <dds/DCPS/BuiltInTopicUtils.h>

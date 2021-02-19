@@ -14,8 +14,6 @@
 #include <map>
 #include <vector>
 
-#include "rmw_opendds_shared_cpp/opendds_include.hpp"
-
 #include "rmw/error_handling.h"
 #include "rmw/impl/cpp/key_value.hpp"
 
@@ -25,8 +23,6 @@
 #include "rmw_opendds_shared_cpp/topic_endpoint_info.hpp"
 #include "rmw_opendds_shared_cpp/types.hpp"
 #include <rmw_opendds_shared_cpp/OpenDDSNode.hpp>
-
-#include <dds/DCPS/DomainParticipantImpl.h>
 
 struct ParticipantNameInfo
 {

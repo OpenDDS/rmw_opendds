@@ -17,11 +17,10 @@
 #include "rmw/types.h"
 
 #include "rmw_opendds_shared_cpp/identifier.hpp"
-#include "rmw_opendds_shared_cpp/opendds_include.hpp"
 #include "rmw_opendds_shared_cpp/trigger_guard_condition.hpp"
 #include "rmw_opendds_shared_cpp/types.hpp"
 
-#include "dds/DCPS/GuardCondition.h"
+#include <dds/DCPS/GuardCondition.h>
 
 rmw_ret_t
 trigger_guard_condition(const rmw_guard_condition_t * guard_condition_handle)

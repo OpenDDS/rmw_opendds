@@ -15,7 +15,7 @@
 #ifndef RMW_OPENDDS_SHARED_CPP__EVENT_CONVERTER_HPP_
 #define RMW_OPENDDS_SHARED_CPP__EVENT_CONVERTER_HPP_
 
-#include "rmw_opendds_shared_cpp/opendds_include.hpp"
+#include <dds/DdsDcpsInfrastructureC.h>
 
 #include "rmw/event.h"
 #include "rmw/ret_types.h"
