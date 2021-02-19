@@ -12,7 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "rmw_opendds_cpp/shared_functions.hpp"
+// #include "rmw_opendds_cpp/shared_functions.hpp"
+#include "rmw_opendds_cpp/wait.hpp"
 
 rmw_wait_set_t *
 create_wait_set(const char * implementation_identifier, size_t max_conditions)

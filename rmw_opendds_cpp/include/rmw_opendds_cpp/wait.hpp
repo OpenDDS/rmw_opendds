@@ -32,36 +32,7 @@
 #include <unordered_set>
 #include <utility>
 
-rmw_ret_t __handle_active_event_conditions(rmw_events_t* events)
-{
-  // enable a status condition for each event
-  if (events) {
-    for (size_t i = 0; i < events->event_count; ++i) {
-      auto current_event = static_cast<rmw_event_t*>(events->events[i]);
-      RMW_CHECK_ARGUMENT_FOR_NULL(current_event->data, RMW_RET_INVALID_ARGUMENT);
-      DDS::Entity* dds_entity = static_cast<OpenDDSCustomEventInfo*>(
-        current_event->data)->get_entity();
-      if (!dds_entity) {
-        RMW_SET_ERROR_MSG("Event handle is null");
-        return RMW_RET_ERROR;
-      }
-
-      DDS::StatusMask status_mask = dds_entity->get_status_changes();
-      bool is_active = false;
-
-      if (is_event_supported(current_event->event_type)) {
-        is_active = static_cast<bool>(status_mask &
-          get_status_kind_from_rmw(current_event->event_type));
-      }
-      // if status condition is not found in the active set
-      // reset the subscriber handle
-      if (!is_active) {
-        events->events[i] = nullptr;
-      }
-    }
-  }
-  return RMW_RET_OK;
-}
+rmw_ret_t __handle_active_event_conditions(rmw_events_t* events);
 
 template<typename SubscriberInfo, typename ServiceInfo, typename ClientInfo>
 rmw_ret_t

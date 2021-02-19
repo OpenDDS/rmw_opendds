@@ -130,7 +130,8 @@ add_library(
   src/types/custom_data_reader_listener.cpp
   src/types/custom_publisher_listener.cpp
   src/types/custom_subscriber_listener.cpp
-  src/topic_endpoint_info.cpp)
+  src/topic_endpoint_info.cpp
+  src/wait.cpp)
 
 
 OPENDDS_TARGET_SOURCES(rmw_opendds_cpp resources/opendds_static_serialized_data.idl TAO_IDL_OPTIONS "-Sa -St")
