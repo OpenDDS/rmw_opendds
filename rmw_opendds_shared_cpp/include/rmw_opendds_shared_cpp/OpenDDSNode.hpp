@@ -22,10 +22,15 @@
 
 #include <rmw/names_and_types.h>
 
+#include <map>
+#include <set>
+#include <string>
+
 class OpenDDSNode
 {
 public:
   typedef RmwAllocateFree<OpenDDSNode> Raf;
+  typedef typename std::map<std::string, std::set<std::string>> NameTypeMap;
   static OpenDDSNode * from(const rmw_node_t * node);
   static bool validate_name_namespace(const char * node_name, const char * node_namespace);
   const std::string& name() const { return name_; }
@@ -42,11 +47,11 @@ public:
   rmw_ret_t count_publishers(const char * topic_name, size_t * count);
   rmw_ret_t count_subscribers(const char * topic_name, size_t * count);
   rmw_ret_t get_names(rcutils_string_array_t * names, rcutils_string_array_t * namespaces, rcutils_string_array_t * enclaves) const;
-  rmw_ret_t get_pub_names_types(rmw_names_and_types_t * names_types, const char * node_name, const char * node_namespace, bool no_demangle, rcutils_allocator_t * allocator) const;
-  rmw_ret_t get_sub_names_types(rmw_names_and_types_t * names_types, const char * node_name, const char * node_namespace, bool no_demangle, rcutils_allocator_t * allocator) const;
-  rmw_ret_t get_topic_names_types(rmw_names_and_types_t * names_types, bool no_demangle, rcutils_allocator_t * allocator) const;
-  rmw_ret_t get_service_names_types(rmw_names_and_types_t * names_types, rcutils_allocator_t * allocator) const;
-  rmw_ret_t get_service_names_types(rmw_names_and_types_t * names_types, const char * node_name, const char * node_namespace, const char* suffix, rcutils_allocator_t* allocator) const;
+  rmw_ret_t get_pub_names_types(rmw_names_and_types_t * nt, const char * node_name, const char * node_namespace, bool no_demangle, rcutils_allocator_t * allocator) const;
+  rmw_ret_t get_sub_names_types(rmw_names_and_types_t * nt, const char * node_name, const char * node_namespace, bool no_demangle, rcutils_allocator_t * allocator) const;
+  rmw_ret_t get_topic_names_types(rmw_names_and_types_t * nt, bool no_demangle, rcutils_allocator_t * allocator) const;
+  rmw_ret_t get_service_names_types(rmw_names_and_types_t * nt, rcutils_allocator_t * allocator) const;
+  rmw_ret_t get_service_names_types(rmw_names_and_types_t * nt, const char * node_name, const char * node_namespace, const char* suffix, rcutils_allocator_t* allocator) const;
 
 private:
   friend Raf;
@@ -57,6 +62,8 @@ private:
   bool configureTransport();
   bool match(DDS::UserDataQosPolicy & user_data_qos, const std::string & node_name, const std::string & node_namespace) const;
   rmw_ret_t get_key(DDS::GUID_t & key, const char * node_name, const char * node_namespace) const;
+  rmw_ret_t copy_topic_names_types(rmw_names_and_types_t * nt, const NameTypeMap & ntm, bool no_demangle, rcutils_allocator_t * allocator) const;
+  rmw_ret_t copy_service_names_types(rmw_names_and_types_t * nt, const NameTypeMap & ntm, rcutils_allocator_t * allocator) const;
 
   rmw_context_t & context_;
   const std::string name_;

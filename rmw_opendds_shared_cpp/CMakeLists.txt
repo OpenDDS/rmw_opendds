@@ -82,7 +82,6 @@ add_library(
   src/namespace_prefix.cpp
   src/OpenDDSNode.cpp
   src/qos.cpp
-  src/names_and_types_helpers.cpp
   src/Service.cpp
   src/DDSTopic.cpp
   src/trigger_guard_condition.cpp

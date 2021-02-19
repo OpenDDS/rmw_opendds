@@ -13,12 +13,12 @@
 // limitations under the License.
 
 #include <rmw_opendds_shared_cpp/OpenDDSNode.hpp>
+#include <rmw_opendds_shared_cpp/demangle.hpp>
 #include <rmw_opendds_shared_cpp/guard_condition.hpp>
 #include <rmw_opendds_shared_cpp/init.hpp>
 #include <rmw_opendds_shared_cpp/types.hpp>
 #include <rmw_opendds_shared_cpp/identifier.hpp>
 #include <rmw_opendds_shared_cpp/opendds_include.hpp>
-#include <rmw_opendds_shared_cpp/names_and_types_helpers.hpp> //?? to be removed
 
 #include <dds/DdsDcpsCoreTypeSupportC.h>
 #include <dds/DCPS/BuiltInTopicUtils.h>
@@ -36,12 +36,11 @@
 #include <rcutils/strdup.h>
 
 #include <rmw/allocators.h>
+#include <rmw/convert_rcutils_ret_to_rmw_ret.h>
 #include <rmw/error_handling.h>
 #include <rmw/sanity_checks.h>
 #include <rmw/impl/cpp/macros.hpp>
 #include <rmw/impl/cpp/key_value.hpp>
-
-#include <string>
 
 OpenDDSNode* OpenDDSNode::from(const rmw_node_t * node)
 {
@@ -238,10 +237,10 @@ rmw_ret_t OpenDDSNode::get_names(rcutils_string_array_t * names, rcutils_string_
   return RMW_RET_ERROR;
 }
 
-rmw_ret_t OpenDDSNode::get_pub_names_types(rmw_names_and_types_t * names_types,
+rmw_ret_t OpenDDSNode::get_pub_names_types(rmw_names_and_types_t * nt,
   const char * node_name, const char * node_namespace, bool no_demangle, rcutils_allocator_t * allocator) const
 {
-  rmw_ret_t ret = rmw_names_and_types_check_zero(names_types);
+  rmw_ret_t ret = rmw_names_and_types_check_zero(nt);
   if (ret != RMW_RET_OK) {
     return ret;
   }
@@ -253,15 +252,15 @@ rmw_ret_t OpenDDSNode::get_pub_names_types(rmw_names_and_types_t * names_types,
   if (get_guid_err != RMW_RET_OK) {
     return get_guid_err;
   }
-  std::map<std::string, std::set<std::string>> topics;
-  pub_listener_->fill_topic_names_and_types_by_guid(no_demangle, topics, key);
-  return copy_topics_names_and_types(topics, allocator, no_demangle, names_types);
+  NameTypeMap ntm;
+  pub_listener_->fill_topic_names_and_types_by_guid(no_demangle, ntm, key);
+  return copy_topic_names_types(nt, ntm, no_demangle, allocator);
 }
 
-rmw_ret_t OpenDDSNode::get_sub_names_types(rmw_names_and_types_t * names_types,
+rmw_ret_t OpenDDSNode::get_sub_names_types(rmw_names_and_types_t * nt,
   const char * node_name, const char * node_namespace, bool no_demangle, rcutils_allocator_t * allocator) const
 {
-  rmw_ret_t ret = rmw_names_and_types_check_zero(names_types);
+  rmw_ret_t ret = rmw_names_and_types_check_zero(nt);
   if (ret != RMW_RET_OK) {
     return ret;
   }
@@ -273,27 +272,27 @@ rmw_ret_t OpenDDSNode::get_sub_names_types(rmw_names_and_types_t * names_types,
   if (get_guid_err != RMW_RET_OK) {
     return get_guid_err;
   }
-  std::map<std::string, std::set<std::string>> topics;
-  sub_listener_->fill_topic_names_and_types_by_guid(no_demangle, topics, key);
-  return copy_topics_names_and_types(topics, allocator, no_demangle, names_types);
+  NameTypeMap ntm;
+  sub_listener_->fill_topic_names_and_types_by_guid(no_demangle, ntm, key);
+  return copy_topic_names_types(nt, ntm, no_demangle, allocator);
 }
 
-rmw_ret_t OpenDDSNode::get_topic_names_types(rmw_names_and_types_t * names_types, bool no_demangle, rcutils_allocator_t * allocator) const
+rmw_ret_t OpenDDSNode::get_topic_names_types(rmw_names_and_types_t * nt, bool no_demangle, rcutils_allocator_t * allocator) const
 {
-  rmw_ret_t ret = rmw_names_and_types_check_zero(names_types);
+  rmw_ret_t ret = rmw_names_and_types_check_zero(nt);
   if (ret != RMW_RET_OK) {
     return ret;
   }
   // combine publisher and subscriber information
-  std::map<std::string, std::set<std::string>> topics;
-  pub_listener_->fill_topic_names_and_types(no_demangle, topics);
-  sub_listener_->fill_topic_names_and_types(no_demangle, topics);
-  return !topics.empty() ? copy_topics_names_and_types(topics, allocator, no_demangle, names_types) : RMW_RET_OK;
+  NameTypeMap ntm;
+  pub_listener_->fill_topic_names_and_types(no_demangle, ntm);
+  sub_listener_->fill_topic_names_and_types(no_demangle, ntm);
+  return copy_topic_names_types(nt, ntm, no_demangle, allocator);
 }
 
-rmw_ret_t OpenDDSNode::get_service_names_types(rmw_names_and_types_t * names_types, rcutils_allocator_t * allocator) const
+rmw_ret_t OpenDDSNode::get_service_names_types(rmw_names_and_types_t * nt, rcutils_allocator_t * allocator) const
 {
-  rmw_ret_t ret = rmw_names_and_types_check_zero(names_types);
+  rmw_ret_t ret = rmw_names_and_types_check_zero(nt);
   if (ret != RMW_RET_OK) {
     return ret;
   }
@@ -302,16 +301,16 @@ rmw_ret_t OpenDDSNode::get_service_names_types(rmw_names_and_types_t * names_typ
     return RMW_RET_INVALID_ARGUMENT;
   }
   // combine publisher and subscriber information
-  std::map<std::string, std::set<std::string>> services;
-  pub_listener_->fill_service_names_and_types(services);
-  sub_listener_->fill_service_names_and_types(services);
-  return !services.empty() ? copy_services_to_names_and_types(services, allocator, names_types) : RMW_RET_OK;
+  NameTypeMap ntm;
+  pub_listener_->fill_service_names_and_types(ntm);
+  sub_listener_->fill_service_names_and_types(ntm);
+  return copy_service_names_types(nt, ntm, allocator);
 }
 
-rmw_ret_t OpenDDSNode::get_service_names_types(rmw_names_and_types_t * names_types,
+rmw_ret_t OpenDDSNode::get_service_names_types(rmw_names_and_types_t * nt,
   const char * node_name, const char * node_namespace, const char* suffix, rcutils_allocator_t* allocator) const
 {
-  rmw_ret_t ret = rmw_names_and_types_check_zero(names_types);
+  rmw_ret_t ret = rmw_names_and_types_check_zero(nt);
   if (ret != RMW_RET_OK) {
     return ret;
   }
@@ -327,9 +326,9 @@ rmw_ret_t OpenDDSNode::get_service_names_types(rmw_names_and_types_t * names_typ
   if (get_guid_err != RMW_RET_OK) {
     return get_guid_err;
   }
-  std::map<std::string, std::set<std::string>> services;
-  sub_listener_->fill_service_names_and_types_by_guid(services, key, suffix);
-  return !services.empty() ? copy_services_to_names_and_types(services, allocator, names_types) : RMW_RET_OK;
+  NameTypeMap ntm;
+  sub_listener_->fill_service_names_and_types_by_guid(ntm, key, suffix);
+  return copy_service_names_types(nt, ntm, allocator);
 }
 
 OpenDDSNode::OpenDDSNode(rmw_context_t & context, const char * name, const char * name_space)
@@ -596,4 +595,128 @@ rmw_ret_t OpenDDSNode::get_key(DDS::GUID_t & key, const char * node_name, const 
     node_name
   );
   return RMW_RET_NODE_NAME_NON_EXISTENT;
+}
+
+//?? from rmw_opendds_shared_cpp/src/names_and_types_helpers.cpp
+constexpr char SAMPLE_PREFIX[] = "/Sample_";
+
+rmw_ret_t OpenDDSNode::copy_topic_names_types(rmw_names_and_types_t * nt,
+  const NameTypeMap & ntm, bool no_demangle, rcutils_allocator_t * allocator) const
+{
+  // Copy data to results handle
+  if (!ntm.empty()) {
+    // Setup string array to store names
+    rmw_ret_t rmw_ret = rmw_names_and_types_init(nt, ntm.size(), allocator);
+    if (rmw_ret != RMW_RET_OK) {
+      return rmw_ret;
+    }
+    // Setup cleanup function, in case of failure below
+    auto fail_cleanup = [&nt]() {
+      if (rmw_names_and_types_fini(nt) != RMW_RET_OK) {
+        RCUTILS_LOG_ERROR("rmw_names_and_types_fini failed: %s", rmw_get_error_string().str);
+      }
+    };
+    // Setup demangling functions based on no_demangle option
+    auto demangle_topic = _demangle_if_ros_topic;
+    auto demangle_type = _demangle_if_ros_type;
+    if (no_demangle) {
+      auto noop = [](const std::string & in) { return in; };
+      demangle_topic = noop;
+      demangle_type = noop;
+    }
+    // For each topic, store the name, initialize the string array for types, and store all types
+    size_t index = 0;
+    for (const auto & topic_n_types : ntm) {
+      // Duplicate and store the topic_name
+      char * topic_name = rcutils_strdup(demangle_topic(topic_n_types.first).c_str(), *allocator);
+      if (!topic_name) {
+        RMW_SET_ERROR_MSG("failed to allocate memory for topic name");
+        fail_cleanup();
+        return RMW_RET_BAD_ALLOC;
+      }
+      nt->names.data[index] = topic_name;
+      // Setup storage for types
+      {
+        rcutils_ret_t rcutils_ret = rcutils_string_array_init(&nt->types[index], topic_n_types.second.size(), allocator);
+        if (rcutils_ret != RCUTILS_RET_OK) {
+          RMW_SET_ERROR_MSG(rcutils_get_error_string().str);
+          fail_cleanup();
+          return rmw_convert_rcutils_ret_to_rmw_ret(rcutils_ret);
+        }
+      }
+      // Duplicate and store each type for the topic
+      size_t type_index = 0;
+      for (const auto & type : topic_n_types.second) {
+        char * type_name = rcutils_strdup(demangle_type(type).c_str(), *allocator);
+        if (!type_name) {
+          RMW_SET_ERROR_MSG("failed to allocate memory for type name");
+          fail_cleanup();
+          return RMW_RET_BAD_ALLOC;
+        }
+        nt->types[index].data[type_index] = type_name;
+        ++type_index;
+      }  // for each type
+      ++index;
+    }  // for each topic
+  }
+  return RMW_RET_OK;
+}
+
+rmw_ret_t OpenDDSNode::copy_service_names_types(rmw_names_and_types_t * nt, const NameTypeMap & ntm, rcutils_allocator_t * allocator) const
+{
+  if (!ntm.empty()) {
+    // Setup string array to store names
+    rmw_ret_t rmw_ret = rmw_names_and_types_init(nt, ntm.size(), allocator);
+    if (rmw_ret != RMW_RET_OK) {
+      return rmw_ret;
+    }
+    // Setup cleanup function, in case of failure below
+    auto fail_cleanup = [&nt]() {
+      if (rmw_names_and_types_fini(nt) != RMW_RET_OK) {
+        RCUTILS_LOG_ERROR("rmw_names_and_types_fini failed: %s", rmw_get_error_string().str);
+      }
+    };
+    // For each service, store the name, initialize the string array for types, and store all types
+    size_t index = 0;
+    for (const auto & service_n_types : ntm) {
+      // Duplicate and store the service_name
+      char * service_name = rcutils_strdup(service_n_types.first.c_str(), *allocator);
+      if (!service_name) {
+        RMW_SET_ERROR_MSG("failed to allocate memory for service name");
+        fail_cleanup();
+        return RMW_RET_BAD_ALLOC;
+      }
+      nt->names.data[index] = service_name;
+      // Setup storage for types
+      {
+        rcutils_ret_t rcutils_ret = rcutils_string_array_init(&nt->types[index], service_n_types.second.size(), allocator);
+        if (rcutils_ret != RCUTILS_RET_OK) {
+          RMW_SET_ERROR_MSG(rcutils_get_error_string().str);
+          fail_cleanup();
+          return rmw_convert_rcutils_ret_to_rmw_ret(rcutils_ret);
+        }
+      }
+      // Duplicate and store each type for the service
+      size_t type_index = 0;
+      for (const auto & type : service_n_types.second) {
+        // Strip the SAMPLE_PREFIX if it is found (e.g. from services using OpenSplice typesupport).
+        // It may not be found if services are detected using other typesupports.
+        size_t n = type.find(SAMPLE_PREFIX);
+        std::string stripped_type = type;
+        if (std::string::npos != n) {
+          stripped_type = type.substr(0, n + 1) + type.substr(n + strlen(SAMPLE_PREFIX));
+        }
+        char * type_name = rcutils_strdup(stripped_type.c_str(), *allocator);
+        if (!type_name) {
+          RMW_SET_ERROR_MSG("failed to allocate memory for type name");
+          fail_cleanup();
+          return RMW_RET_BAD_ALLOC;
+        }
+        nt->types[index].data[type_index] = type_name;
+        ++type_index;
+      }  // for each type
+      ++index;
+    }  // for each service
+  }
+  return RMW_RET_OK;
 }
