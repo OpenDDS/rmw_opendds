@@ -15,7 +15,7 @@
 #ifndef RMW_OPENDDS_CPP__GET_PARTICIPANT_HPP_
 #define RMW_OPENDDS_CPP__GET_PARTICIPANT_HPP_
 
-#include "rmw_opendds_shared_cpp/opendds_include.hpp"
+#include "rmw_opendds_cpp/opendds_include.hpp"
 #include "rmw/rmw.h"
 #include "rmw_opendds_cpp/visibility_control.h"
 

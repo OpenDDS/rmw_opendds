@@ -18,14 +18,14 @@
 // include patched generated code from the build folder
 #include "opendds_static_serialized_dataTypeSupportImpl.h"
 
-#include "rmw_opendds_shared_cpp/qos.hpp"
-#include "rmw_opendds_shared_cpp/types.hpp"
-#include "rmw_opendds_shared_cpp/identifier.hpp"
-#include "rmw_opendds_shared_cpp/OpenDDSNode.hpp"
+#include "rmw_opendds_cpp/qos.hpp"
+#include "rmw_opendds_cpp/types.hpp"
+#include "rmw_opendds_cpp/identifier.hpp"
+#include "rmw_opendds_cpp/OpenDDSNode.hpp"
 
 // Uncomment this to get extra console output about discovery.
 // This affects code in this file, but there is a similar variable in:
-//   rmw_opendds_shared_cpp/shared_functions.cpp
+//   rmw_opendds_cpp/shared_functions.cpp
 // #define DISCOVERY_DEBUG_LOGGING 1
 
 #include <dds/DCPS/DataReaderImpl_T.h>

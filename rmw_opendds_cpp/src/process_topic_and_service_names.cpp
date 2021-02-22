@@ -21,8 +21,8 @@
 #include "rmw/allocators.h"
 #include "rmw/error_handling.h"
 
-#include "rmw_opendds_shared_cpp/namespace_prefix.hpp"
-#include "rmw_opendds_shared_cpp/opendds_include.hpp"
+#include "rmw_opendds_cpp/namespace_prefix.hpp"
+#include "rmw_opendds_cpp/opendds_include.hpp"
 
 std::string
 get_topic_str(

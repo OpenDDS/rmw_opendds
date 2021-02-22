@@ -14,7 +14,7 @@
 
 #include "rmw/rmw.h"
 
-#include "rmw_opendds_shared_cpp/identifier.hpp"
+#include "rmw_opendds_cpp/identifier.hpp"
 
 extern "C"
 {

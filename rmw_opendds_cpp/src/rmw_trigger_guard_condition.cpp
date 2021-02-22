@@ -14,7 +14,7 @@
 
 #include "rmw/rmw.h"
 
-#include "rmw_opendds_shared_cpp/trigger_guard_condition.hpp"
+#include "rmw_opendds_cpp/trigger_guard_condition.hpp"
 
 extern "C"
 {

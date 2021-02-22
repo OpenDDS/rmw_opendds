@@ -16,10 +16,10 @@
 #include "opendds_static_serialized_dataTypeSupportImpl.h"
 #include "type_support_common.hpp"
 
-#include "rmw_opendds_shared_cpp/event_converter.hpp"
-#include "rmw_opendds_shared_cpp/identifier.hpp"
-#include "rmw_opendds_shared_cpp/qos.hpp"
-#include "rmw_opendds_shared_cpp/types.hpp"
+#include "rmw_opendds_cpp/event_converter.hpp"
+#include "rmw_opendds_cpp/identifier.hpp"
+#include "rmw_opendds_cpp/qos.hpp"
+#include "rmw_opendds_cpp/types.hpp"
 
 #include <dds/DCPS/DataWriterImpl_T.h>
 

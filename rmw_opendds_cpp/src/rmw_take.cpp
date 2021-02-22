@@ -15,8 +15,8 @@
 // include patched generated code from the build folder
 #include "opendds_static_serialized_dataTypeSupportC.h"
 #include "rmw_opendds_cpp/DDSSubscriber.hpp"
-#include "rmw_opendds_shared_cpp/identifier.hpp"
-#include "rmw_opendds_shared_cpp/types.hpp"
+#include "rmw_opendds_cpp/identifier.hpp"
+#include "rmw_opendds_cpp/types.hpp"
 
 #include "rmw/error_handling.h"
 #include "rmw/impl/cpp/macros.hpp"

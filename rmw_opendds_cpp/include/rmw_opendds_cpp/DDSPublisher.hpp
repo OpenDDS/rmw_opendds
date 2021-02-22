@@ -15,8 +15,8 @@
 #ifndef RMW_OPENDDS_CPP__DDSPUBLISHER_HPP_
 #define RMW_OPENDDS_CPP__DDSPUBLISHER_HPP_
 
-#include "rmw_opendds_shared_cpp/DDSEntity.hpp"
-#include "rmw_opendds_shared_cpp/RmwAllocateFree.hpp"
+#include "rmw_opendds_cpp/DDSEntity.hpp"
+#include "rmw_opendds_cpp/RmwAllocateFree.hpp"
 
 #include <atomic>
 
