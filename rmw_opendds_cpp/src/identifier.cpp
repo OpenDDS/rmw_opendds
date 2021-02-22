@@ -12,15 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "rmw/rmw.h"
-
 #include "rmw_opendds_cpp/identifier.hpp"
+#include <rmw/error_handling.h>
 
-extern "C"
+const char * const opendds_identifier = "rmw_opendds_cpp";
+
+bool check_impl_id(const char * implementation_identifier)
 {
-const char *
-rmw_get_implementation_identifier()
-{
-  return opendds_identifier;
+  if (opendds_identifier == implementation_identifier) {
+    return true;
+  } else if (!implementation_identifier) {
+    RMW_SET_ERROR_MSG("implementation_identifier is null");
+  } else {
+    RMW_SET_ERROR_MSG_WITH_FORMAT_STRING(
+      "implementation '%s' does not match rmw implementation '%s'",
+      implementation_identifier, opendds_identifier);
+  }
+  return false;
 }
-}  // extern "C"

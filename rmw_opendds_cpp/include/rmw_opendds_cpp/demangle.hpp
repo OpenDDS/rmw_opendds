@@ -1,4 +1,4 @@
-// Copyright 2014-2017 Open Source Robotics Foundation, Inc.
+// Copyright 2015-2017 Open Source Robotics Foundation, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,15 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "rmw/rmw.h"
+#ifndef RMW_OPENDDS_CPP__DEMANGLE_HPP_
+#define RMW_OPENDDS_CPP__DEMANGLE_HPP_
 
-#include "rmw_opendds_cpp/identifier.hpp"
+#include <string>
 
-extern "C"
-{
-const char *
-rmw_get_implementation_identifier()
-{
-  return opendds_identifier;
-}
-}  // extern "C"
+std::string
+_demangle_if_ros_topic(const std::string & topic_name);
+
+std::string
+_demangle_if_ros_type(const std::string & dds_type_string);
+
+std::string
+_demangle_service_from_topic(const std::string & topic_name);
+
+std::string
+_demangle_service_type_only(const std::string & dds_type_name);
+
+#endif  // RMW_OPENDDS_CPP__DEMANGLE_HPP_

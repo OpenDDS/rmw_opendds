@@ -1,4 +1,4 @@
-// Copyright 2014-2017 Open Source Robotics Foundation, Inc.
+// Copyright 2015-2017 Open Source Robotics Foundation, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,15 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "rmw/rmw.h"
+#ifndef RMW_OPENDDS_CPP__NDDS_INCLUDE_HPP_
+#define RMW_OPENDDS_CPP__NDDS_INCLUDE_HPP_
 
-#include "rmw_opendds_cpp/identifier.hpp"
+#include <dds/DdsDcpsInfrastructureC.h>
+#include <dds/DdsDcpsDomainC.h>
+#include <dds/DCPS/WaitSet.h>
+#include <dds/DCPS/GuardCondition.h>
 
-extern "C"
-{
-const char *
-rmw_get_implementation_identifier()
-{
-  return opendds_identifier;
-}
-}  // extern "C"
+#endif  // RMW_OPENDDS_CPP__NDDS_INCLUDE_HPP_
