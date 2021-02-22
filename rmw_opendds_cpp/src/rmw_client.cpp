@@ -23,7 +23,7 @@
 
 // Uncomment this to get extra console output about discovery.
 // This affects code in this file, but there is a similar variable in:
-//   rmw_opendds_shared_cpp/shared_functions.cpp
+//   rmw_opendds_cpp/shared_functions.cpp
 // #define DISCOVERY_DEBUG_LOGGING 1
 
 #include <rmw/allocators.h>

@@ -1,4 +1,4 @@
-// Copyright 2014-2017 Open Source Robotics Foundation, Inc.
+// Copyright 2015-2017 Open Source Robotics Foundation, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,15 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "rmw/rmw.h"
+#ifndef RMW_OPENDDS_CPP__TRIGGER_GUARD_CONDITION_HPP_
+#define RMW_OPENDDS_CPP__TRIGGER_GUARD_CONDITION_HPP_
 
-#include "rmw_opendds_cpp/identifier.hpp"
+#include "rmw/types.h"
 
-extern "C"
-{
-const char *
-rmw_get_implementation_identifier()
-{
-  return opendds_identifier;
-}
-}  // extern "C"
+#include "rmw_opendds_cpp/visibility_control.h"
+
+RMW_OPENDDS_CPP_PUBLIC
+rmw_ret_t
+trigger_guard_condition(const rmw_guard_condition_t * guard_condition_handle);
+
+#endif  // RMW_OPENDDS_CPP__TRIGGER_GUARD_CONDITION_HPP_
