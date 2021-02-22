@@ -7,7 +7,6 @@ This project contains several ROS2 packages:
 
 - `rmw_opendds`: composed of (this repo)
   - `rmw_opendds_cpp`: Responsible for binding the ROS2 `rmw.h` interface functions to the equivalent OpenDDS functions.
-  - `rmw_opendds_shared_cpp`: Shared code used in rmw_opendds.
 - `rosidl_typesupport_opendds`: composed of (https://github.com/oci-labs/rosidl_typesupport_opendds)
   - `opendds_cmake_module`: Responsible for configuring paths to the TAO/OpenDDS IDL processors and headers.
   - `rosidl_typesupport_opendds_c`: Responsible for generating OpenDDS C headers based on the OMG IDLs produced by ROS2 preprocessors.
