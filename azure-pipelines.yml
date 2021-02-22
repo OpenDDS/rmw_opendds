@@ -30,7 +30,7 @@ jobs:
     displayName: filesystem check
   - script: |
       cd $(Agent.BuildDirectory)/s
-      git clone --branch opendds_3.16 https://github.com/oci-labs/rosidl_typesupport_opendds
+      git clone --branch opendds_3.16 https://github.com/adamsj-oci/rosidl_typesupport_opendds.git
     displayName: clone rosidl_typesupport_opendds
   - script: |
         cd $(Agent.BuildDirectory)
