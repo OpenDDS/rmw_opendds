@@ -15,11 +15,11 @@
 #ifndef RMW_OPENDDS_CPP__CONDITION_ERROR_HPP_
 #define RMW_OPENDDS_CPP__CONDITION_ERROR_HPP_
 
+#include <rmw_opendds_cpp/visibility_control.h>
+
 #include <dds/DdsDcpsInfrastructureC.h>
 
-#include "rmw/types.h"
-
-#include "rmw_opendds_cpp/visibility_control.h"
+#include <rmw/types.h>
 
 RMW_OPENDDS_CPP_PUBLIC
 rmw_ret_t check_attach_condition_error(DDS::ReturnCode_t retcode);

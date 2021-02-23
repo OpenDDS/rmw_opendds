@@ -15,9 +15,9 @@
 #ifndef RMW_OPENDDS_CPP__WAIT_SET_HPP_
 #define RMW_OPENDDS_CPP__WAIT_SET_HPP_
 
-#include "rmw/types.h"
+#include <rmw_opendds_cpp/visibility_control.h>
 
-#include "rmw_opendds_cpp/visibility_control.h"
+#include <rmw/types.h>
 
 RMW_OPENDDS_CPP_PUBLIC
 rmw_wait_set_t *

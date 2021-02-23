@@ -15,12 +15,10 @@
 #ifndef RMW_OPENDDS_CPP__EVENT_HPP_
 #define RMW_OPENDDS_CPP__EVENT_HPP_
 
-// #include "ndds_include.hpp"
+#include <rmw_opendds_cpp/visibility_control.h>
 
-#include "rmw/types.h"
-#include "rmw/event.h"
-
-#include "rmw_opendds_cpp/visibility_control.h"
+#include <rmw/types.h>
+#include <rmw/event.h>
 
 /// Initialize a rmw_event_t.
 /**

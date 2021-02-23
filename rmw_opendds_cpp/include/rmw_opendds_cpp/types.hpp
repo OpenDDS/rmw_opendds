@@ -15,14 +15,15 @@
 #ifndef RMW_OPENDDS_CPP__TYPES_HPP_
 #define RMW_OPENDDS_CPP__TYPES_HPP_
 
-#include "topic_cache.hpp"
-#include "rmw_opendds_cpp/RmwAllocateFree.hpp"
-#include "rmw_opendds_cpp/opendds_include.hpp"
-#include "rmw_opendds_cpp/visibility_control.h"
+#include <rmw_opendds_cpp/topic_cache.hpp>
+#include <rmw_opendds_cpp/RmwAllocateFree.hpp>
+#include <rmw_opendds_cpp/visibility_control.h>
 
-#include "rmw/rmw.h"
+#include <dds/DdsDcpsInfrastructureC.h>
+#include <dds/DdsDcpsDomainC.h>
+#include <dds/DCPS/WaitSet.h>
 
-#include "dds/DCPS/WaitSet.h"
+#include <rmw/rmw.h>
 
 #include <cassert>
 #include <exception>
@@ -133,20 +134,6 @@ public:
   ~CustomSubscriberListener() {}
 
   virtual void on_data_available(DDS::DataReader * reader);
-};
-
-// to be removed
-struct OpenDDSNodeInfo
-{
-  DDS::DomainParticipant_var participant;
-  CustomPublisherListener * publisher_listener;
-  CustomSubscriberListener * subscriber_listener;
-  rmw_guard_condition_t * graph_guard_condition;
-  OpenDDSNodeInfo() :
-    participant(nullptr),
-    publisher_listener(nullptr),
-    subscriber_listener(nullptr),
-    graph_guard_condition(nullptr) {}
 };
 
 struct OpenDDSPublisherGID

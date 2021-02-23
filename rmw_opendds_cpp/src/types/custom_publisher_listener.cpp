@@ -12,14 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <string>
+#include <rmw_opendds_cpp/guid_helper.hpp>
+#include <rmw_opendds_cpp/types.hpp>
 
-#include "rmw_opendds_cpp/guid_helper.hpp"
-#include "rmw_opendds_cpp/types.hpp"
-#include "dds/DdsDcpsCoreTypeSupportC.h"
-#include "dds/DCPS/DomainParticipantImpl.h"
+#include <dds/DdsDcpsCoreTypeSupportC.h>
+#include <dds/DCPS/DomainParticipantImpl.h>
 // Uncomment this to get extra console output about discovery.
 // #define DISCOVERY_DEBUG_LOGGING 1
+
+#include <string>
 
 void CustomPublisherListener::on_data_available(DDS::DataReader * reader)
 {

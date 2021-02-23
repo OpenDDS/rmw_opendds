@@ -12,13 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "rmw/error_handling.h"
-#include "rmw/rmw.h"
-
 #include "./type_support_common.hpp"
 
 // include patched generated code from the build folder
 #include "opendds_static_serialized_dataTypeSupportC.h"
+
+#include <rmw/error_handling.h>
+#include <rmw/rmw.h>
 
 extern "C"
 {

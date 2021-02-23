@@ -12,15 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <rmw_opendds_shared_cpp/DDSPublisher.hpp>
-#include <rmw_opendds_shared_cpp/OpenDDSNode.hpp>
-#include <rmw_opendds_shared_cpp/identifier.hpp>
-#include <rmw_opendds_shared_cpp/qos.hpp>
-#include <rmw_opendds_shared_cpp/types.hpp>
+#include <rmw_opendds_cpp/DDSPublisher.hpp>
+#include <rmw_opendds_cpp/OpenDDSNode.hpp>
+#include <rmw_opendds_cpp/identifier.hpp>
+#include <rmw_opendds_cpp/qos.hpp>
+#include <rmw_opendds_cpp/types.hpp>
 
 // Uncomment this to get extra console output about discovery.
-// This affects code in this file, but there is a similar variable in:
-//   rmw_opendds_cpp/shared_functions.cpp
 // #define DISCOVERY_DEBUG_LOGGING 1
 
 #include <dds/DCPS/DataWriterImpl_T.h>

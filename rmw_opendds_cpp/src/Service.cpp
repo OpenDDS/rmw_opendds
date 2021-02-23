@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <rmw_opendds_shared_cpp/Service.hpp>
-#include <rmw_opendds_shared_cpp/namespace_prefix.hpp>
-#include <rmw_opendds_shared_cpp/qos.hpp>
+#include <rmw_opendds_cpp/Service.hpp>
+#include <rmw_opendds_cpp/namespace_prefix.hpp>
+#include <rmw_opendds_cpp/qos.hpp>
 
 #include <rosidl_typesupport_opendds_c/identifier.h>
 #include <rosidl_typesupport_opendds_cpp/identifier.hpp>

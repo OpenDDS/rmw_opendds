@@ -12,12 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef RMW_OPENDDS_SHARED_CPP__DDSPUBLISHER_HPP_
-#define RMW_OPENDDS_SHARED_CPP__DDSPUBLISHER_HPP_
+#ifndef RMW_OPENDDS_CPP__DDSPUBLISHER_HPP_
+#define RMW_OPENDDS_CPP__DDSPUBLISHER_HPP_
 
-#include <rmw_opendds_shared_cpp/DDSEntity.hpp>
-#include <rmw_opendds_shared_cpp/DDSTopic.hpp>
-#include <rmw_opendds_shared_cpp/RmwAllocateFree.hpp>
+#include <rmw_opendds_cpp/DDSEntity.hpp>
+#include <rmw_opendds_cpp/DDSTopic.hpp>
+#include <rmw_opendds_cpp/RmwAllocateFree.hpp>
 
 #include <atomic>
 
@@ -75,4 +75,4 @@ private:
   rmw_gid_t publisher_gid_;
 };
 
-#endif  // RMW_OPENDDS_SHARED_CPP__DDSPUBLISHER_HPP_
+#endif  // RMW_OPENDDS_CPP__DDSPUBLISHER_HPP_

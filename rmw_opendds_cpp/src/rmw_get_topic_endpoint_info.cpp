@@ -10,9 +10,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "rmw/get_topic_endpoint_info.h"
-#include "rmw/topic_endpoint_info_array.h"
-#include "rmw_opendds_shared_cpp/topic_endpoint_info.hpp"
+#include <rmw_opendds_cpp/topic_endpoint_info.hpp>
+
+#include <rmw/get_topic_endpoint_info.h>
+#include <rmw/topic_endpoint_info_array.h>
 
 extern "C"
 {

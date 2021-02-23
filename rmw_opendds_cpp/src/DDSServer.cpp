@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <rmw_opendds_shared_cpp/DDSServer.hpp>
-#include <rmw_opendds_shared_cpp/identifier.hpp>
+#include <rmw_opendds_cpp/DDSServer.hpp>
+#include <rmw_opendds_cpp/identifier.hpp>
 
 DDSServer * DDSServer::from(const rmw_service_t * service)
 {

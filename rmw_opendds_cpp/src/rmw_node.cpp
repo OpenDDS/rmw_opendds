@@ -12,11 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <rmw_opendds_shared_cpp/OpenDDSNode.hpp>
-#include <rmw_opendds_shared_cpp/init.hpp>
-#include <rmw_opendds_shared_cpp/identifier.hpp>
+#include <rmw_opendds_cpp/OpenDDSNode.hpp>
+#include <rmw_opendds_cpp/init.hpp>
+#include <rmw_opendds_cpp/identifier.hpp>
 
 #include <rmw/error_handling.h>
+#include <rmw/get_service_names_and_types.h>
+#include <rmw/get_topic_names_and_types.h>
 #include <rmw/sanity_checks.h>
 #include <rmw/impl/cpp/macros.hpp>
 #include <rmw/rmw.h>

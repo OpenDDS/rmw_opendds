@@ -12,10 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "rmw_opendds_cpp/opendds_include.hpp"
-#include "rmw_opendds_cpp/condition_error.hpp"
+#include <rmw_opendds_cpp/condition_error.hpp>
 
-#include "rmw/error_handling.h"
+#include <dds/DdsDcpsInfrastructureC.h>
+
+#include <rmw/error_handling.h>
 
 rmw_ret_t
 check_attach_condition_error(DDS::ReturnCode_t retcode)

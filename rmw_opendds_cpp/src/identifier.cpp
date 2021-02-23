@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "rmw_opendds_cpp/identifier.hpp"
+#include <rmw_opendds_cpp/identifier.hpp>
 #include <rmw/error_handling.h>
 
 const char * const opendds_identifier = "rmw_opendds_cpp";

@@ -12,10 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <rmw_opendds_shared_cpp/DDSSubscriber.hpp>
-#include <rmw_opendds_shared_cpp/event_converter.hpp>
-#include <rmw_opendds_shared_cpp/identifier.hpp>
-#include <rmw_opendds_shared_cpp/qos.hpp>
+#include <rmw_opendds_cpp/DDSSubscriber.hpp>
+#include <rmw_opendds_cpp/event_converter.hpp>
+#include <rmw_opendds_cpp/identifier.hpp>
+#include <rmw_opendds_cpp/qos.hpp>
 
 #include <dds/DCPS/DataReaderImpl_T.h>
 #include <dds/DCPS/Marked_Default_Qos.h>

@@ -1,4 +1,0 @@
-#include <dds/DdsDcpsCore.idl>
-@topic struct OpenDDSStaticSerializedData {
-  DDS::OctetSeq  serialized_data;
-};

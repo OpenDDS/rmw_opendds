@@ -12,11 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "rmw/impl/cpp/macros.hpp"
-#include "rmw/rmw.h"
+#include <rmw_opendds_cpp/guard_condition.hpp>
+#include <rmw_opendds_cpp/identifier.hpp>
 
-#include "rmw_opendds_cpp/guard_condition.hpp"
-#include "rmw_opendds_cpp/identifier.hpp"
+#include <rmw/impl/cpp/macros.hpp>
+#include <rmw/rmw.h>
 
 extern "C"
 {

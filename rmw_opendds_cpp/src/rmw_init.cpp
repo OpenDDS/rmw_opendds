@@ -12,12 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "rmw/init.h"
-#include "rmw/init_options.h"
+#include <rmw_opendds_cpp/init.hpp>
+#include <rmw_opendds_cpp/identifier.hpp>
 
-#include "rmw/impl/cpp/macros.hpp"
-#include "rmw_opendds_cpp/init.hpp"
-#include "rmw_opendds_cpp/identifier.hpp"
+#include <rmw/init.h>
+#include <rmw/init_options.h>
+#include <rmw/impl/cpp/macros.hpp>
 
 extern "C"
 {

@@ -12,10 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <rmw_opendds_shared_cpp/DDSSubscriber.hpp>
-#include <rmw_opendds_shared_cpp/DDSClient.hpp>
-#include <rmw_opendds_shared_cpp/DDSServer.hpp>
-#include <rmw_opendds_shared_cpp/wait.hpp>
+#include <rmw_opendds_cpp/DDSSubscriber.hpp>
+#include <rmw_opendds_cpp/DDSClient.hpp>
+#include <rmw_opendds_cpp/DDSServer.hpp>
+#include <rmw_opendds_cpp/wait.hpp>
 
 #include <rmw/rmw.h>
 

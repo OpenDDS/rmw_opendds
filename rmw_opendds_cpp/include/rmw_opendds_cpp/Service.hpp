@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef RMW_OPENDDS_SHARED_CPP__SERVICE_HPP_
-#define RMW_OPENDDS_SHARED_CPP__SERVICE_HPP_
+#ifndef RMW_OPENDDS_CPP__SERVICE_HPP_
+#define RMW_OPENDDS_CPP__SERVICE_HPP_
 
 #include <rosidl_typesupport_opendds_cpp/service_type_support.h>
 
@@ -58,4 +58,4 @@ private:
   DDS::Subscriber_var sub_;
 };
 
-#endif  // RMW_OPENDDS_SHARED_CPP__SERVICE_HPP_
+#endif  // RMW_OPENDDS_CPP__SERVICE_HPP_

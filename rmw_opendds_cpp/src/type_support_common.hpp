@@ -15,17 +15,16 @@
 #ifndef TYPE_SUPPORT_COMMON_HPP_
 #define TYPE_SUPPORT_COMMON_HPP_
 
+#include <rosidl_typesupport_opendds_c/identifier.h>
+#include <rosidl_typesupport_opendds_cpp/identifier.hpp>
+#include <rosidl_typesupport_opendds_cpp/message_type_support.h>
+#include <rosidl_typesupport_opendds_cpp/service_type_support.h>
+
+#include <rmw/allocators.h>
+#include <rmw/error_handling.h>
+#include <rmw/impl/cpp/macros.hpp>
+
 #include <string>
-
-#include "rmw/allocators.h"
-#include "rmw/error_handling.h"
-
-#include "rmw/impl/cpp/macros.hpp"
-
-#include "rosidl_typesupport_opendds_c/identifier.h"
-#include "rosidl_typesupport_opendds_cpp/identifier.hpp"
-#include "rosidl_typesupport_opendds_cpp/message_type_support.h"
-#include "rosidl_typesupport_opendds_cpp/service_type_support.h"
 
 inline const rosidl_message_type_support_t *
 rmw_get_message_type_support(const rosidl_message_type_support_t * type_support)

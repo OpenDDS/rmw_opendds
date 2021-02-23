@@ -12,10 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "rmw_opendds_cpp/event.hpp"
-#include "rmw_opendds_cpp/identifier.hpp"
+#include <rmw_opendds_cpp/event.hpp>
+#include <rmw_opendds_cpp/identifier.hpp>
 
-#include "rmw/rmw.h"
+#include <rmw/rmw.h>
 
 extern "C"
 {

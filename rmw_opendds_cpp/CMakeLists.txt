@@ -66,16 +66,40 @@ register_rmw_implementation(
   "cpp:rosidl_typesupport_cpp:rosidl_typesupport_opendds_cpp"
 )
 
-
 # Build RMW library.
 add_library(
   rmw_opendds_cpp
   SHARED
+  src/DDSPublisher.cpp
+  src/DDSSubscriber.cpp
+  src/DDSClient.cpp
+  src/DDSServer.cpp
+  src/DDSTopic.cpp
+  src/OpenDDSNode.cpp
+  src/Service.cpp
+  src/condition_error.cpp
+  src/demangle.cpp
+  src/event.cpp
+  src/event_converter.cpp
+  src/guard_condition.cpp
+  src/identifier.cpp
+  src/init.cpp
+  src/namespace_prefix.cpp
+  src/qos.cpp
+  src/serialization_format.cpp
+  src/topic_endpoint_info.cpp
+  src/trigger_guard_condition.cpp
+  src/types/custom_data_reader_listener.cpp
+  src/types/custom_publisher_listener.cpp
+  src/types/custom_subscriber_listener.cpp
+  src/wait.cpp
+  src/wait_set.cpp
   src/rmw_client.cpp
   src/rmw_compare_gid_equals.cpp
   src/rmw_event.cpp
   src/rmw_get_implementation_identifier.cpp
   src/rmw_get_serialization_format.cpp
+  src/rmw_get_topic_endpoint_info.cpp
   src/rmw_guard_condition.cpp
   src/rmw_init.cpp
   src/rmw_logging.cpp
@@ -89,33 +113,7 @@ add_library(
   src/rmw_trigger_guard_condition.cpp
   src/rmw_wait.cpp
   src/rmw_wait_set.cpp
-  src/serialization_format.cpp
-  src/rmw_get_topic_endpoint_info.cpp
-  src/condition_error.cpp
-  src/count.cpp
-  src/demangle.cpp
-  src/event.cpp
-  src/event_converter.cpp
-  src/guard_condition.cpp
-  src/identifier.cpp
-  src/init.cpp
-  src/namespace_prefix.cpp
-  src/node.cpp
-  src/node_names.cpp
-  src/OpenDDSNode.cpp
-  src/qos.cpp
-  src/names_and_types_helpers.cpp
-  src/node_info_and_types.cpp
-  src/service_names_and_types.cpp
-  src/topic_names_and_types.cpp
-  src/trigger_guard_condition.cpp
-  src/wait_set.cpp
-  src/types/custom_data_reader_listener.cpp
-  src/types/custom_publisher_listener.cpp
-  src/types/custom_subscriber_listener.cpp
-  src/topic_endpoint_info.cpp
-  src/wait.cpp)
-
+  )
 
 OPENDDS_TARGET_SOURCES(rmw_opendds_cpp resources/opendds_static_serialized_data.idl TAO_IDL_OPTIONS "-Sa -St")
 target_link_libraries(rmw_opendds_cpp ${opendds_libs})

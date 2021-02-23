@@ -10,8 +10,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef RMW_OPENDDS_SHARED_CPP__DDSTOPIC_HPP_
-#define RMW_OPENDDS_SHARED_CPP__DDSTOPIC_HPP_
+#ifndef RMW_OPENDDS_CPP__DDSTOPIC_HPP_
+#define RMW_OPENDDS_CPP__DDSTOPIC_HPP_
 
 #include <opendds_static_serialized_dataTypeSupportImpl.h>
 
@@ -46,4 +46,4 @@ private:
   DDS::Topic_var topic_;
 };
 
-#endif  // RMW_OPENDDS_SHARED_CPP__DDSTOPIC_HPP_
+#endif  // RMW_OPENDDS_CPP__DDSTOPIC_HPP_

@@ -15,10 +15,10 @@
 #ifndef RMW_OPENDDS_CPP__GUID_HELPER_HPP_
 #define RMW_OPENDDS_CPP__GUID_HELPER_HPP_
 
+#include <dds/DCPS/GuidUtils.h>
+
 #include <cstring>
 #include <iostream>
-#include "rmw_opendds_cpp/opendds_include.hpp"
-#include "dds/DCPS/GuidUtils.h"
 
 namespace DDS
 {
