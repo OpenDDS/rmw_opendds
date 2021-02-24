@@ -32,6 +32,7 @@
 #include <dds/DCPS/transport/framework/TransportConfig.h>
 #include <dds/DCPS/transport/framework/TransportInst.h>
 #include <dds/DCPS/transport/framework/TransportExceptions.h>
+#include <dds/DCPS/RTPS/RtpsDiscovery.h>
 #ifdef OPENDDS_SECURITY
 #include <dds/DCPS/security/framework/Properties.h>
 #endif
@@ -240,6 +241,10 @@ create_node(
     RMW_TRY_PLACEMENT_NEW(info, buf, throw 1, OpenDDSNodeInfo,)
     node->data = info;
     buf = nullptr;
+
+    OpenDDS::DCPS::Discovery_rch disco = TheServiceParticipant->get_discovery(domain_id);
+    OpenDDS::RTPS::RtpsDiscovery_rch rtps_disco = OpenDDS::DCPS::dynamic_rchandle_cast<OpenDDS::RTPS::RtpsDiscovery>(disco);
+    rtps_disco->use_xtypes(false);
 
     info->participant = dpf->create_participant(static_cast<DDS::DomainId_t>(domain_id), qos, 0, 0);
     if (!info->participant) {

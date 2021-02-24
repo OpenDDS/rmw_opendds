@@ -207,6 +207,8 @@ rmw_create_publisher(
     if (!get_datawriter_qos(publisher_info->dds_publisher_.in(), *qos_policies, dw_qos)) {
       throw std::string("get_datawriter_qos failed");
     }
+    dw_qos.representation.value.length(1);
+    dw_qos.representation.value[0] = DDS::XCDR_DATA_REPRESENTATION;
     publisher_info->topic_writer_ = publisher_info->dds_publisher_->create_datawriter(
       topic, dw_qos, NULL, OpenDDS::DCPS::NO_STATUS_MASK);
     if (!publisher_info->topic_writer_) {
