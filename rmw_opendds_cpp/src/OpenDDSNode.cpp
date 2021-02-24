@@ -84,16 +84,18 @@ void OpenDDSNode::add_sub(const DDS::InstanceHandle_t& sub, const std::string& t
 bool OpenDDSNode::remove_pub(const DDS::InstanceHandle_t& pub)
 {
   DDS::GUID_t guid = dpi_->get_repoid(pub);
-  pub_listener_->remove_information(guid, EntityType::Publisher);
-  pub_listener_->trigger_graph_guard_condition();
+  if (pub_listener_->remove_information(guid, EntityType::Publisher)) {
+    pub_listener_->trigger_graph_guard_condition();
+  }
   return true;
 }
 
 bool OpenDDSNode::remove_sub(const DDS::InstanceHandle_t& sub)
 {
   DDS::GUID_t guid = dpi_->get_repoid(sub);
-  sub_listener_->remove_information(guid, EntityType::Subscriber);
-  sub_listener_->trigger_graph_guard_condition();
+  if (sub_listener_->remove_information(guid, EntityType::Subscriber)) {
+    sub_listener_->trigger_graph_guard_condition();
+  }
   return true;
 }
 
