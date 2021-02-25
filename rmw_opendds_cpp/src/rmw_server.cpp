@@ -34,6 +34,7 @@ extern "C"
 {
 void clean_service(rmw_service_t * service)
 {
+/*
   if (service) {
     auto dds_server = static_cast<DDSServer*>(service->data);
     if (dds_server) {
@@ -42,6 +43,7 @@ void clean_service(rmw_service_t * service)
     }
     rmw_service_free(service);
   }
+*/
 }
 
 rmw_service_t *
