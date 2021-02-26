@@ -32,7 +32,6 @@
 
 extern "C"
 {
-
 void clean_client(rmw_client_t * client)
 {
   if (client) {
@@ -165,5 +164,4 @@ rmw_take_response(
   *taken = dds_client->take(request_header, ros_response);
   return RMW_RET_OK;
 }
-
 }  // extern "C"

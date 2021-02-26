@@ -14,8 +14,10 @@
 
 #include <rmw_opendds_cpp/init.hpp>
 #include <rmw_opendds_cpp/RmwAllocateFree.hpp>
+
 #include <rmw/init_options.h>
 #include <rmw/error_handling.h>
+
 #include <dds/DCPS/Service_Participant.h>
 
 rmw_context_impl_t::rmw_context_impl_t() : dpf_(TheParticipantFactory)

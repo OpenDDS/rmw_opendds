@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include <rmw_opendds_cpp/identifier.hpp>
+
 #include <rmw/error_handling.h>
 
 const char * const opendds_identifier = "rmw_opendds_cpp";
