@@ -35,6 +35,7 @@
 #include <dds/DCPS/transport/framework/TransportConfig.h>
 #include <dds/DCPS/transport/framework/TransportInst.h>
 #include <dds/DCPS/transport/framework/TransportExceptions.h>
+#include <dds/DCPS/RTPS/RtpsDiscovery.h>
 #ifdef OPENDDS_SECURITY
 #include <dds/DCPS/security/framework/Properties.h>
 #endif
@@ -140,6 +141,9 @@ OpenDDSNode::OpenDDSNode(rmw_context_t & context)
     if (!sub_listener_) {
       throw std::runtime_error("CustomSubscriberListener failed");
     }
+    OpenDDS::DCPS::Discovery_rch disco = TheServiceParticipant->get_discovery(context.options.domain_id);
+    OpenDDS::RTPS::RtpsDiscovery_rch rtps_disco = OpenDDS::DCPS::dynamic_rchandle_cast<OpenDDS::RTPS::RtpsDiscovery>(disco);
+    rtps_disco->use_xtypes(false);
     dp_ = context.impl->dpf_->create_participant(
       static_cast<DDS::DomainId_t>(context.options.domain_id), PARTICIPANT_QOS_DEFAULT, 0, 0);
     if (!dp_) {
