@@ -156,8 +156,10 @@ rmw_ret_t OpenDDSNode::get_names(rcutils_string_array_t * names, rcutils_string_
         throw std::runtime_error(rcutils_get_error_string().str);
       }
     }
-  //?? why data[0] cannot be put in the for loop?
-  //?? names->data[0] not set?
+    names->data[0] = rcutils_strdup(name_.c_str(), allocator);
+    if (!names->data[0]) {
+      throw std::runtime_error("could not allocate memory for node name");
+    }
     namespaces->data[0] = rcutils_strdup(namespace_.c_str(), allocator);
     if (!namespaces->data[0]) {
       throw std::runtime_error("could not allocate memory for node namespace");
