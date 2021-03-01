@@ -34,7 +34,7 @@ extern "C"
 {
 void clean_service(rmw_service_t * service)
 {
-/*
+/* TODO: fix ~Replier() unhandled exception (SIGABRT)
   if (service) {
     auto dds_server = static_cast<DDSServer*>(service->data);
     if (dds_server) {
