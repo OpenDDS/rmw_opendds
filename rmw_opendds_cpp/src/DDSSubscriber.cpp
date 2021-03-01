@@ -12,17 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "rmw_opendds_cpp/DDSSubscriber.hpp"
-#include "opendds_static_serialized_dataTypeSupportImpl.h"
-
-#include "rmw_opendds_cpp/event_converter.hpp"
-#include "rmw_opendds_cpp/identifier.hpp"
-#include "rmw_opendds_cpp/qos.hpp"
+#include <rmw_opendds_cpp/DDSSubscriber.hpp>
+#include <rmw_opendds_cpp/event_converter.hpp>
+#include <rmw_opendds_cpp/identifier.hpp>
+#include <rmw_opendds_cpp/qos.hpp>
 
 #include <dds/DCPS/DataReaderImpl_T.h>
+#include <dds/DCPS/Marked_Default_Qos.h>
 
-#include "rmw/visibility_control.h"
-#include "rmw/incompatible_qos_events_statuses.h"
+#include <rmw/visibility_control.h>
+#include <rmw/incompatible_qos_events_statuses.h>
 
 DDSSubscriber * DDSSubscriber::from(const rmw_subscription_t * sub)
 {
@@ -55,7 +54,7 @@ rmw_ret_t DDSSubscriber::get_rmw_qos(rmw_qos_profile_t & qos) const
 
 rmw_ret_t DDSSubscriber::to_ros_message(const rcutils_uint8_array_t & cdr_stream, void * ros_message)
 {
-  if (callbacks_->to_message(&cdr_stream, ros_message)) {
+  if (topic_.callbacks()->to_message(&cdr_stream, ros_message)) {
     return RMW_RET_OK;
   }
   RMW_SET_ERROR_MSG("to_ros_message failed");
@@ -122,10 +121,10 @@ void DDSSubscriber::cleanup()
 }
 
 DDSSubscriber::DDSSubscriber(DDS::DomainParticipant_var dp
-  , const rosidl_message_type_support_t & ros_ts
+  , const rosidl_message_type_support_t * ros_ts
   , const char * topic_name
-  , const rmw_qos_profile_t & rmw_qos
-) : DDSEntity(ros_ts, topic_name, rmw_qos)
+  , const rmw_qos_profile_t * rmw_qos
+) : topic_(ros_ts, topic_name, rmw_qos, dp)
   , listener_(OpenDDSSubscriberListener::Raf::create())
   , subscriber_()
   , reader_()
@@ -136,30 +135,19 @@ DDSSubscriber::DDSSubscriber(DDS::DomainParticipant_var dp
     if (!listener_) {
       throw std::runtime_error("OpenDDSSubscriberListener failed to contstruct");
     }
-    if (!dp) {
-      throw std::runtime_error("DomainParticipant is null");
-    }
     subscriber_ = dp->create_subscriber(SUBSCRIBER_QOS_DEFAULT, listener_, DDS::SUBSCRIPTION_MATCHED_STATUS);
     if (!subscriber_) {
       throw std::runtime_error("create_subscriber failed");
     }
-    if (!register_type(dp)) {
-      throw std::runtime_error("failed to register OpenDDS type");
-    }
 
-    DDS::Topic_var topic = find_or_create_topic(dp);
-    if (!topic) {
-      throw std::runtime_error("find_or_create_topic failed");
-    }
     DDS::DataReaderQos dr_qos;
-    if (!get_datareader_qos(subscriber_.in(), rmw_qos, dr_qos)) {
+    if (!get_datareader_qos(subscriber_.in(), *rmw_qos, dr_qos)) {
       throw std::runtime_error("get_datareader_qos failed");
     }
-    reader_ = subscriber_->create_datareader(topic, dr_qos, NULL, OpenDDS::DCPS::NO_STATUS_MASK);
+    reader_ = subscriber_->create_datareader(topic_.get(), dr_qos, NULL, OpenDDS::DCPS::NO_STATUS_MASK);
     if (!reader_) {
       throw std::runtime_error("create_datawriter failed");
     }
-
     auto rdi = dynamic_cast<OpenDDS::DCPS::DataReaderImpl_T<OpenDDSStaticSerializedData>*>(reader_.in());
     rdi->set_marshal_skip_serialize(true);
 

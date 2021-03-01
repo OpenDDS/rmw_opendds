@@ -10,10 +10,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "rmw/get_topic_endpoint_info.h"
-#include "rmw/topic_endpoint_info_array.h"
-#include "rmw_opendds_cpp/topic_endpoint_info.hpp"
-#include "rmw_opendds_cpp/identifier.hpp"
+#include <rmw_opendds_cpp/topic_endpoint_info.hpp>
+
+#include <rmw/get_topic_endpoint_info.h>
+#include <rmw/topic_endpoint_info_array.h>
 
 extern "C"
 {
@@ -26,7 +26,6 @@ rmw_get_publishers_info_by_topic(
   rmw_topic_endpoint_info_array_t * publishers_info)
 {
   return get_publishers_info_by_topic(
-    opendds_identifier,
     node,
     allocator,
     topic_name,
@@ -43,7 +42,6 @@ rmw_get_subscriptions_info_by_topic(
   rmw_topic_endpoint_info_array_t * subscriptions_info)
 {
   return get_subscriptions_info_by_topic(
-    opendds_identifier,
     node,
     allocator,
     topic_name,

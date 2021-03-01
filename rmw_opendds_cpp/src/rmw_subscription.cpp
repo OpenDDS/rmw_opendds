@@ -12,30 +12,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "rmw_opendds_cpp/DDSSubscriber.hpp"
-#include "process_topic_and_service_names.hpp"
-#include "type_support_common.hpp"
-// include patched generated code from the build folder
-#include "opendds_static_serialized_dataTypeSupportImpl.h"
-
-#include "rmw_opendds_cpp/qos.hpp"
-#include "rmw_opendds_cpp/types.hpp"
-#include "rmw_opendds_cpp/identifier.hpp"
-#include "rmw_opendds_cpp/OpenDDSNode.hpp"
+#include <rmw_opendds_cpp/DDSSubscriber.hpp>
+#include <rmw_opendds_cpp/OpenDDSNode.hpp>
+#include <rmw_opendds_cpp/identifier.hpp>
+#include <rmw_opendds_cpp/qos.hpp>
+#include <rmw_opendds_cpp/types.hpp>
 
 // Uncomment this to get extra console output about discovery.
-// This affects code in this file, but there is a similar variable in:
-//   rmw_opendds_cpp/shared_functions.cpp
 // #define DISCOVERY_DEBUG_LOGGING 1
 
 #include <dds/DCPS/DataReaderImpl_T.h>
 #include <dds/DCPS/DomainParticipantImpl.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
 
-#include "rmw/allocators.h"
-#include "rmw/error_handling.h"
-#include "rmw/impl/cpp/macros.hpp"
-#include "rmw/rmw.h"
+#include <rmw/allocators.h>
+#include <rmw/error_handling.h>
+#include <rmw/impl/cpp/macros.hpp>
+#include <rmw/rmw.h>
 
 #include <string>
 
@@ -107,29 +100,16 @@ rmw_create_subscription(
   if (!dds_node) {
     return nullptr; // error set
   }
-  if (!dds_node->dp()) {
-    RMW_SET_ERROR_MSG("DomainParticipant is null");
-    return nullptr;
-  }
-  const rosidl_message_type_support_t * ts = rmw_get_message_type_support(type_supports);
-  if (!ts) {
-    return nullptr;
-  }
-  if (!rmw_qos) {
-    RMW_SET_ERROR_MSG("rmw_qos is null");
-    return nullptr;
-  }
-
   rmw_subscription_t * subscription = nullptr;
   try {
     subscription = create_initial_subscription(subscription_options);
-    auto sub_i = DDSSubscriber::Raf::create(dds_node->dp(), *ts, topic_name, *rmw_qos);
-    if (!sub_i) {
+    auto dds_sub = DDSSubscriber::Raf::create(dds_node->dp(), type_supports, topic_name, rmw_qos);
+    if (!dds_sub) {
       throw std::runtime_error("DDSSubscriber failed");
     }
-    subscription->data = sub_i;
-    subscription->topic_name = sub_i->topic_name_.c_str();
-    dds_node->add_sub(sub_i->instance_handle(), sub_i->topic_name_, sub_i->type_name_);
+    subscription->data = dds_sub;
+    subscription->topic_name = dds_sub->topic_name().c_str();
+    dds_node->add_sub(dds_sub->instance_handle(), dds_sub->topic_name(), dds_sub->topic_type());
     return subscription;
   } catch (const std::exception& e) {
     RMW_SET_ERROR_MSG(e.what());

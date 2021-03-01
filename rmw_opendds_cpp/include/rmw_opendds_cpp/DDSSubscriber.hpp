@@ -15,8 +15,9 @@
 #ifndef RMW_OPENDDS_CPP__DDSSUBSCRIBER_HPP_
 #define RMW_OPENDDS_CPP__DDSSUBSCRIBER_HPP_
 
-#include "rmw_opendds_cpp/DDSEntity.hpp"
-#include "rmw_opendds_cpp/RmwAllocateFree.hpp"
+#include <rmw_opendds_cpp/DDSEntity.hpp>
+#include <rmw_opendds_cpp/DDSTopic.hpp>
+#include <rmw_opendds_cpp/RmwAllocateFree.hpp>
 
 #include <atomic>
 
@@ -64,6 +65,8 @@ class DDSSubscriber : public DDSEntity
 public:
   typedef RmwAllocateFree<DDSSubscriber> Raf;
   static DDSSubscriber * from(const rmw_subscription_t * sub);
+  const std::string& topic_name() const { return topic_.name(); }
+  const std::string& topic_type() const { return topic_.type(); }
   rmw_ret_t get_rmw_qos(rmw_qos_profile_t & qos) const;
   rmw_ret_t to_ros_message(const rcutils_uint8_array_t & cdr_stream, void * ros_message);
   DDS::ReadCondition_var read_condition() const { return read_condition_; }
@@ -73,14 +76,15 @@ public:
   // Remap the specific OpenDDS DataReader status to a generic RMW status
   rmw_ret_t get_status(const DDS::StatusMask mask, void * rmw_status) override;
   // Return the reader associated with this subscriber
-  DDS::Entity * get() override { return reader_; }
+  DDS::Entity * get_entity() override { return reader_; }
 private:
   friend Raf;
-  DDSSubscriber(DDS::DomainParticipant_var dp, const rosidl_message_type_support_t & ros_ts,
-                const char * topic_name, const rmw_qos_profile_t & rmw_qos);
+  DDSSubscriber(DDS::DomainParticipant_var dp, const rosidl_message_type_support_t * ros_ts,
+                const char * topic_name, const rmw_qos_profile_t * rmw_qos);
   ~DDSSubscriber() { cleanup(); }
   void cleanup();
 
+  DDSTopic topic_;
   OpenDDSSubscriberListener * listener_;
   DDS::Subscriber_var subscriber_;
   DDS::DataReader_var reader_;

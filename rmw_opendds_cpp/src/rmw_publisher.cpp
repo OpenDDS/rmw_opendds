@@ -12,30 +12,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "rmw_opendds_cpp/DDSPublisher.hpp"
-#include "process_topic_and_service_names.hpp"
-#include "type_support_common.hpp"
-#include "opendds_static_serialized_dataTypeSupportImpl.h"
-
-#include "rmw_opendds_cpp/identifier.hpp"
-#include "rmw_opendds_cpp/OpenDDSNode.hpp"
-#include "rmw_opendds_cpp/qos.hpp"
-#include "rmw_opendds_cpp/types.hpp"
+#include <rmw_opendds_cpp/DDSPublisher.hpp>
+#include <rmw_opendds_cpp/OpenDDSNode.hpp>
+#include <rmw_opendds_cpp/identifier.hpp>
+#include <rmw_opendds_cpp/qos.hpp>
+#include <rmw_opendds_cpp/types.hpp>
 
 // Uncomment this to get extra console output about discovery.
-// This affects code in this file, but there is a similar variable in:
-//   rmw_opendds_cpp/shared_functions.cpp
 // #define DISCOVERY_DEBUG_LOGGING 1
 
 #include <dds/DCPS/DataWriterImpl_T.h>
 #include <dds/DCPS/DomainParticipantImpl.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
 
-#include "rmw/allocators.h"
-#include "rmw/error_handling.h"
-#include "rmw/impl/cpp/macros.hpp"
-#include "rmw/rmw.h"
-#include "rmw/types.h"
+#include <rmw/allocators.h>
+#include <rmw/error_handling.h>
+#include <rmw/impl/cpp/macros.hpp>
+#include <rmw/rmw.h>
+#include <rmw/types.h>
 
 #include <string>
 
@@ -106,26 +100,16 @@ rmw_create_publisher(
   if (!dds_node) {
     return nullptr;
   }
-  const rosidl_message_type_support_t * ts = rmw_get_message_type_support(type_supports);
-  if (!ts) {
-    return nullptr; // error set in rmw_get_message_type_support
-  }
-  if (!rmw_qos) {
-    RMW_SET_ERROR_MSG("rmw_qos is null");
-    return nullptr;
-  }
-
   rmw_publisher_t * publisher = nullptr;
   try {
     publisher = create_initial_publisher(publisher_options);
-    auto pub_i = DDSPublisher::Raf::create(dds_node->dp(), *ts, topic_name, *rmw_qos);
-    if (!pub_i) {
+    auto dds_pub = DDSPublisher::Raf::create(dds_node->dp(), type_supports, topic_name, rmw_qos);
+    if (!dds_pub) {
       throw std::runtime_error("DDSPublisher failed");
     }
-    publisher->data = pub_i;
-    publisher->topic_name = pub_i->topic_name_.c_str();
-
-    dds_node->add_pub(pub_i->instance_handle(), pub_i->topic_name_, pub_i->type_name_);
+    publisher->data = dds_pub;
+    publisher->topic_name = dds_pub->topic_name().c_str();
+    dds_node->add_pub(dds_pub->instance_handle(), dds_pub->topic_name(), dds_pub->topic_type());
     return publisher;
   } catch (const std::exception& e) {
     RMW_SET_ERROR_MSG(e.what());

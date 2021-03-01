@@ -15,6 +15,10 @@
 #ifndef RMW_OPENDDS_CPP__TOPIC_CACHE_HPP_
 #define RMW_OPENDDS_CPP__TOPIC_CACHE_HPP_
 
+#include <rmw_opendds_cpp/guid_helper.hpp>
+
+#include <rcutils/logging_macros.h>
+
 #include <algorithm>
 #include <iterator>
 #include <map>
@@ -23,10 +27,6 @@
 #include <sstream>
 #include <string>
 #include <utility>
-
-#include "rcutils/logging_macros.h"
-
-#include "rmw_opendds_cpp/guid_helper.hpp"
 
 /**
  * Topics to types.

@@ -12,10 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <rmw_opendds_cpp/namespace_prefix.hpp>
+
 #include <string>
 #include <vector>
-
-#include "rmw_opendds_cpp/namespace_prefix.hpp"
 
 const char * const ros_topic_prefix = "rt";
 const char * const ros_service_requester_prefix = "rq";

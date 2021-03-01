@@ -12,16 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "rmw/error_handling.h"
-#include "rmw/impl/cpp/macros.hpp"
-#include "rmw/types.h"
+#include <rmw_opendds_cpp/trigger_guard_condition.hpp>
+#include <rmw_opendds_cpp/identifier.hpp>
+#include <rmw_opendds_cpp/types.hpp>
 
-#include "rmw_opendds_cpp/identifier.hpp"
-#include "rmw_opendds_cpp/opendds_include.hpp"
-#include "rmw_opendds_cpp/trigger_guard_condition.hpp"
-#include "rmw_opendds_cpp/types.hpp"
+#include <dds/DCPS/GuardCondition.h>
 
-#include "dds/DCPS/GuardCondition.h"
+#include <rmw/error_handling.h>
+#include <rmw/impl/cpp/macros.hpp>
+#include <rmw/types.h>
 
 rmw_ret_t
 trigger_guard_condition(const rmw_guard_condition_t * guard_condition_handle)

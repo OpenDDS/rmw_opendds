@@ -18,7 +18,8 @@
 #include <cassert>
 #include <limits>
 
-#include "opendds_include.hpp"
+#include <dds/DdsDcpsInfrastructureC.h>
+#include <dds/DdsDcpsDomainC.h>
 
 #include "rmw/error_handling.h"
 #include "rmw/types.h"

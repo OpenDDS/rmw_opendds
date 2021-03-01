@@ -15,10 +15,10 @@
 #ifndef RMW_OPENDDS_CPP__NAMESPACE_PREFIX_HPP_
 #define RMW_OPENDDS_CPP__NAMESPACE_PREFIX_HPP_
 
+#include <rmw_opendds_cpp/visibility_control.h>
+
 #include <string>
 #include <vector>
-
-#include "rmw_opendds_cpp/visibility_control.h"
 
 RMW_OPENDDS_CPP_PUBLIC extern const char * const ros_topic_prefix;
 RMW_OPENDDS_CPP_PUBLIC extern const char * const ros_service_requester_prefix;

@@ -15,8 +15,9 @@
 #ifndef RMW_OPENDDS_CPP__DDSPUBLISHER_HPP_
 #define RMW_OPENDDS_CPP__DDSPUBLISHER_HPP_
 
-#include "rmw_opendds_cpp/DDSEntity.hpp"
-#include "rmw_opendds_cpp/RmwAllocateFree.hpp"
+#include <rmw_opendds_cpp/DDSEntity.hpp>
+#include <rmw_opendds_cpp/DDSTopic.hpp>
+#include <rmw_opendds_cpp/RmwAllocateFree.hpp>
 
 #include <atomic>
 
@@ -46,6 +47,8 @@ class DDSPublisher : public DDSEntity
 public:
   typedef RmwAllocateFree<DDSPublisher> Raf;
   static DDSPublisher * from(const rmw_publisher_t * pub);
+  const std::string& topic_name() const { return topic_.name(); }
+  const std::string& topic_type() const { return topic_.type(); }
   rmw_ret_t get_rmw_qos(rmw_qos_profile_t & qos) const;
   rmw_ret_t to_cdr_stream(const void * ros_message, rcutils_uint8_array_t & cdr_stream);
   DDS::DataWriter_var writer() const { return writer_; }
@@ -57,14 +60,15 @@ public:
   // Remap the OpenDDS DataWriter status to a generic RMW status
   rmw_ret_t get_status(const DDS::StatusMask mask, void * rmw_status) override;
   // Return the writer associated with this publisher
-  DDS::Entity * get() override { return writer_; }
+  DDS::Entity * get_entity() override { return writer_; }
 private:
   friend Raf;
-  DDSPublisher(DDS::DomainParticipant_var dp, const rosidl_message_type_support_t & ros_ts,
-               const char * topic_name, const rmw_qos_profile_t & rmw_qos);
+  DDSPublisher(DDS::DomainParticipant_var dp, const rosidl_message_type_support_t * ros_ts,
+               const char * topic_name, const rmw_qos_profile_t * rmw_qos);
   ~DDSPublisher() { cleanup(); }
   void cleanup();
 
+  DDSTopic topic_;
   OpenDDSPublisherListener * listener_;
   DDS::Publisher_var publisher_;
   DDS::DataWriter_var writer_;

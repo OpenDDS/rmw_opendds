@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "rmw_opendds_cpp/qos.hpp"
+#include <rmw_opendds_cpp/qos.hpp>
 
 bool
 get_datareader_qos(

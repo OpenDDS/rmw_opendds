@@ -12,19 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "rmw_opendds_cpp/DDSPublisher.hpp"
-#include "opendds_static_serialized_dataTypeSupportImpl.h"
-#include "type_support_common.hpp"
-
-#include "rmw_opendds_cpp/event_converter.hpp"
-#include "rmw_opendds_cpp/identifier.hpp"
-#include "rmw_opendds_cpp/qos.hpp"
-#include "rmw_opendds_cpp/types.hpp"
+#include <rmw_opendds_cpp/DDSPublisher.hpp>
+#include <rmw_opendds_cpp/event_converter.hpp>
+#include <rmw_opendds_cpp/identifier.hpp>
+#include <rmw_opendds_cpp/qos.hpp>
+#include <rmw_opendds_cpp/types.hpp>
 
 #include <dds/DCPS/DataWriterImpl_T.h>
+#include <dds/DCPS/Marked_Default_Qos.h>
 
-#include "rmw/visibility_control.h"
-#include "rmw/incompatible_qos_events_statuses.h"
+#include <rmw/visibility_control.h>
+#include <rmw/incompatible_qos_events_statuses.h>
 
 DDSPublisher * DDSPublisher::from(const rmw_publisher_t * pub)
 {
@@ -61,7 +59,7 @@ rmw_ret_t DDSPublisher::to_cdr_stream(const void * ros_message, rcutils_uint8_ar
     RMW_SET_ERROR_MSG("ros_message is null");
     return RMW_RET_ERROR;
   }
-  if (callbacks_->to_cdr_stream(ros_message, &cdr_stream)) {
+  if (topic_.callbacks()->to_cdr_stream(ros_message, &cdr_stream)) {
     return RMW_RET_OK;
   }
   RMW_SET_ERROR_MSG("to_cdr_stream failed");
@@ -126,10 +124,10 @@ void DDSPublisher::cleanup()
 }
 
 DDSPublisher::DDSPublisher(DDS::DomainParticipant_var dp
-  , const rosidl_message_type_support_t & ros_ts
+  , const rosidl_message_type_support_t * ros_ts
   , const char * topic_name
-  , const rmw_qos_profile_t & rmw_qos
-) : DDSEntity(ros_ts, topic_name, rmw_qos)
+  , const rmw_qos_profile_t * rmw_qos
+) : topic_(ros_ts, topic_name, rmw_qos, dp)
   , listener_(OpenDDSPublisherListener::Raf::create())
   , publisher_()
   , writer_()
@@ -139,30 +137,19 @@ DDSPublisher::DDSPublisher(DDS::DomainParticipant_var dp
     if (!listener_) {
       throw std::runtime_error("OpenDDSPublisherListener failed to contstruct");
     }
-    if (!dp) {
-      throw std::runtime_error("DomainParticipant is null");
-    }
     publisher_ = dp->create_publisher(PUBLISHER_QOS_DEFAULT, listener_, DDS::PUBLICATION_MATCHED_STATUS);
     if (!publisher_) {
       throw std::runtime_error("create_publisher failed");
     }
-    if (!register_type(dp)) {
-      throw std::runtime_error("failed to register OpenDDS type");
-    }
 
-    DDS::Topic_var topic = find_or_create_topic(dp);
-    if (!topic) {
-      throw std::runtime_error("find_or_create_topic failed");
-    }
     DDS::DataWriterQos dw_qos;
-    if (!get_datawriter_qos(publisher_.in(), rmw_qos, dw_qos)) {
+    if (!get_datawriter_qos(publisher_.in(), *rmw_qos, dw_qos)) {
       throw std::runtime_error("get_datawriter_qos failed");
     }
-    writer_ = publisher_->create_datawriter(topic, dw_qos, NULL, OpenDDS::DCPS::NO_STATUS_MASK);
+    writer_ = publisher_->create_datawriter(topic_.get(), dw_qos, NULL, OpenDDS::DCPS::NO_STATUS_MASK);
     if (!writer_) {
       throw std::runtime_error("create_datawriter failed");
     }
-
     auto wri = dynamic_cast<OpenDDS::DCPS::DataWriterImpl_T<OpenDDSStaticSerializedData>*>(writer_.in());
     wri->set_marshal_skip_serialize(true);
 

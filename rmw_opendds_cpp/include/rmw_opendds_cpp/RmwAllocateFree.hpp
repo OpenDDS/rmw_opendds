@@ -60,6 +60,8 @@ public:
       T* t = nullptr;
       try {
         t = new (v) T();
+      } catch (const std::exception& e) {
+        RMW_SET_ERROR_MSG(e.what());
       } catch (...) {
         RMW_SET_ERROR_MSG("RmwAllocateFree::create: exception\n");
       }
@@ -78,6 +80,8 @@ public:
       T* t = nullptr;
       try {
         t = new (v) T(args ...);
+      } catch (const std::exception& e) {
+        RMW_SET_ERROR_MSG(e.what());
       } catch (...) {
         RMW_SET_ERROR_MSG("RmwAllocateFree::create: exception\n");
       }

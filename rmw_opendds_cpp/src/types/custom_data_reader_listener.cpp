@@ -12,19 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <rmw_opendds_cpp/trigger_guard_condition.hpp>
+#include <rmw_opendds_cpp/namespace_prefix.hpp>
+#include <rmw_opendds_cpp/demangle.hpp>
+#include <rmw_opendds_cpp/guid_helper.hpp>
+#include <rmw_opendds_cpp/types.hpp>
+
+#include <rmw/error_handling.h>
+
 #include <map>
 #include <mutex>
 #include <set>
 #include <string>
 #include <iostream>
-
-#include "rmw/error_handling.h"
-
-#include "rmw_opendds_cpp/trigger_guard_condition.hpp"
-#include "rmw_opendds_cpp/namespace_prefix.hpp"
-#include "rmw_opendds_cpp/demangle.hpp"
-#include "rmw_opendds_cpp/guid_helper.hpp"
-#include "rmw_opendds_cpp/types.hpp"
 
 // Uncomment this to get extra console output about discovery.
 // #define DISCOVERY_DEBUG_LOGGING 1

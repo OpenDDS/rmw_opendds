@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <unordered_map>
+#include <rmw_opendds_cpp/event_converter.hpp>
 
-#include "rmw_opendds_cpp/event_converter.hpp"
+#include <unordered_map>
 
 /// Mapping of RMW_EVENT to the corresponding DDS_StatusKind.
 static const std::unordered_map<rmw_event_type_t, CORBA::ULong> mask_map{

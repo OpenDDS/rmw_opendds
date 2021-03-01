@@ -15,22 +15,18 @@
 #ifndef RMW_OPENDDS_CPP__WAIT_HPP_
 #define RMW_OPENDDS_CPP__WAIT_HPP_
 
-#include "opendds_include.hpp"
+#include <rmw_opendds_cpp/condition_error.hpp>
+#include <rmw_opendds_cpp/identifier.hpp>
+#include <rmw_opendds_cpp/types.hpp>
 
-#include "rmw_opendds_cpp/condition_error.hpp"
-#include "rmw_opendds_cpp/event_converter.hpp"
-#include "rmw_opendds_cpp/identifier.hpp"
-#include "rmw_opendds_cpp/types.hpp"
-#include "rmw_opendds_cpp/visibility_control.h"
-#include "rmw_opendds_cpp/opendds_static_event_info.hpp"
+#include <dds/DdsDcpsInfrastructureC.h>
+#include <dds/DdsDcpsDomainC.h>
+#include <dds/DCPS/WaitSet.h>
+#include <dds/DCPS/GuardCondition.h>
 
-#include "rmw/error_handling.h"
-#include "rmw/impl/cpp/macros.hpp"
-#include "rmw/types.h"
-
-#include <unordered_map>
-#include <unordered_set>
-#include <utility>
+#include <rmw/error_handling.h>
+#include <rmw/impl/cpp/macros.hpp>
+#include <rmw/types.h>
 
 rmw_ret_t __handle_active_event_conditions(rmw_events_t* events);
 
@@ -121,11 +117,12 @@ wait(
         RMW_SET_ERROR_MSG("service info is null");
         return RMW_RET_ERROR;
       }
-      if (!info->read_condition_) {
+      DDS::ReadCondition_var read_cond = info->read_condition();
+      if (!read_cond) {
         RMW_SET_ERROR_MSG("read condition is null");
         return RMW_RET_ERROR;
       }
-      rmw_ret_t ret = check_attach_condition_error(dds_wait_set.attach_condition(info->read_condition_));
+      rmw_ret_t ret = check_attach_condition_error(dds_wait_set.attach_condition(read_cond));
       if (ret != RMW_RET_OK) {
         return ret;
       }
@@ -140,11 +137,12 @@ wait(
         RMW_SET_ERROR_MSG("client info is null");
         return RMW_RET_ERROR;
       }
-      if (!info->read_condition_) {
+      DDS::ReadCondition_var read_cond = info->read_condition();
+      if (!read_cond) {
         RMW_SET_ERROR_MSG("read condition is null");
         return RMW_RET_ERROR;
       }
-      rmw_ret_t ret = check_attach_condition_error(dds_wait_set.attach_condition(info->read_condition_));
+      rmw_ret_t ret = check_attach_condition_error(dds_wait_set.attach_condition(read_cond));
       if (ret != RMW_RET_OK) {
         return ret;
       }
@@ -217,14 +215,15 @@ wait(
         RMW_SET_ERROR_MSG("service info is null");
         return RMW_RET_ERROR;
       }
-      if (!info->read_condition_) {
+      DDS::ReadCondition_var read_cond = info->read_condition();
+      if (!read_cond) {
         RMW_SET_ERROR_MSG("read condition is null");
         return RMW_RET_ERROR;
       }
 
       // reset the service if its read_condition is not in the active set
       ::CORBA::ULong j = 0;
-      while (j < active_conditions.length() && active_conditions[j] != info->read_condition_) { ++j; }
+      while (j < active_conditions.length() && active_conditions[j] != read_cond) { ++j; }
       if (!(j < active_conditions.length())) {
         services->services[i] = nullptr;
       }
@@ -239,14 +238,15 @@ wait(
         RMW_SET_ERROR_MSG("client info is null");
         return RMW_RET_ERROR;
       }
-      if (!info->read_condition_) {
+      DDS::ReadCondition_var read_cond = info->read_condition();
+      if (!read_cond) {
         RMW_SET_ERROR_MSG("read condition is null");
         return RMW_RET_ERROR;
       }
 
       // reset the client if its read_condition is not in the active set
       ::CORBA::ULong j = 0;
-      while (j < active_conditions.length() && active_conditions[j] != info->read_condition_) { ++j; }
+      while (j < active_conditions.length() && active_conditions[j] != read_cond) { ++j; }
       if (!(j < active_conditions.length())) {
         clients->clients[i] = nullptr;
       }

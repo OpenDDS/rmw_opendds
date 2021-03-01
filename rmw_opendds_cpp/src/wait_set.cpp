@@ -12,8 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// #include "rmw_opendds_cpp/shared_functions.hpp"
-#include "rmw_opendds_cpp/wait.hpp"
+#include <rmw_opendds_cpp/wait_set.hpp>
+#include <rmw_opendds_cpp/demangle.hpp>
+#include <rmw_opendds_cpp/guard_condition.hpp>
+#include <rmw_opendds_cpp/types.hpp>
+
+#include <dds/DCPS/WaitSet.h>
+
+#include <rmw/error_handling.h>
+#include <rmw/impl/cpp/macros.hpp>
 
 rmw_wait_set_t *
 create_wait_set(const char * implementation_identifier, size_t max_conditions)

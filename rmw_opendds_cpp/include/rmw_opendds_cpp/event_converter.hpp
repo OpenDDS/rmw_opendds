@@ -15,13 +15,13 @@
 #ifndef RMW_OPENDDS_CPP__EVENT_CONVERTER_HPP_
 #define RMW_OPENDDS_CPP__EVENT_CONVERTER_HPP_
 
-#include "rmw_opendds_cpp/opendds_include.hpp"
+#include <rmw_opendds_cpp/visibility_control.h>
 
-#include "rmw/event.h"
-#include "rmw/ret_types.h"
-#include "rmw/types.h"
+#include <dds/DdsDcpsInfrastructureC.h>
 
-#include "rmw_opendds_cpp/visibility_control.h"
+#include <rmw/event.h>
+#include <rmw/ret_types.h>
+#include <rmw/types.h>
 
 /// Return the corresponding DDS_StatusKind to the input RMW_EVENT.
 /**

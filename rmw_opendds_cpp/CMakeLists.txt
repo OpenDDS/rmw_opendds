@@ -12,7 +12,6 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 endif()
 
 find_package(ament_cmake REQUIRED)
-
 find_package(opendds_cmake_module REQUIRED)
 find_package(OpenDDS QUIET)
 
@@ -67,47 +66,18 @@ register_rmw_implementation(
   "cpp:rosidl_typesupport_cpp:rosidl_typesupport_opendds_cpp"
 )
 
-
 # Build RMW library.
 add_library(
   rmw_opendds_cpp
   SHARED
   src/DDSPublisher.cpp
   src/DDSSubscriber.cpp
-  src/get_client.cpp
-  src/get_participant.cpp
-  src/get_service.cpp
-  src/process_topic_and_service_names.cpp
-  src/rmw_client.cpp
-  src/rmw_compare_gid_equals.cpp
-  src/rmw_count.cpp
-  src/rmw_event.cpp
-  src/rmw_get_implementation_identifier.cpp
-  src/rmw_get_serialization_format.cpp
-  src/rmw_guard_condition.cpp
-  src/rmw_init.cpp
-  src/rmw_logging.cpp
-  src/rmw_node.cpp
-  src/rmw_node_info_and_types.cpp
-  src/rmw_node_names.cpp
-  src/rmw_publish.cpp
-  src/rmw_publisher.cpp
-  src/rmw_request.cpp
-  src/rmw_response.cpp
-  src/rmw_serialize.cpp
-  src/rmw_service.cpp
-  src/rmw_service_names_and_types.cpp
-  src/rmw_service_server_is_available.cpp
-  src/rmw_subscription.cpp
-  src/rmw_take.cpp
-  src/rmw_topic_names_and_types.cpp
-  src/rmw_trigger_guard_condition.cpp
-  src/rmw_wait.cpp
-  src/rmw_wait_set.cpp
-  src/serialization_format.cpp
-  src/rmw_get_topic_endpoint_info.cpp
+  src/DDSClient.cpp
+  src/DDSServer.cpp
+  src/DDSTopic.cpp
+  src/OpenDDSNode.cpp
+  src/Service.cpp
   src/condition_error.cpp
-  src/count.cpp
   src/demangle.cpp
   src/event.cpp
   src/event_converter.cpp
@@ -115,22 +85,35 @@ add_library(
   src/identifier.cpp
   src/init.cpp
   src/namespace_prefix.cpp
-  src/node.cpp
-  src/node_names.cpp
-  src/OpenDDSNode.cpp
   src/qos.cpp
-  src/names_and_types_helpers.cpp
-  src/node_info_and_types.cpp
-  src/service_names_and_types.cpp
-  src/topic_names_and_types.cpp
+  src/serialization_format.cpp
+  src/topic_endpoint_info.cpp
   src/trigger_guard_condition.cpp
-  src/wait_set.cpp
   src/types/custom_data_reader_listener.cpp
   src/types/custom_publisher_listener.cpp
   src/types/custom_subscriber_listener.cpp
-  src/topic_endpoint_info.cpp
-  src/wait.cpp)
-
+  src/wait.cpp
+  src/wait_set.cpp
+  src/rmw_client.cpp
+  src/rmw_compare_gid_equals.cpp
+  src/rmw_event.cpp
+  src/rmw_get_implementation_identifier.cpp
+  src/rmw_get_serialization_format.cpp
+  src/rmw_get_topic_endpoint_info.cpp
+  src/rmw_guard_condition.cpp
+  src/rmw_init.cpp
+  src/rmw_logging.cpp
+  src/rmw_node.cpp
+  src/rmw_publish.cpp
+  src/rmw_publisher.cpp
+  src/rmw_serialize.cpp
+  src/rmw_server.cpp
+  src/rmw_subscription.cpp
+  src/rmw_take.cpp
+  src/rmw_trigger_guard_condition.cpp
+  src/rmw_wait.cpp
+  src/rmw_wait_set.cpp
+  )
 
 OPENDDS_TARGET_SOURCES(rmw_opendds_cpp resources/opendds_static_serialized_data.idl TAO_IDL_OPTIONS "-Sa -St")
 target_link_libraries(rmw_opendds_cpp ${opendds_libs})

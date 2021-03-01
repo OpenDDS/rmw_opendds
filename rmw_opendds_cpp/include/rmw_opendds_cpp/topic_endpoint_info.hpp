@@ -19,7 +19,6 @@
 RMW_OPENDDS_CPP_PUBLIC
 rmw_ret_t
 get_publishers_info_by_topic(
-  const char * identifier,
   const rmw_node_t * node,
   rcutils_allocator_t * allocator,
   const char * topic_name,
@@ -29,7 +28,6 @@ get_publishers_info_by_topic(
 RMW_OPENDDS_CPP_PUBLIC
 rmw_ret_t
 get_subscriptions_info_by_topic(
-  const char * identifier,
   const rmw_node_t * node,
   rcutils_allocator_t * allocator,
   const char * topic_name,
