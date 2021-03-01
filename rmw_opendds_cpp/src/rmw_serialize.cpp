@@ -12,13 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "rmw/error_handling.h"
-#include "rmw/rmw.h"
-
 #include "./type_support_common.hpp"
 
 // include patched generated code from the build folder
 #include "opendds_static_serialized_dataTypeSupportC.h"
+
+#include <rmw/error_handling.h>
+#include <rmw/rmw.h>
 
 extern "C"
 {
@@ -30,7 +30,7 @@ rmw_serialize(
 {
   const rosidl_message_type_support_t * ts = rmw_get_message_type_support(type_support);
   if (!ts) {
-    return NULL;
+    return RMW_RET_ERROR;
   }
 
   const message_type_support_callbacks_t * callbacks =
@@ -56,7 +56,7 @@ rmw_deserialize(
 {
   const rosidl_message_type_support_t * ts = rmw_get_message_type_support(type_support);
   if (!ts) {
-    return NULL;
+    return RMW_RET_ERROR;
   }
 
   const message_type_support_callbacks_t * callbacks =

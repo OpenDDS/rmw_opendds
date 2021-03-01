@@ -12,12 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "rmw/impl/cpp/macros.hpp"
-#include "rmw/rmw.h"
+#include <rmw_opendds_cpp/guard_condition.hpp>
+#include <rmw_opendds_cpp/identifier.hpp>
 
-#include "rmw_opendds_shared_cpp/guard_condition.hpp"
-
-#include "rmw_opendds_cpp/identifier.hpp"
+#include <rmw/impl/cpp/macros.hpp>
+#include <rmw/rmw.h>
 
 extern "C"
 {
@@ -31,12 +30,12 @@ rmw_create_guard_condition(rmw_context_t * context)
     opendds_identifier,
     // TODO(wjwwood): replace this with RMW_RET_INCORRECT_RMW_IMPLEMENTATION when refactored
     return NULL);
-  return create_guard_condition(opendds_identifier);
+  return create_guard_condition();
 }
 
 rmw_ret_t
 rmw_destroy_guard_condition(rmw_guard_condition_t * guard_condition)
 {
-  return destroy_guard_condition(opendds_identifier, guard_condition);
+  return destroy_guard_condition(guard_condition);
 }
 }  // extern "C"

@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "rmw/rmw.h"
+#include <rmw_opendds_cpp/serialization_format.hpp>
 
-#include "rmw_opendds_cpp/serialization_format.hpp"
+#include <rmw/rmw.h>
 
 extern "C"
 {

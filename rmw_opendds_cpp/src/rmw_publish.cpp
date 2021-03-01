@@ -12,19 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <limits>
+#include <rmw_opendds_cpp/DDSPublisher.hpp>
 
-#include "rmw/error_handling.h"
-#include "rmw/rmw.h"
-#include "rmw/types.h"
-
-#include "rmw_opendds_cpp/opendds_static_publisher_info.hpp"
-#include "rmw_opendds_cpp/identifier.hpp"
-
-#include "dds/DCPS/DataWriterImpl.h"
-#include "opendds_static_serialized_dataTypeSupportC.h"
+#include <dds/DCPS/DataWriterImpl.h>
 
 #include <ace/Message_Block.h>
+
+#include <rmw/error_handling.h>
+#include <rmw/rmw.h>
+#include <rmw/types.h>
+
+#include <limits>
+
+static const size_t buffer_max = (std::numeric_limits<CORBA::ULong>::max)();
 
 bool
 publish(DDS::DataWriter * dds_data_writer, const rcutils_uint8_array_t * cdr_stream)
@@ -34,9 +34,8 @@ publish(DDS::DataWriter * dds_data_writer, const rcutils_uint8_array_t * cdr_str
     RMW_SET_ERROR_MSG("failed to narrow data writer");
     return false;
   }
-
-  if (cdr_stream->buffer_length > (std::numeric_limits<CORBA::Long>::max)()) {
-    RMW_SET_ERROR_MSG("cdr_stream->buffer_length unexpectedly larger than DDS_Long's max value");
+  if (cdr_stream->buffer_length > buffer_max) {
+    RMW_SET_ERROR_MSG("cdr_stream->buffer_length > buffer_max");
     return false;
   }
 
@@ -56,53 +55,32 @@ rmw_publish(
   const void * ros_message,
   rmw_publisher_allocation_t * allocation)
 {
-  if (!publisher) {
-    RMW_SET_ERROR_MSG("publisher is null");
-    return RMW_RET_ERROR;
-  }
-  if (publisher->implementation_identifier != opendds_identifier) {
-    RMW_SET_ERROR_MSG("publisher is not from this rmw implementation");
-    return RMW_RET_ERROR;
-  }
-  if (!ros_message) {
-    RMW_SET_ERROR_MSG("ros message is null");
-    return RMW_RET_ERROR;
-  }
-  OpenDDSStaticPublisherInfo * info = static_cast<OpenDDSStaticPublisherInfo *>(publisher->data);
-  if (!info) {
-    RMW_SET_ERROR_MSG("publisher info is null");
-    return RMW_RET_ERROR;
-  }
-  const message_type_support_callbacks_t * callbacks = info->callbacks_;
-  if (!callbacks) {
-    RMW_SET_ERROR_MSG("publisher info callbacks is null");
-    return RMW_RET_ERROR;
-  }
-  DDS::DataWriter_var writer = info->topic_writer_;
-  if (!writer) {
-    RMW_SET_ERROR_MSG("topic writer is null");
-    return RMW_RET_ERROR;
+  ACE_UNUSED_ARG(allocation);
+  auto dds_pub = DDSPublisher::from(publisher);
+  if (!dds_pub) {
+    return RMW_RET_ERROR; // error set
   }
 
   auto ret = RMW_RET_ERROR;
   rcutils_uint8_array_t cdr_stream = rcutils_get_zero_initialized_uint8_array();
   cdr_stream.allocator = rcutils_get_default_allocator();
   try {
-    if (!callbacks->to_cdr_stream(ros_message, &cdr_stream)) {
-      throw std::string("failed to convert ros_message to cdr stream");
+    ret = dds_pub->to_cdr_stream(ros_message, cdr_stream);
+    if (ret != RMW_RET_OK) {
+      return ret; //error set
     }
     if (cdr_stream.buffer_length == 0) {
-      throw std::string("no message length set");
+      throw std::runtime_error("no message length set");
     }
     if (!cdr_stream.buffer) {
-      throw std::string("no serialized message attached");
+      throw std::runtime_error("no serialized message attached");
     }
-    if (!publish(writer, &cdr_stream)) {
-      throw std::string("failed to publish message");
+    if (!publish(dds_pub->writer(), &cdr_stream)) {
+      throw std::runtime_error("failed to publish message");
     }
     ret = RMW_RET_OK;
-  } catch (const std::string& e) {
-    RMW_SET_ERROR_MSG(e.c_str());
+  } catch (const std::exception& e) {
+    RMW_SET_ERROR_MSG(e.what());
   } catch (...) {
     RMW_SET_ERROR_MSG("rmw_publish failed");
   }
@@ -116,36 +94,16 @@ rmw_publish_serialized_message(
   const rmw_serialized_message_t * serialized_message,
   rmw_publisher_allocation_t * allocation)
 {
-  if (!publisher) {
-    RMW_SET_ERROR_MSG("publisher is null");
-    return RMW_RET_ERROR;
-  }
-  if (publisher->implementation_identifier != opendds_identifier) {
-    RMW_SET_ERROR_MSG("publisher is not from this rmw implementation");
+  ACE_UNUSED_ARG(allocation);
+  auto dds_pub = DDSPublisher::from(publisher);
+  if (!dds_pub) {
     return RMW_RET_ERROR;
   }
   if (!serialized_message) {
     RMW_SET_ERROR_MSG("serialized message is null");
     return RMW_RET_ERROR;
   }
-
-  OpenDDSStaticPublisherInfo * info = static_cast<OpenDDSStaticPublisherInfo *>(publisher->data);
-  if (!info) {
-    RMW_SET_ERROR_MSG("publisher info is null");
-    return RMW_RET_ERROR;
-  }
-  const message_type_support_callbacks_t * callbacks = info->callbacks_;
-  if (!callbacks) {
-    RMW_SET_ERROR_MSG("publisher info callbacks is null");
-    return RMW_RET_ERROR;
-  }
-  DDS::DataWriter_var writer = info->topic_writer_;
-  if (!writer) {
-    RMW_SET_ERROR_MSG("topic writer is null");
-    return RMW_RET_ERROR;
-  }
-
-  if (!publish(writer, serialized_message)) {
+  if (!publish(dds_pub->writer(), serialized_message)) {
     RMW_SET_ERROR_MSG("failed to publish message");
     return RMW_RET_ERROR;
   }

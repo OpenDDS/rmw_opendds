@@ -12,6 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "rmw_opendds_cpp/serialization_format.hpp"
+#include <rmw_opendds_cpp/serialization_format.hpp>
 
 const char * const opendds_serialization_format = "cdr";

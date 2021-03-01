@@ -12,14 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "rmw/rmw.h"
+#include <rmw_opendds_cpp/DDSSubscriber.hpp>
+#include <rmw_opendds_cpp/DDSClient.hpp>
+#include <rmw_opendds_cpp/DDSServer.hpp>
+#include <rmw_opendds_cpp/wait.hpp>
 
-#include "rmw_opendds_shared_cpp/wait.hpp"
-
-#include "rmw_opendds_cpp/identifier.hpp"
-#include "rmw_opendds_cpp/opendds_static_client_info.hpp"
-#include "rmw_opendds_cpp/opendds_static_service_info.hpp"
-#include "rmw_opendds_cpp/opendds_static_subscriber_info.hpp"
+#include <rmw/rmw.h>
 
 extern "C"
 {
@@ -33,8 +31,7 @@ rmw_wait(
   rmw_wait_set_t * wait_set,
   const rmw_time_t * wait_timeout)
 {
-  return wait<OpenDDSStaticSubscriberInfo, OpenDDSStaticServiceInfo, OpenDDSStaticClientInfo>(
-    opendds_identifier, subscriptions, guard_conditions, services, clients, events, wait_set,
-    wait_timeout);
+  return wait<DDSSubscriber, DDSServer, DDSClient>(
+    subscriptions, guard_conditions, services, clients, events, wait_set, wait_timeout);
 }
 }  // extern "C"

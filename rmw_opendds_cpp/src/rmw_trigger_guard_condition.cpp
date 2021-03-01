@@ -12,17 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "rmw/rmw.h"
+#include <rmw_opendds_cpp/trigger_guard_condition.hpp>
 
-#include "rmw_opendds_shared_cpp/trigger_guard_condition.hpp"
-
-#include "rmw_opendds_cpp/identifier.hpp"
+#include <rmw/rmw.h>
 
 extern "C"
 {
 rmw_ret_t
 rmw_trigger_guard_condition(const rmw_guard_condition_t * guard_condition_handle)
 {
-  return trigger_guard_condition(opendds_identifier, guard_condition_handle);
+  return trigger_guard_condition(guard_condition_handle);
 }
 }  // extern "C"
