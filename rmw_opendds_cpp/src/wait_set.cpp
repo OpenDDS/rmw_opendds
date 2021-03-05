@@ -14,7 +14,6 @@
 
 #include <rmw_opendds_cpp/wait_set.hpp>
 #include <rmw_opendds_cpp/demangle.hpp>
-#include <rmw_opendds_cpp/guard_condition.hpp>
 #include <rmw_opendds_cpp/types.hpp>
 
 #include <dds/DCPS/WaitSet.h>
