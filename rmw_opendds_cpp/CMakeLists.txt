@@ -77,18 +77,17 @@ add_library(
   src/DDSTopic.cpp
   src/OpenDDSNode.cpp
   src/Service.cpp
+  src/DDSGuardCondition.cpp
   src/condition_error.cpp
   src/demangle.cpp
   src/event.cpp
   src/event_converter.cpp
-  src/guard_condition.cpp
   src/identifier.cpp
   src/init.cpp
   src/namespace_prefix.cpp
   src/qos.cpp
   src/serialization_format.cpp
   src/topic_endpoint_info.cpp
-  src/trigger_guard_condition.cpp
   src/types/custom_data_reader_listener.cpp
   src/types/custom_publisher_listener.cpp
   src/types/custom_subscriber_listener.cpp
@@ -110,7 +109,6 @@ add_library(
   src/rmw_server.cpp
   src/rmw_subscription.cpp
   src/rmw_take.cpp
-  src/rmw_trigger_guard_condition.cpp
   src/rmw_wait.cpp
   src/rmw_wait_set.cpp
   )

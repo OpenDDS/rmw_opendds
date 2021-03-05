@@ -14,7 +14,6 @@
 
 #include <rmw_opendds_cpp/OpenDDSNode.hpp>
 #include <rmw_opendds_cpp/demangle.hpp>
-#include <rmw_opendds_cpp/guard_condition.hpp>
 #include <rmw_opendds_cpp/init.hpp>
 #include <rmw_opendds_cpp/types.hpp>
 #include <rmw_opendds_cpp/identifier.hpp>
@@ -345,7 +344,7 @@ OpenDDSNode::OpenDDSNode(rmw_context_t & context, const char * name, const char 
       throw std::runtime_error("node namespace_ is null");
     }
     set_default_participant_qos();
-    gc_ = create_guard_condition();
+    gc_ = rmw_create_guard_condition(&context);
     if (!gc_) {
       throw std::runtime_error("create_guard_condition failed");
     }
@@ -425,7 +424,7 @@ void OpenDDSNode::cleanup()
   CustomPublisherListener::Raf::destroy(pub_listener_);
 
   if (gc_) {
-    if (destroy_guard_condition(gc_) != RMW_RET_OK) {
+    if (rmw_destroy_guard_condition(gc_) != RMW_RET_OK) {
       RMW_SET_ERROR_MSG("destroy_guard_condition failed");
     }
     gc_ = nullptr;

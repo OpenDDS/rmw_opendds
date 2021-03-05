@@ -15,6 +15,7 @@
 #ifndef RMW_OPENDDS_CPP__WAIT_HPP_
 #define RMW_OPENDDS_CPP__WAIT_HPP_
 
+#include <rmw_opendds_cpp/DDSGuardCondition.hpp>
 #include <rmw_opendds_cpp/condition_error.hpp>
 #include <rmw_opendds_cpp/identifier.hpp>
 #include <rmw_opendds_cpp/types.hpp>
@@ -97,12 +98,12 @@ wait(
   // add each guard condition
   if (guard_conditions) {
     for (size_t i = 0; i < guard_conditions->guard_condition_count; ++i) {
-      auto condition = static_cast<DDS::GuardCondition *>(guard_conditions->guard_conditions[i]);
+      auto condition = DDSGuardCondition::from(guard_conditions->guard_conditions[i]);
       if (!condition) {
         RMW_SET_ERROR_MSG("guard condition is null");
         return RMW_RET_ERROR;
       }
-      rmw_ret_t ret = check_attach_condition_error(dds_wait_set.attach_condition(condition));
+      rmw_ret_t ret = check_attach_condition_error(dds_wait_set.attach_condition(condition->gc()));
       if (ret != RMW_RET_OK) {
         return ret;
       }
@@ -186,19 +187,15 @@ wait(
   // reset guard condition for all untriggered conditions
   if (guard_conditions) {
     for (size_t i = 0; i < guard_conditions->guard_condition_count; ++i) {
-      auto condition = static_cast<DDS::Condition *>(guard_conditions->guard_conditions[i]);
+      auto condition = DDSGuardCondition::from(guard_conditions->guard_conditions[i]);
       if (!condition) {
         RMW_SET_ERROR_MSG("guard_condition is null");
         return RMW_RET_ERROR;
       }
 
       // reset the guard condition
-      ::CORBA::ULong j = 0;
-      while (j < active_conditions.length() && active_conditions[j] != condition) { ++j; }
-      if (j < active_conditions.length()) {
-        DDS::GuardCondition_var guard = DDS::GuardCondition::_narrow(condition);
-        if (guard->set_trigger_value(false) != DDS::RETCODE_OK) {
-          RMW_SET_ERROR_MSG("failed to set trigger value");
+      if (condition->is_in(active_conditions)) {
+        if (condition->set(false) != RMW_RET_OK) {
           return RMW_RET_ERROR;
         }
       } else {
