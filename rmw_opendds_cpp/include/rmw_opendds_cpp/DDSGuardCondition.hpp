@@ -26,7 +26,7 @@ public:
   static DDSGuardCondition * from(const rmw_guard_condition_t * rmw_guard_condition);
   static DDSGuardCondition * from(void * guard_condition);
   rmw_ret_t set(bool trigger_value = true);
-  bool is_in(const DDS::ConditionSeq cq) const;
+  bool is_in(const DDS::ConditionSeq& cq) const;
   DDS::GuardCondition * gc() const { return gc_; }
 
 private:

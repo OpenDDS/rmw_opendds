@@ -45,7 +45,7 @@ rmw_ret_t DDSGuardCondition::set(bool trigger_value)
   return RMW_RET_ERROR;
 }
 
-bool DDSGuardCondition::is_in(const DDS::ConditionSeq cq) const
+bool DDSGuardCondition::is_in(const DDS::ConditionSeq& cq) const
 {
   for (CORBA::ULong i = 0; i < cq.length(); ++i) {
     if (cq[i] == gc_) {
