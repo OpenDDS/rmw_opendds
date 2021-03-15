@@ -2,8 +2,8 @@
 Changelog for package rmw_opendds_cpp
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.1.0 (2021-03-15)
+------------------
 * non-xytpes interop
 * support new option in dds_marshal
 * reduce payload size to match other ROS2 DDS
