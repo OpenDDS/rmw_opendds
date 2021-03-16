@@ -43,7 +43,7 @@ bool DDSClient::take(rmw_service_info_t * request_header, void * ros_reply) cons
 
 void DDSClient::add_to(OpenDDSNode * dds_node)
 {
-  DDS::TopicDescription_ptr rtd = reader_->get_topicdescription();
+  DDS::TopicDescription_var rtd = reader_->get_topicdescription();
   if (!rtd) {
     throw std::runtime_error("get_topicdescription failed");
   }
@@ -54,7 +54,7 @@ void DDSClient::add_to(OpenDDSNode * dds_node)
   }
   dds_node->add_sub(reader_->get_instance_handle(), name.in(), type_name.in()); //?? double-check
 
-  DDS::Topic_ptr wt = writer_->get_topic();
+  DDS::Topic_var wt = writer_->get_topic();
   if (!wt) {
     throw std::runtime_error("writer->get_topic failed");
   }
