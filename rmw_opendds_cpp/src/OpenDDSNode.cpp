@@ -373,12 +373,12 @@ OpenDDSNode::OpenDDSNode(rmw_context_t & context, const char * name, const char 
       throw std::runtime_error("configureTransport failed");
     }
 
-    DDS::Subscriber_ptr sub = dp_->get_builtin_subscriber();
+    DDS::Subscriber_var sub = dp_->get_builtin_subscriber();
     if (!sub) {
       throw std::runtime_error("get_builtin_subscriber failed");
     }
     // setup publisher listener
-    DDS::DataReader_ptr dr = sub->lookup_datareader(OpenDDS::DCPS::BUILT_IN_PUBLICATION_TOPIC);
+    DDS::DataReader_var dr = sub->lookup_datareader(OpenDDS::DCPS::BUILT_IN_PUBLICATION_TOPIC);
     auto pub_dr = dynamic_cast<DDS::PublicationBuiltinTopicDataDataReader*>(dr);
     if (!pub_dr) {
       throw std::runtime_error("builtin publication datareader is null");
