@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <rmw/error_handling.h>
+#include <rmw/ret_types.h>
 #include <rmw_opendds_cpp/event.hpp>
 #include <rmw_opendds_cpp/identifier.hpp>
 
@@ -59,4 +61,19 @@ extern "C"
       event_info,
       taken);
   }
+
+  rmw_ret_t
+    rmw_event_set_callback (
+      rmw_event_t * event,
+      rmw_event_callback_t callback,
+      const void * user_data)
+  {
+    (void) event;
+    (void) callback;
+    (void) user_data;
+    // Unused in current implementation.
+    RMW_SET_ERROR_MSG("unimplemented");
+    return RMW_RET_ERROR;
+  }
+
 }  // extern "C"

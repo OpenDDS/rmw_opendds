@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <rmw/ret_types.h>
 #include <rmw_opendds_cpp/DDSPublisher.hpp>
 #include <rmw_opendds_cpp/OpenDDSNode.hpp>
 #include <rmw_opendds_cpp/identifier.hpp>
@@ -45,6 +46,18 @@ rmw_init_publisher_allocation(
   (void) type_support;
   (void) message_bounds;
   (void) allocation;
+  RMW_SET_ERROR_MSG("unimplemented");
+  return RMW_RET_ERROR;
+}
+
+rmw_ret_t
+rmw_publisher_wait_for_all_acked(
+  const rmw_publisher_t * publisher,
+  rmw_time_t wait_timeout)
+{
+  (void) publisher;
+  (void) wait_timeout;
+  // Unused in current implementation.
   RMW_SET_ERROR_MSG("unimplemented");
   return RMW_RET_ERROR;
 }

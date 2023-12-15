@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <rmw/ret_types.h>
+#include <rmw/types.h>
 #include <rmw_opendds_cpp/DDSServer.hpp>
 #include <rmw_opendds_cpp/OpenDDSNode.hpp>
 #include <rmw_opendds_cpp/identifier.hpp>
@@ -92,6 +94,44 @@ rmw_destroy_service(rmw_node_t * node, rmw_service_t * service)
       return RMW_RET_OK;
     }
   }
+  return RMW_RET_ERROR;
+}
+
+rmw_ret_t
+rmw_service_set_on_new_request_callback(
+  rmw_service_t * service,
+  rmw_event_callback_t callback,
+  const void * user_data)
+{
+  (void) service;
+  (void) callback;
+  (void) user_data;
+  // Unused in current implementation.
+  RMW_SET_ERROR_MSG("unimplemented");
+  return RMW_RET_ERROR;
+}
+
+rmw_ret_t
+rmw_service_request_subscription_get_actual_qos(
+  const rmw_service_t * service,
+  rmw_qos_profile_t * qos)
+{
+  (void) service;
+  (void) qos;
+  // Unused in current implementation.
+  RMW_SET_ERROR_MSG("unimplemented");
+  return RMW_RET_ERROR;
+}
+
+rmw_ret_t
+rmw_service_response_publisher_get_actual_qos(
+  const rmw_service_t * service,
+  rmw_qos_profile_t * qos)
+{
+  (void) service;
+  (void) qos;
+  // Unused in current implementation.
+  RMW_SET_ERROR_MSG("unimplemented");
   return RMW_RET_ERROR;
 }
 

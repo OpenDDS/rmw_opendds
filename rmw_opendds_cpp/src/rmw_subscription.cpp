@@ -12,6 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <rcutils/allocator.h>
+#include <rmw/ret_types.h>
+#include <rmw/subscription_content_filter_options.h>
+#include <rmw/types.h>
 #include <rmw_opendds_cpp/DDSSubscriber.hpp>
 #include <rmw_opendds_cpp/OpenDDSNode.hpp>
 #include <rmw_opendds_cpp/identifier.hpp>
@@ -134,6 +138,46 @@ rmw_subscription_count_matched_publishers(
     *publisher_count = dds_sub->matched_publishers();
     return RMW_RET_OK;
   }
+  return RMW_RET_ERROR;
+}
+
+rmw_ret_t
+rmw_subscription_set_content_filter (
+  rmw_subscription_t * subscription,
+  const rmw_subscription_content_filter_options_t * options)
+{
+  (void) subscription;
+  (void) options;
+  // Unused in current implementation.
+  RMW_SET_ERROR_MSG("unimplemented");
+  return RMW_RET_ERROR;
+}
+
+rmw_ret_t
+rmw_subscription_get_content_filter (
+  const rmw_subscription_t * subscription,
+  rcutils_allocator_t * allocator,
+  rmw_subscription_content_filter_options_t * options)
+{
+  (void) subscription;
+  (void) allocator;
+  (void) options;
+  // Unused in current implementation.
+  RMW_SET_ERROR_MSG("unimplemented");
+  return RMW_RET_ERROR;
+}
+
+rmw_ret_t
+rmw_subscription_set_on_new_message_callback(
+  rmw_subscription_t * subscription,
+  rmw_event_callback_t callback,
+  const void * user_data)
+{  
+  (void) subscription;
+  (void) callback;
+  (void) user_data;
+  // Unused in current implementation.
+  RMW_SET_ERROR_MSG("unimplemented");
   return RMW_RET_ERROR;
 }
 
