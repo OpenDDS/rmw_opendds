@@ -21,21 +21,20 @@
 
 #include <dds/DdsDcpsDomainC.h>
 
-struct rmw_context_impl_t
-{
-  rmw_context_impl_t();
-  ~rmw_context_impl_t();
+struct rmw_context_impl_s {
+  rmw_context_impl_s();
+  ~rmw_context_impl_s();
   DDS::DomainParticipantFactory_var dpf_;
 };
 
 RMW_OPENDDS_CPP_PUBLIC
-rmw_ret_t init(rmw_context_t& context);
+rmw_ret_t init(rmw_context_t &context);
 
 RMW_OPENDDS_CPP_PUBLIC
-rmw_ret_t shutdown(rmw_context_t& context);
+rmw_ret_t shutdown(rmw_context_t &context);
 
-bool is_zero_initialized(const rmw_init_options_t * o);
+bool is_zero_initialized(const rmw_init_options_t *o);
 
-bool is_zero_initialized(const rmw_context_t * c);
+bool is_zero_initialized(const rmw_context_t *c);
 
-#endif  // RMW_OPENDDS_CPP__INIT_HPP_
+#endif // RMW_OPENDDS_CPP__INIT_HPP_

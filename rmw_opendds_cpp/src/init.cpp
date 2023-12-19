@@ -12,36 +12,33 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <rmw_opendds_cpp/init.hpp>
 #include <rmw_opendds_cpp/RmwAllocateFree.hpp>
+#include <rmw_opendds_cpp/init.hpp>
 
-#include <rmw/init_options.h>
 #include <rmw/error_handling.h>
+#include <rmw/init_options.h>
 
 #include <dds/DCPS/Service_Participant.h>
 
-rmw_context_impl_t::rmw_context_impl_t() : dpf_(TheParticipantFactory)
-{
+rmw_context_impl_t::rmw_context_impl_s() : dpf_(TheParticipantFactory) {
   if (dpf_) {
-    TheServiceParticipant->set_default_discovery(OpenDDS::DCPS::Discovery::DEFAULT_RTPS);
+    TheServiceParticipant->set_default_discovery(
+        OpenDDS::DCPS::Discovery::DEFAULT_RTPS);
   } else {
-    const char* msg = "failed to get participant factory";
+    const char *msg = "failed to get participant factory";
     RMW_SET_ERROR_MSG(msg);
     throw std::runtime_error(msg);
   }
 }
 
-rmw_context_impl_t::~rmw_context_impl_t()
-{
+rmw_context_impl_t::~rmw_context_impl_s() {
   if (dpf_) {
     TheServiceParticipant->shutdown();
     dpf_ = nullptr;
   }
 }
 
-rmw_ret_t
-init(rmw_context_t& context)
-{
+rmw_ret_t init(rmw_context_t &context) {
   context.impl = RmwAllocateFree<rmw_context_impl_t>::create();
   if (context.impl) {
     return RMW_RET_OK;
@@ -53,29 +50,23 @@ init(rmw_context_t& context)
 // See rmw/init.h: rmw_ret_t rmw_shutdown(rmw_context_t * context)
 // "If context has been already invalidated (`rmw_shutdown()` was called on it),
 // then this function is a no-op and `RMW_RET_OK` is returned."
-rmw_ret_t
-shutdown(rmw_context_t& context)
-{
+rmw_ret_t shutdown(rmw_context_t &context) {
   if (context.impl) {
     RmwAllocateFree<rmw_context_impl_t>::destroy(context.impl);
   }
   return RMW_RET_OK;
 }
 
-bool is_zero_initialized(const rmw_init_options_t * opt)
-{
-  return opt && opt->instance_id == 0
-    && !(opt->implementation_identifier)
-    && opt->domain_id == RMW_DEFAULT_DOMAIN_ID
-    && opt->security_options.enforce_security == 0 && !(opt->security_options.security_root_path)
-    && opt->localhost_only == RMW_LOCALHOST_ONLY_DEFAULT
-    && !(opt->enclave)
-    && !(opt->impl);
+bool is_zero_initialized(const rmw_init_options_t *opt) {
+  return opt && opt->instance_id == 0 && !(opt->implementation_identifier) &&
+         opt->domain_id == RMW_DEFAULT_DOMAIN_ID &&
+         opt->security_options.enforce_security == 0 &&
+         !(opt->security_options.security_root_path) &&
+         opt->localhost_only == RMW_LOCALHOST_ONLY_DEFAULT && !(opt->enclave) &&
+         !(opt->impl);
 }
 
-bool is_zero_initialized(const rmw_context_t * ctx)
-{
-  return ctx && ctx->instance_id == 0
-    && !(ctx->implementation_identifier)
-    && !(ctx->impl);
+bool is_zero_initialized(const rmw_context_t *ctx) {
+  return ctx && ctx->instance_id == 0 && !(ctx->implementation_identifier) &&
+         !(ctx->impl);
 }

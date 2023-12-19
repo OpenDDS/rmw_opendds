@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <rmw/ret_types.h>
 #include <rmw_opendds_cpp/DDSClient.hpp>
 #include <rmw_opendds_cpp/OpenDDSNode.hpp>
 #include <rmw_opendds_cpp/identifier.hpp>
@@ -164,4 +165,67 @@ rmw_take_response(
   *taken = dds_client->take(request_header, ros_response);
   return RMW_RET_OK;
 }
+
+rmw_ret_t
+rmw_client_set_on_new_response_callback(
+  rmw_client_t * client,
+  rmw_event_callback_t callback,
+  const void * user_data)
+{
+    (void) client;
+    (void) callback;
+    (void) user_data;
+    // Unused in current implementation.
+    RMW_SET_ERROR_MSG("unimplemented");
+    return RMW_RET_ERROR;
+}
+
+rmw_ret_t
+rmw_client_request_publisher_get_actual_qos(
+  const rmw_client_t * client,
+  rmw_qos_profile_t * qos)
+{
+    (void) client;
+    (void) qos;
+    // Unused in current implementation.
+    RMW_SET_ERROR_MSG("unimplemented");
+    return RMW_RET_ERROR;
+}
+
+rmw_ret_t
+rmw_client_response_subscriber_get_actual_qos(
+  const rmw_client_t * client,
+  rmw_qos_profile_t * qos)
+{
+    (void) client;
+    (void) qos;
+    // Unused in current implementation.
+    RMW_SET_ERROR_MSG("unimplemented");
+    return RMW_RET_ERROR;
+}
+
+rmw_ret_t
+rmw_client_response_publisher_get_actual_qos(
+  const rmw_client_t * client,
+  rmw_qos_profile_t * qos)
+{
+    (void) client;
+    (void) qos;
+    // Unused in current implementation.
+    RMW_SET_ERROR_MSG("unimplemented");
+    return RMW_RET_ERROR;
+}
+
+rmw_ret_t
+rmw_client_response_subscription_get_actual_qos(
+  const rmw_client_t * client,
+  rmw_qos_profile_t * qos)
+{
+    (void) client;
+    (void) qos;
+    // Unused in current implementation.
+    RMW_SET_ERROR_MSG("unimplemented");
+    return RMW_RET_ERROR;
+}
+
 }  // extern "C"

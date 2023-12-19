@@ -48,12 +48,8 @@ rmw_node_t *
 rmw_create_node(
   rmw_context_t * context,
   const char * name,
-  const char * namespace_,
-  size_t domain_id,
-  bool localhost_only)
+  const char * namespace_)
 {
-  ACE_UNUSED_ARG(domain_id);
-  ACE_UNUSED_ARG(localhost_only);
   RMW_CHECK_FOR_NULL_WITH_MSG(context, "context is null", nullptr);
   if (!check_impl_id(context->implementation_identifier)) {
     return nullptr;

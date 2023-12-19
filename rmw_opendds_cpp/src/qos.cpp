@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <rmw/qos_profiles.h>
+#include <rmw/types.h>
 #include <rmw_opendds_cpp/qos.hpp>
 
 bool
@@ -61,3 +63,20 @@ dds_qos_policy_to_rmw_qos_policy(DDS::QosPolicyId_t policy_id)
   }
 }
 
+rmw_ret_t
+rmw_qos_profile_check_compatible (
+  const rmw_qos_profile_t publisher_profile, 
+  const rmw_qos_profile_t subscriber_profile,
+  rmw_qos_compatibility_type_t * compatibility,
+  char * reason,
+  size_t reason_size)
+{
+    (void) publisher_profile;
+    (void) subscriber_profile;
+    (void) compatibility;
+    (void) reason;
+    (void) reason_size;
+    // Unused in current implementation.
+    RMW_SET_ERROR_MSG("unimplemented");
+    return RMW_RET_ERROR;
+}
